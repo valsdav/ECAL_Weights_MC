@@ -20,11 +20,11 @@
 #include <vector>
 
 // Might need to move these to proper directory
-//#include "CLHEP/Matrix/Matrix.h"
-//#include "CLHEP/Matrix/SymMatrix.h"
+#include "CLHEP/Matrix/Matrix.h"
+#include "CLHEP/Matrix/SymMatrix.h"
 
-#include "/home/abe/Documents/Fall_2017/Computational_Physics/CLHEP/Matrix/Matrix/Matrix.h"
-#include "/home/abe/Documents/Fall_2017/Computational_Physics/CLHEP/Matrix/Matrix/SymMatrix.h"
+//#include "CLHEP/Matrix/Matrix/Matrix.h"
+//#include "CLHEP/Matrix/Matrix/SymMatrix.h"
 
 class ComputeWeights
 {
