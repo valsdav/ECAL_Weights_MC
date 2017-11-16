@@ -16,11 +16,11 @@
  */
 
 // Header Files 
-
-// #include "CalibCalorimetry/EcalWeightsTools/interface/ComputeWeights.h"
+// 
+#include "../interface/ComputeWeights.h"
 
 // Changed path. Might be a better way to do this. 
-#include "/home/abe/Documents/Fall_2017/Computational_Physics/Weights/CMSSW_3_5_0_pre3/src/CalibCalorimetry/EcalWeightsTools/interface/ComputeWeights.h"
+#include "../ComputeWeights.h"
 
 #include <iostream>
 #include <iomanip>
