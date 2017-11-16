@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/meganstark/Computation*/opensource/CLHEP/Utility/test/testSharedPtrConvertible.cc
+CLHEP/Utility/noncopyable.h
+/Users/meganstark/Computation*/opensource/CLHEP/Utility/test/CLHEP/Utility/noncopyable.h
+CLHEP/Utility/memory.h
+/Users/meganstark/Computation*/opensource/CLHEP/Utility/test/CLHEP/Utility/memory.h
+cassert
+-
+
+CLHEP/Utility/defs.h
+
+CLHEP/Utility/memory.h
+CLHEP/Utility/defs.h
+CLHEP/Utility/CLHEP/Utility/defs.h
+memory
+-
+
+CLHEP/Utility/noncopyable.h
+CLHEP/Utility/defs.h
+CLHEP/Utility/CLHEP/Utility/defs.h
+

@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/meganstark/Computation*/opensource/CLHEP/Evaluator/test/testBug66214.cc
+iostream
+-
+fstream
+-
+CLHEP/Evaluator/Evaluator.h
+-
+
+CLHEP/Evaluator/Evaluator.h
+string
+-
+
