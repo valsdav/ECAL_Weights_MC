@@ -17,21 +17,36 @@
 
 // Header Files 
 
-// #include "CalibCalorimetry/EcalWeightsTools/interface/ComputeWeights.h"
+#include "CalibCalorimetry/EcalWeightsTools/interface/ComputeWeights.h"
 
 // Changed path. Might be a better way to do this. 
-#include "/home/abe/Documents/Fall_2017/Computational_Physics/Weights/CMSSW_3_5_0_pre3/src/CalibCalorimetry/EcalWeightsTools/interface/ComputeWeights.h"
+// #include "/home/abe/Documents/Fall_2017/Computational_Physics/Weights/CMSSW_3_5_0_pre3/src/CalibCalorimetry/EcalWeightsTools/interface/ComputeWeights.h"
 
 #include <iostream>
 #include <iomanip>
 
+int main() {
+
 // Constructor. Call to create an object
-ComputeWeights::ComputeWeights(int verbosity, 
+
+/* ComputeWeights::ComputeWeights(int verbosity, 
 			       bool doFitBaseline, bool doFitTime, 
 			       int nPulseSamples, int nPrePulseSamples) :
   verbosity_(verbosity), doFitBaseline_(doFitBaseline),
   doFitTime_(doFitTime), nPulseSamples_(nPulseSamples),
   nPrePulseSamples_(nPrePulseSamples)
+*/ 
+
+bool doFitBaseline, doFitTime;
+int verbosity, nPulseSamples, nPrePulseSamples;
+
+ComputeWeights(verbosity, 
+			       doFitBaseline, doFitTime, 
+			       nPulseSamples, nPrePulseSamples) :
+  verbosity_(verbosity), doFitBaseline_(doFitBaseline),
+  doFitTime_(doFitTime), nPulseSamples_(nPulseSamples),
+  nPrePulseSamples_(nPrePulseSamples)
+
 
 // ':' allows you to initialize member variables. Variable(value)
 
@@ -315,3 +330,8 @@ double ComputeWeights::getChi2Matrix(int iSample1, int iSample2) const
   }
   return chi2_[iSample1][iSample2];
 }//Get chi2
+
+return 0;
+
+}
+

@@ -1,10 +1,6 @@
 #ifndef CalibCalorimetry_EcalWeightsTools_ComputeWeights_h
 #define CalibCalorimetry_EcalWeightsTools_ComputeWeights_h
 
-//#ifndef _home_abe_Documents_Fall_2017_Computational_Physics_Weights_CMSSW_3_5_0_pre3_src_CalibCalorimetry_EcalWeightsTools_interface_ComputeWeights_h
-//#define  _home_abe_Documents_Fall_2017_Computational_Physics_Weights_CMSSW_3_5_0_pre3_src_CalibCalorimetry_EcalWeightsTools_interface_ComputeWeights_h
-
-
 /** \class ComputeWeights
   *  Class used to compute weights from a pulse shape profile.
   *
@@ -19,12 +15,13 @@
 
 #include <vector>
 
-// Might need to move these to proper directory
-//#include "CLHEP/Matrix/Matrix.h"
-//#include "CLHEP/Matrix/SymMatrix.h"
+// Other Header Files
 
-#include "/home/abe/Documents/Fall_2017/Computational_Physics/CLHEP/Matrix/Matrix/Matrix.h"
-#include "/home/abe/Documents/Fall_2017/Computational_Physics/CLHEP/Matrix/Matrix/SymMatrix.h"
+#include "CLHEP/Matrix/Matrix.h"
+#include "CLHEP/Matrix/SymMatrix.h"
+
+// #include "/home/abe/Documents/Fall_2017/Computational_Physics/CLHEP/Matrix/Matrix/Matrix.h"
+// #include "/home/abe/Documents/Fall_2017/Computational_Physics/CLHEP/Matrix/Matrix/SymMatrix.h"
 
 class ComputeWeights
 {
