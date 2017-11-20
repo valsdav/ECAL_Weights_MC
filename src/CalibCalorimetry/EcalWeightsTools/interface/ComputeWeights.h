@@ -11,17 +11,11 @@
 
 // Looked at by Abe Tishelman-Charny on 8, November 2017
 
-// Math header files.
+// Header Files
 
 #include <vector>
-
-// Other Header Files
-
-#include "CLHEP/Matrix/Matrix.h"
-#include "CLHEP/Matrix/SymMatrix.h"
-
-// #include "/home/abe/Documents/Fall_2017/Computational_Physics/CLHEP/Matrix/Matrix/Matrix.h"
-// #include "/home/abe/Documents/Fall_2017/Computational_Physics/CLHEP/Matrix/Matrix/SymMatrix.h"
+#include <CLHEP/Matrix/Matrix.h>
+#include <CLHEP/Matrix/SymMatrix.h>
 
 class ComputeWeights
 {
@@ -30,16 +24,32 @@ class ComputeWeights
  public:
   /// Constructor
   // explicit ComputeWeights(edm::ParameterSet const& pSet);
+
+  //int verbosity, nPulseSamples, nPrePulseSamples;
+  //bool doFitBaseline, doFitTime;
+
   ComputeWeights(int verbosity, bool doFitBaseline, bool doFitTime, 
 		 int nPulseSamples, int nPrePulseSamples);
 
-  /// Destructor
-  ~ComputeWeights();
+  ~ComputeWeights(); 
 
+  /*{
+
+  cout << "Instance of ComputeWeights created. Verbosity = " << verbosity << "." << endl;
+	
+  };*/
+
+  /// Destructor
+/*  ~ComputeWeights()
+
+  {};
+*/
   /// Compute weights from an input pulse shape
   bool compute(const std::vector<double>& pulseShape,
 	       const std::vector<double>& pulseShapeDerivative,
 	       const double tMax); //modif
+
+  // 
 
   /// Get weight used to compute amplitude
   double getAmpWeight(int iSample) const;
@@ -55,13 +65,24 @@ class ComputeWeights
 
  // Only accessible through class methods 
  private:
+
   int verbosity_;        //< Messages verbosity
   bool doFitBaseline_;   //< Fit baseline or not
   bool doFitTime_;       //< Fit time jitter or not
   int nPulseSamples_;    //< Number of samples in the pulse
   int nPrePulseSamples_; //< Number of samples in the pre-pulse
-  CLHEP::HepMatrix weights_; // Namesapce CLHEP, class HepMatrix, instance (function?) 'weights'
+  CLHEP::HepMatrix weights_; // Type CLHEP, class HepMatrix, instance (function?) 'weights'
   CLHEP::HepSymMatrix chi2_;
 
+/*
+  int verbosity_ = verbosity;        //< Messages verbosity
+  bool doFitBaseline_ = doFitBaseline;   //< Fit baseline or not
+  bool doFitTime_ = doFitTime;       //< Fit time jitter or not
+  int nPulseSamples_ = nPulseSamples;    //< Number of samples in the pulse
+  int nPrePulseSamples_ = nPrePulseSamples; //< Number of samples in the pre-pulse
+  CLHEP::HepMatrix weights_; // Namesapce CLHEP, class HepMatrix, instance (function?) 'weights'
+  CLHEP::HepSymMatrix chi2_;
+*/
 };
-#endif // CalibCalorimetry_EcalWeightsTools_ComputeWeights_h
+
+#endif

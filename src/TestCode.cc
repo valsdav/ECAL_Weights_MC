@@ -24,9 +24,6 @@ using namespace std;
 #include <iostream>
 #include <iomanip>
 
-#include <CLHEP/Matrix/Matrix.h>
-#include <CLHEP/Matrix/SymMatrix.h>
-
 //int main()  // not sure if this is necessary or not.
 //{ 
 
@@ -92,6 +89,8 @@ ComputeWeights::~ComputeWeights()
   if (verbosity_)
     std::cout << "ComputeWeights::~ComputeWeights: Destructing ComputeWeights" << std::endl;
 }
+
+/*
 
 // Compute weights from an input pulse shape
 // Call member function compute from class ComputeWeights. Try this with sample shape first.
@@ -165,7 +164,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
     }
 */
   
-
+/*
 
   // Fill coef matrix
 
@@ -237,6 +236,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   }
 */
 
+/*
   // Copy matrices into class members
   chi2[3][3]=0.;
   chi2[9][9]=0.;
@@ -247,7 +247,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
     for (int iRow = 0; iRow < size; iRow++)
       chi2_[iRow][iColumn] = chi2[iRow][iColumn]; // equate chi2_ and chi2
   }
-
+*/
 
 /*
   for(int i=0;i<10;i++)
@@ -263,6 +263,8 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 //  std::cout<<" chi2=" << chi2 << std::endl;
 //  std::cout<<" weights_ "<< weights_ << std::endl;
 //  std::cout<<" weights "<< weights << std::endl;
+
+/*
 
   return true;
 } // ComputeWeights::compute
@@ -340,4 +342,6 @@ double ComputeWeights::getChi2Matrix(int iSample1, int iSample2) const
   }
   return chi2_[iSample1][iSample2];
 }//Get chi2
+
+*/
 
