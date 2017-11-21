@@ -9,12 +9,10 @@ Test file for extracting weights from sample waveform.
 
 using namespace std; 
 
-#include "TestCode.h"
+#include "ComputeWeights.h"
 
 #include <iostream>
 #include <iomanip>
-
-//#include "CLHEP/Matrix/Matrix.h"
 
 int main() {
 
@@ -29,9 +27,10 @@ int main() {
 
   cout << "Create weights from pulse shape " << endl;  
 
-  std::vector <float> pulseShape;
+  vector <double> pulseShape;
+  vector <double> pulseShapeDerivative;
   
-  //---- dummy pulse shape
+  // dummy pulse shape
   pulseShape.push_back(0.0);
   pulseShape.push_back(0.0);
   pulseShape.push_back(0.0);
@@ -43,17 +42,31 @@ int main() {
   pulseShape.push_back(0.3);
   pulseShape.push_back(0.2); 
 
+  // dummy pulse shape derivative
+  pulseShapeDerivative.push_back(0.0);
+  pulseShapeDerivative.push_back(0.0);
+  pulseShapeDerivative.push_back(0.05);
+  pulseShapeDerivative.push_back(0.1);
+  pulseShapeDerivative.push_back(0.35);
+  pulseShapeDerivative.push_back(0.25);
+  pulseShapeDerivative.push_back(-0.25);
+  pulseShapeDerivative.push_back(-0.25);
+  pulseShapeDerivative.push_back(-0.25);
+  pulseShapeDerivative.push_back(0.0);
+
   int nSamples = pulseShape.size(); 
+
+  double tMax = pulseShape.size();
 
   ComputeWeights A(1, false, false, nSamples,0);
 
   int nParams = 1 + int(A.GetDoFitBaseline()) + int(A.GetDoFitTime());
 
-  cout << "Verbosity = " << A.GetVerbosity() << endl;
-
-  //cout << "Verbosity = " << A.GetVerbosity() << endl;
-
-
+  cout << "verbosity_ = " << A.GetVerbosity() << endl;
+  cout << "doFitBaseline_ = " << A.GetDoFitBaseline() << endl;
+  cout << "doFitTime_ = " << A.GetDoFitTime() << endl;
+  cout << "nPulseSamples_ = " << A.GetnPulseSamples() << endl;
+  cout << "nPrePulseSamples_ = " << A.GetnPrePulseSamples() << endl;
 
   // Check if nSamples is large enough
   if (nSamples < A.GetnPulseSamples() || (A.GetDoFitBaseline() && 
@@ -76,6 +89,10 @@ int main() {
       }
 
     }    
+
+
+  A.compute(pulseShape,pulseShapeDerivative,tMax);
+
 
   
 }

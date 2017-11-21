@@ -9,9 +9,12 @@
   *  \author R. Bruneliere - CERN
   */
 
-// Looked at by Abe Tishelman-Charny on 8, November 2017
+// Revised by Abe Tishelman-Charny
+// November 8, 2017
 
 #include <vector>
+
+// Include Class Libraries for High Energy Physics
 #include "CLHEP/Matrix/Matrix.h"
 #include "CLHEP/Matrix/SymMatrix.h"
 
@@ -21,12 +24,16 @@ class ComputeWeights
  // Can access outside of class
  public:
 
+  // Constructor
   ComputeWeights(int verbosity, bool doFitBaseline, bool doFitTime, 
 		 int nPulseSamples, int nPrePulseSamples);
 
+  // Destructor
   ~ComputeWeights(); 
 
-  // I don't know if this is inefficent, but A.variable didn't seem to be working, saying variable was private.
+  // Member functions to obtain variable values
+
+  // I don't know if this is inefficent, but instance.variable didn't seem to be working, saying variables were private. There may be a much better way to do this.
 
   int GetVerbosity()
   	{
@@ -63,21 +70,21 @@ class ComputeWeights
 	return chi2_;
 	}
 
-  /// Compute weights from an input pulse shape
+  // Compute weights from an input pulse shape
   bool compute(const std::vector<double>& pulseShape,
 	       const std::vector<double>& pulseShapeDerivative,
 	       const double tMax); //modif 
 
-  /// Get weight used to compute amplitude
+  // Get weight used to compute amplitude
   double getAmpWeight(int iSample) const;
 
-  /// Get weight used to compute dynamic pedestal
+  // Get weight used to compute dynamic pedestal
   double getPedWeight(int iSample) const;
 
-  /// Get weight used to compute time jitter
+  // Get weight used to compute time jitter
   double getTimeWeight(int iSample) const;
 
-  /// Get chi2 matrix
+  // Get chi2 matrix
   double getChi2Matrix(int iSample1, int iSample2) const;
 
  // Only accessible through class methods 

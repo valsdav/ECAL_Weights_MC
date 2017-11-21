@@ -8,44 +8,17 @@
  * $Revision: 1.2 $
  * Updated by Alex Zabi.
 
-
+  Modified by Abe Tishelman-Charny
   November 1, 2017
-
-  Code being looked at by Abe Tishelman-Charny
 
  */
 
 // Header Files 
 
-#include "TestCode.h" 
+#include "ComputeWeights.h" 
 
 #include <iostream>
 #include <iomanip>
-
-//int main()  // not sure if this is necessary or not.
-//{ 
-
-// Constructor. Call to create an object
-
-/*ComputeWeights::ComputeWeights(int, 
-			       bool, bool, 
-			       int, int) :
-  verbosity_(verbosity), doFitBaseline_(doFitBaseline),
-  doFitTime_(doFitTime), nPulseSamples_(nPulseSamples),
-  nPrePulseSamples_(nPrePulseSamples)
-*/
-
-/*
-bool doFitBaseline, doFitTime;
-int verbosity, nPulseSamples, nPrePulseSamples;
-
-ComputeWeights(verbosity, doFitBaseline, doFitTime, nPulseSamples, nPrePulseSamples) :
-  verbosity_(verbosity), doFitBaseline_(doFitBaseline),
-  doFitTime_(doFitTime), nPulseSamples_(nPulseSamples),
-  nPrePulseSamples_(nPrePulseSamples);
-*/
-
-// ':' allows you to initialize member variables. Variable(value)
 
 // if(c) means if (c != 0)
 
@@ -87,10 +60,10 @@ ComputeWeights::~ComputeWeights()
     std::cout << "ComputeWeights::~ComputeWeights: Destructing ComputeWeights" << std::endl;
 }
 
-/*
+
 
 // Compute weights from an input pulse shape
-// Call member function compute from class ComputeWeights. Try this with sample shape first.
+// Call member function 'compute' from class ComputeWeights. Try this with sample shape first.
 
 // const, can't change anything about vector
 bool ComputeWeights::compute(const std::vector<double>& pulseShape,
@@ -122,7 +95,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
     }
   }
 
-/*
+
   //DETERMINATION OF THE FIRST SAMPLE
   int firstSample = int(tMax) - 1;
   if(nPulseSamples_ == 1) firstSample = int(tMax); // if only 1 sample -> the max sample is chosen
@@ -132,17 +105,17 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   if (firstSample + nPulseSamples_ > nSamples) {
     if (verbosity_)
       std::cout << "ComputeWeights::compute: Warning: firstSample cannot be "
-		<< firstSample << " because they are too few samples beyond."
+		<< firstSample << " because they are too few samples beyond." // there?
 		<< std::endl << "firstSample is set to "
 		<< nSamples - nPulseSamples_ << std::endl;
     firstSample = nSamples - nPulseSamples_;
   }//check max samples considered
-*/
-/*
+
+
   // Fill coef matrix
   int size = nPulseSamples_;
   if (doFitBaseline_) size += nPrePulseSamples_;
-  HepMatrix coef(size, nParams);
+  CLHEP::HepMatrix coef(size, nParams);
   for (int iRow = 0; iRow < nPulseSamples_; iRow++)
     for (int iColumn = 0; iColumn < nParams; iColumn++) {
       if (iColumn == 0)
@@ -159,13 +132,13 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
       else
 	coef[iRow][iColumn] = 0.;
     }
-*/
+
   
-/*
+
 
   // Fill coef matrix
-
-  int size = 10;
+/*
+  // int size = 10;
   CLHEP::HepMatrix coef(size, nParams); // (size x nParams) matrix
   for (int iRow = 0; iRow < size; iRow++)
     for (int iColumn = 0; iColumn < nParams; iColumn++) {
@@ -177,7 +150,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
       else // doFitTime_ || nParams == 3
 	coef[iRow][iColumn] = pulseShapeDerivative[iRow];
     }
-
+*/
 
   CLHEP::HepMatrix tCoef = coef.T(); // transpose coef
 
@@ -214,7 +187,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   CLHEP::HepMatrix tDeltaInvCov = tDelta*invCov;
   CLHEP::HepMatrix chi2 = tDeltaInvCov*delta;
 
-/*
+
   // Copy matrices into class members
   for (int iColumn = 0; iColumn < nPulseSamples_; iColumn++) {
     for (int iRow = 0; iRow < nParams; iRow++)
@@ -231,22 +204,26 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 				   [iColumn + nPulseSamples_];
     }
   }
-*/
 
-/*
+
+
   // Copy matrices into class members
   chi2[3][3]=0.;
   chi2[9][9]=0.;
 
-  for (int iColumn = 0; iColumn < size; iColumn++) {
-    for (int iRow = 0; iRow < nParams; iRow++)
+  int iColumn = 0;
+  int iRow = 0;
+
+  for (iColumn = 0; iColumn < size; iColumn++) {
+    for (iRow = 0; iRow < nParams; iRow++)
       weights_[iRow][iColumn] = weights[iRow][iColumn];
+      std::cout<<"weights_["<<iRow<<"]["<<iColumn<<"]="<<weights_[iRow][iColumn]<<";"<<std::endl;
     for (int iRow = 0; iRow < size; iRow++)
       chi2_[iRow][iColumn] = chi2[iRow][iColumn]; // equate chi2_ and chi2
   }
-*/
 
-/*
+
+
   for(int i=0;i<10;i++)
   {
     for(int j =0 ; j<10; j++)
@@ -254,14 +231,15 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
       std::cout<<"b["<<i<<"]["<<j<<"]="<< chi2_[i][j]<<";"<<std::endl;
     }
   }
-*/
+
+
 
 //  std::cout<<" chi2_=" << chi2_ << std::endl;
 //  std::cout<<" chi2=" << chi2 << std::endl;
 //  std::cout<<" weights_ "<< weights_ << std::endl;
 //  std::cout<<" weights "<< weights << std::endl;
 
-/*
+
 
   return true;
 } // ComputeWeights::compute
@@ -324,7 +302,7 @@ double ComputeWeights::getTimeWeight(int iSample) const
   if (doFitBaseline_)
     return weights_[2][iSample];
   return weights_[1][iSample];
-}//Get Time Weights
+} //Get Time Weights
 
 // Get chi2 matrix
 double ComputeWeights::getChi2Matrix(int iSample1, int iSample2) const
@@ -340,5 +318,5 @@ double ComputeWeights::getChi2Matrix(int iSample1, int iSample2) const
   return chi2_[iSample1][iSample2];
 }//Get chi2
 
-*/
+
 
