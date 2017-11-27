@@ -17,10 +17,10 @@
 
 // Header Files 
 // 
-#include "../interface/ComputeWeights.h"
+#include "interface/ComputeWeights.h"
 
 // Changed path. Might be a better way to do this. 
-#include "../ComputeWeights.h"
+#include "interface/ComputeWeights.h"
 
 #include <iostream>
 #include <iomanip>
