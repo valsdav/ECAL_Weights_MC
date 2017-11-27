@@ -16,20 +16,20 @@ using namespace std;
 
 int main() {
 
-// Create matrix
+  // Extra print messages: Set verbosity = 1
+  int verbosity = 0;
 
-//CLHEP::HepMatrix A(5, 5, 0);
-
-//cout << "Created a Matrix." << endl;
-
-//cout << "A[0][0] = " << A[0][0] << endl;
-
-
+  cout << "Enter 1 or 0 for verbosity: ";
+  cin >> verbosity;
+  cout << "Verbosity = " << verbosity << endl;
+ 
   cout << "Create weights from pulse shape " << endl;  
 
   vector <double> pulseShape;
   vector <double> pulseShapeDerivative;
-  
+ 
+  /*
+ 
   // dummy pulse shape
   pulseShape.push_back(0.0);
   pulseShape.push_back(0.0);
@@ -42,6 +42,21 @@ int main() {
   pulseShape.push_back(0.3);
   pulseShape.push_back(0.2); 
 
+  */
+  
+  // dummy pulse shape
+  pulseShape.push_back(0.015940);
+  pulseShape.push_back(0.784977);
+  pulseShape.push_back(1.000000);
+  pulseShape.push_back(0.876717);
+  pulseShape.push_back(0.661014);
+  pulseShape.push_back(0.464784);
+  pulseShape.push_back(0.313724);
+  pulseShape.push_back(0.205646);
+  pulseShape.push_back(0.134262);
+  pulseShape.push_back(0.088418); 
+
+/*
   // dummy pulse shape derivative
   pulseShapeDerivative.push_back(0.0);
   pulseShapeDerivative.push_back(0.0);
@@ -53,13 +68,13 @@ int main() {
   pulseShapeDerivative.push_back(-0.25);
   pulseShapeDerivative.push_back(-0.25);
   pulseShapeDerivative.push_back(0.0);
+*/
+  int nSamples = pulseShape.size(); 
 
-  //int nSamples = pulseShape.size(); 
-
-  //double tMax = pulseShape.size();
+  double tMax = pulseShape.size();
 
   // Create instance of object ComputeWeights
-  ComputeWeights A(1, false, false, nSamples,0);
+  ComputeWeights A(verbosity, false, false, nSamples,0);
 
   cout << "verbosity_ = " << A.GetVerbosity() << endl;
   cout << "doFitBaseline_ = " << A.GetDoFitBaseline() << endl;
@@ -69,5 +84,8 @@ int main() {
 
   // Compute weights
   A.compute(pulseShape,pulseShapeDerivative,tMax);
+
+  cout << "A.getAmpWeight(5) returns: " << A.getAmpWeight(5) << endl;
+  cout << "A.getChi2Matrix(5,5) returns: " << A.getChi2Matrix(5,5) << endl;
   
 }

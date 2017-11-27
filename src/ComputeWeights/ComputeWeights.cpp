@@ -20,6 +20,8 @@
 #include <iostream>
 #include <iomanip>
 
+// Constructor
+// Creates instance of class
 ComputeWeights::ComputeWeights(int verbosity, 
 			       bool doFitBaseline, bool doFitTime, 
 			       int nPulseSamples, int nPrePulseSamples) :
@@ -45,36 +47,32 @@ ComputeWeights::ComputeWeights(int verbosity,
     if (doFitBaseline_)
       std::cout << "  - the number of samples used to extract baseline in the"
 		<< " pre-pulse is " << nPrePulseSamples_ << std::endl; 
-    std::cout << std::endl;
-  } // if (verbosity_)
-}//CONSTRUCTOR
+    std::cout << "___________________________________" << std::endl;
+  } // verbosity
+
+}// Constructor
 
 // Destructor
 // Destructs instance of a class from memory
-
 ComputeWeights::~ComputeWeights()
 {
   if (verbosity_)
     std::cout << "ComputeWeights::~ComputeWeights: Destructing ComputeWeights" << std::endl;
 }
 
-
-
 // Compute weights from an input pulse shape
 // Call member function 'compute' from class ComputeWeights. Try this with sample shape first.
-
-// const, can't change anything about vector
 bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 			     const std::vector<double>& pulseShapeDerivative,
 			     const double tMax)
 {
   int nSamples = pulseShape.size(); // Number of samples (size of pulseShape vector)
-  int nParams = 1 + int(doFitBaseline_) + int(doFitTime_); // number of 'parameters'. Add one if doing fitbaseline or fitting time.
+  int nParams = 1 + int(doFitBaseline_) + int(doFitTime_); // number of parameters. Add one if doing fitbaseline or fitting time.
 
   // Check if nSamples is large enough
   // '||' = 'or'
   if (nSamples < nPulseSamples_ || (doFitBaseline_ && 
-      nSamples < (nPulseSamples_ + nPrePulseSamples_))) {
+      nSamples < (nPulseSamples_ + nPrePulseSamples_) ) ) {
     std::cout << "ComputeWeights::compute: Error: nSamples = "
 	      << nSamples << " is too small" << std::endl;
     return false;
@@ -97,13 +95,13 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   // DETERMINATION OF THE FIRST SAMPLE
   int firstSample = int(tMax) - 1;
   if(nPulseSamples_ == 1) firstSample = int(tMax); // if only 1 sample -> the max sample is chosen
-  std::cout << "FIRST SAMPLE=" << firstSample << std::endl;
-  std::cout << " nParameters = "<< nParams << std::endl;
+  std::cout << "FIRST SAMPLE = " << firstSample << std::endl;
+  std::cout << "nParameters = " << nParams << std::endl;
 
   if (firstSample + nPulseSamples_ > nSamples) {
     if (verbosity_)
       std::cout << "ComputeWeights::compute: Warning: firstSample cannot be "
-		<< firstSample << " because they are too few samples beyond." // there?
+		<< firstSample << " because there are too few samples beyond." 
 		<< std::endl << "firstSample is set to "
 		<< nSamples - nPulseSamples_ << std::endl;
     firstSample = nSamples - nPulseSamples_;
@@ -124,17 +122,20 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
       else // doFitTime_ || nParams == 3
 	coef[iRow][iColumn] = pulseShapeDerivative[firstSample + iRow];
     }
+
   for (int iRow = nPulseSamples_; iRow < size; iRow++)
     for (int iColumn = 0; iColumn < nParams; iColumn++) {
       if (iColumn == 1)
 	coef[iRow][iColumn] = 1.;
       else
 	coef[iRow][iColumn] = 0.;
+
     }
 
   // Fill coef matrix
+
 /*
-  // int size = 10;
+  int size = 10;
   CLHEP::HepMatrix coef(size, nParams); // (size x nParams) matrix
   for (int iRow = 0; iRow < size; iRow++)
     for (int iColumn = 0; iColumn < nParams; iColumn++) {
@@ -150,13 +151,18 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 
   CLHEP::HepMatrix tCoef = coef.T(); // transpose coef
 
-//  std::cout<<" tcoef ="<< tCoef << std::endl;
+  if (verbosity_)
+  	std::cout<<" coef ="<< coef << std::endl;
+
+  if (verbosity_)
+  	std::cout<<" tcoef ="<< tCoef << std::endl;
 
   // Covariance matrix
   CLHEP::HepSymMatrix  invCov(size, 1); // By default, set it to identity (1)
-  invCov = 1.0*invCov; // 
+  invCov = 1.0*invCov; 
 
-//  std::cout<<" invCov = "<< invCov <<std::endl;
+  if (verbosity_)
+  	std::cout<<" invCov = "<< invCov <<std::endl;
 
   // Variance matrix = [tCoef * invCov * coef]^-1
   CLHEP::HepMatrix tCoeffInvCov = tCoef*invCov;
@@ -169,6 +175,12 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
     std::cout << variance;
     return false;
   }//check inversion
+
+  if (verbosity_)
+  	std::cout<<" tCoeffInvCov ="<< tCoeffInvCov << std::endl;
+
+  if (verbosity_)
+  	std::cout<<" variance ="<< variance << std::endl;
 
   // Weights matrix = variance * tCoef * invCov
   CLHEP::HepMatrix variancetCoef = variance*tCoef;
@@ -183,6 +195,11 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   CLHEP::HepMatrix tDeltaInvCov = tDelta*invCov;
   CLHEP::HepMatrix chi2 = tDeltaInvCov*delta;
 
+  if (verbosity_)
+  	std::cout<<" variancetCoef ="<< variancetCoef << std::endl;
+
+  //if (verbosity_)
+  // 	std::cout<<" coef ="<< coef << std::endl;
 
   // Copy matrices into class members
   for (int iColumn = 0; iColumn < nPulseSamples_; iColumn++) {
@@ -227,12 +244,10 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   }
 */
 
-  std::cout<<" chi2_=" << chi2_ << std::endl;
-  std::cout<<" chi2=" << chi2 << std::endl;
-  std::cout<<" weights_ "<< weights_ << std::endl;
-  std::cout<<" weights "<< weights << std::endl;
-
-
+  //std::cout<<" chi2_=" << chi2_ << std::endl;
+  //std::cout<<" chi2=" << chi2 << std::endl;
+  //std::cout<<" weights_ "<< weights_ << std::endl;
+  std::cout << " weights "<< weights << std::endl;
 
   return true;
 } // ComputeWeights::compute
