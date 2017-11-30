@@ -195,9 +195,10 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   CLHEP::HepMatrix chi2 = tDeltaInvCov*delta;
 
 
-  if (verbosity_)
+  if (verbosity_) {
     std::cout<<" variancetCoef ="<< variancetCoef << std::endl;
     std::cout<<" delta "<< delta << std::endl;
+  }
 
   //if (verbosity_)
   //  std::cout<<" coef ="<< coef << std::endl;
@@ -218,8 +219,8 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
            [iColumn + nPulseSamples_];
     }
 
- CLHEP::HepMatrix v = weights*coef;
- std::cout << " v "<< v << std::endl;
+ //CLHEP::HepMatrix v = weights*coef;
+ //std::cout << " v "<< v << std::endl;
 /*
     v = CLHEP::HepMatrix(nSamples, nSamples, 0); // Fill matrices with zeros. Set size to nSamples x nSamples, if isn't already true.
 
@@ -271,11 +272,13 @@ std::transform( weights.std::begin()+1, weights.std::end(),
   //std::cout<<" chi2_=" << chi2_ << std::endl;
   //std::cout<<" chi2=" << chi2 << std::endl;
   //std::cout<<" weights_ "<< weights_ << std::endl;
-  std::cout << " weights "<< weights << std::endl;
+  //std::cout << " weights "<< weights << std::endl;
 
-
+{
   return true;
-} // ComputeWeights::compute
+}
+} 
+// ComputeWeights::compute
 
 // Get weight used to compute amplitude
 double ComputeWeights::getAmpWeight(int iSample) const
