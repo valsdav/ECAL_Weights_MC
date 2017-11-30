@@ -14,23 +14,6 @@ using namespace std;
 
 int main() {
 
-  // Create matrix
-
-  //CLHEP::HepMatrix A(5, 5, 0);
-
-  //cout << "Created a Matrix." << endl;
-  //int N = 10;
-
- // double num[10]= { 0,0,0,0,0,0,0,0,0,0};
- // char data[N];
-
-  int verbosity = 0;
-
-  cout << "Enter 1 or 0 for verbosity: ";
-  cin >> verbosity;
-  cout << "Verbosity = " << verbosity << endl;
-  cout << "Create weights from pulse shape " << endl;  
-
 
   cout << "Enter File Name: ";  
   std::string file = "text.txt" ;
@@ -59,7 +42,12 @@ int main() {
         exit(1);  // terminate with error
   }
 
-  //cin.getline(data, 100);
+  int verbosity = 0;
+
+  cout << "Enter 1 or 0 for verbosity: ";
+  cin >> verbosity;
+  cout << "Verbosity = " << verbosity << endl;
+  cout << "Create weights from pulse shape " << endl;  
 
     // dummy pulse shape derivative
 
@@ -105,25 +93,32 @@ int main() {
     double d13;
     double d14;
     // cout << s << endl;
+    // There are 14 numbers on each line, should check this with all data files 
     if(s >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7 >> d8 >> d9 >> d10 >> d11 >> d12 >> d13 >> d14) {
       // cout << "adding to rows" << endl;
-      std::vector<double> row;
-      row.push_back(d1);
-      row.push_back(d2);
-      row.push_back(d3);
-      row.push_back(d4);
-      row.push_back(d5);
-      row.push_back(d6);
-      row.push_back(d7);
-      row.push_back(d8);
-      row.push_back(d9);
-      row.push_back(d10);
-      // row.push_back(d11);
-      // row.push_back(d12);
-      // row.push_back(d13);
-      // row.push_back(d14);
+      std::vector<double> pulseShape;
+      // Make sure to be setting the ones to zero that we want to
+      // set to zero and taking the data points that we want to be taking 
+      pulseShape.push_back(0);
+      pulseShape.push_back(0);
+      pulseShape.push_back(0);
+      //pulseShape.push_back(d1);
+      //pulseShape.push_back(d2);
+      //pulseShape.push_back(d3);
+      pulseShape.push_back(d4);
+      pulseShape.push_back(d5);
+      pulseShape.push_back(d6);
+      pulseShape.push_back(d7);
+      pulseShape.push_back(d8);
+      pulseShape.push_back(d9);
+      pulseShape.push_back(d10);
+      // pulseShape.push_back(d11);
+      // pulseShape.push_back(d12);
+      // pulseShape.push_back(d13);
+      // pulseShape.push_back(d14);
 
-      A.compute(row,pulseShapeDerivative,tMax);
+
+      A.compute(pulseShape,pulseShapeDerivative,tMax);
       if (verbosity > 0) {
         cout << "verbosity_ = " << A.GetVerbosity() << endl;
         cout << "doFitBaseline_ = " << A.GetDoFitBaseline() << endl;

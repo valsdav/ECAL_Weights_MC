@@ -14,7 +14,6 @@
 // Header Files 
 using namespace std; 
 #include "ComputeWeights.h" 
-
 #include <iostream>
 #include <iomanip>
 
@@ -93,8 +92,8 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   // DETERMINATION OF THE FIRST SAMPLE
   int firstSample = int(tMax) - 1;
   if(nPulseSamples_ == 1) firstSample = int(tMax); // if only 1 sample -> the max sample is chosen
-  std::cout << "FIRST SAMPLE = " << firstSample << std::endl;
-  std::cout << "nParameters = " << nParams << std::endl;
+  //std::cout << "FIRST SAMPLE = " << firstSample << std::endl;
+  //std::cout << "nParameters = " << nParams << std::endl;
 
   if (firstSample + nPulseSamples_ > nSamples) {
     if (verbosity_)
@@ -197,6 +196,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 
   if (verbosity_) {
     std::cout<<" variancetCoef ="<< variancetCoef << std::endl;
+    std::cout << " weights "<< weights << std::endl;
     std::cout<<" delta "<< delta << std::endl;
   }
 
@@ -259,24 +259,24 @@ std::transform( weights.std::begin()+1, weights.std::end(),
   }
 
 
-/*
-  for(int i=0;i<10;i++)
-  {
-    for(int j =0 ; j<10; j++)
+  /*
+    for(int i=0;i<10;i++)
     {
-      std::cout<<"b["<<i<<"]["<<j<<"]="<< chi2_[i][j]<<";"<<std::endl;
+      for(int j =0 ; j<10; j++)
+      {
+        std::cout<<"b["<<i<<"]["<<j<<"]="<< chi2_[i][j]<<";"<<std::endl;
+      }
     }
-  }
-*/
+  */
 
   //std::cout<<" chi2_=" << chi2_ << std::endl;
   //std::cout<<" chi2=" << chi2 << std::endl;
   //std::cout<<" weights_ "<< weights_ << std::endl;
-  //std::cout << " weights "<< weights << std::endl;
+  
 
-{
-  return true;
-}
+  {
+    return true;
+  }
 } 
 // ComputeWeights::compute
 
