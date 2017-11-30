@@ -19,27 +19,41 @@ int main() {
   //CLHEP::HepMatrix A(5, 5, 0);
 
   //cout << "Created a Matrix." << endl;
-  int N = 10;
+  //int N = 10;
 
-  double num[10]= { 0,0,0,0,0,0,0,0,0,0};
-  char data[N];
+ // double num[10]= { 0,0,0,0,0,0,0,0,0,0};
+ // char data[N];
 
   int verbosity = 0;
 
   cout << "Enter 1 or 0 for verbosity: ";
   cin >> verbosity;
   cout << "Verbosity = " << verbosity << endl;
-
   cout << "Create weights from pulse shape " << endl;  
 
 
-  //cout << "A[0][0] = " << A[0][0] << endl;
+  cout << "Enter File Name: ";  
+  std::string file = "text.txt" ;
+
+  // comment this out for no file input
+  
+  std::string input;
+  std::cin >> input;
+  cin.ignore(100, '\n');
+  getline(cin, input);
+  if ( !input.empty() ) {
+      std::istringstream istr( input );
+      istr >> file;
+  }
+  
+  // stop commentting out here
+
+
+  cout << "parsing file: " << file;
 
   ifstream inFile;
-  //ofstream outfile;
-  //outfile.open("/Users/meganstark/Computation/practice.txt");
-  // inFile.open("sample.txt");
-  inFile.open("text.txt");
+  inFile.open(file);
+
   if (!inFile) {
         cout << "Unable to open file ";
         exit(1);  // terminate with error
@@ -127,6 +141,8 @@ int main() {
 
     }
   }
+    inFile.close();
+
 
 
   // int R = 1;
@@ -148,7 +164,7 @@ int main() {
    // close the opened file.
   // write the data at the screen.
 
-  inFile.close();
+
 
 
   // Extra print messages: Set verbosity = 1
