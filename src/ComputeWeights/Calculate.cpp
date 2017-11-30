@@ -29,7 +29,7 @@ int main() {
   ifstream inFile;
   //ofstream outfile;
   //outfile.open("/Users/meganstark/Computation/practice.txt");
-  inFile.open("text.txt");
+  inFile.open("sample.txt");
   if (!inFile) {
         cout << "Unable to open file ";
         exit(1);  // terminate with error
@@ -46,11 +46,12 @@ int main() {
   vector <double> pulseShapeDerivative;
   
   int i = 0;
-  while(i < N){
+  while(i < 10){
 
    //read the data from the file and display it.
     inFile >> data;  
     num[i] = atof(data);
+    num[i] = num[i]*2;
     cout << data << endl;
     //cout << num[i] << endl; 
     i = i + 1;
@@ -68,14 +69,13 @@ int main() {
   cin >> verbosity;
   cout << "Verbosity = " << verbosity << endl;
 
-  
-  cout << "Create weights from pulse shape " << endl;  
 
+  cout << "Create weights from pulse shape " << endl;  
 
   
   // dummy pulse shape
   int j = 0;
-  while(j < N){
+  while(j < 10){
       pulseShape.push_back(num[j]);
       cout << pulseShape[j] << endl;
       j = j + 1;

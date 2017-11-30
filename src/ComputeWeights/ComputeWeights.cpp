@@ -12,7 +12,7 @@
  */
 
 // Header Files 
-
+using namespace std; 
 #include "ComputeWeights.h" 
 
 #include <iostream>
@@ -184,6 +184,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   CLHEP::HepMatrix variancetCoef = variance*tCoef;
   CLHEP::HepMatrix weights = variancetCoef*invCov;
 
+
   // Chi2 matrix = (1 - coef * weights)^T * invCov * (1 - coef * weights)
   CLHEP::HepMatrix delta = coef*weights;
   delta *= -1.;
@@ -193,8 +194,10 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   CLHEP::HepMatrix tDeltaInvCov = tDelta*invCov;
   CLHEP::HepMatrix chi2 = tDeltaInvCov*delta;
 
+
   if (verbosity_)
     std::cout<<" variancetCoef ="<< variancetCoef << std::endl;
+    std::cout<<" delta "<< delta << std::endl;
 
   //if (verbosity_)
   //  std::cout<<" coef ="<< coef << std::endl;
@@ -214,6 +217,29 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   chi2_[iRow][iColumn] = chi2[iRow + nPulseSamples_] 
            [iColumn + nPulseSamples_];
     }
+
+ CLHEP::HepMatrix v = weights*coef;
+ std::cout << " v "<< v << std::endl;
+/*
+    v = CLHEP::HepMatrix(nSamples, nSamples, 0); // Fill matrices with zeros. Set size to nSamples x nSamples, if isn't already true.
+
+for (int iColumn = 0; iColumn < nPulseSamples_; iColumn++) {
+  for (int iRow = 0; iRow < nParams; iRow++)
+
+
+   float temp;
+   temp = weights[iRow][iColumn]*coef;
+   v[iRow][iColumn] = temp;
+}
+
+
+
+std::transform( weights.std::begin()+1, weights.std::end(),
+                coef.std::begin()+1, v.std::begin(),  // assumes v1,v2 of same size > 1, 
+                                          //       v one element smaller
+                std::multiplies<double>() ); // assumes values are 'int'
+   std::cout << " v "<< v << std::endl;
+*/
   }
 
   // Copy matrices into class members
@@ -246,6 +272,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   //std::cout<<" chi2=" << chi2 << std::endl;
   //std::cout<<" weights_ "<< weights_ << std::endl;
   std::cout << " weights "<< weights << std::endl;
+
 
   return true;
 } // ComputeWeights::compute
@@ -322,5 +349,8 @@ double ComputeWeights::getChi2Matrix(int iSample1, int iSample2) const
     return 0.;
   }
   return chi2_[iSample1][iSample2];
+
+
+
 }//Get chi2
 
