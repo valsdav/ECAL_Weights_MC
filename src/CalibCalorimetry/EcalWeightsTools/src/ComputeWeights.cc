@@ -15,17 +15,45 @@
 
  */
 
+using namespace std; 
+
 // Header Files 
 
-// #include "CalibCalorimetry/EcalWeightsTools/interface/ComputeWeights.h"
-
-// Changed path. Might be a better way to do this. 
-#include "/home/abe/Documents/Fall_2017/Computational_Physics/Weights/CMSSW_3_5_0_pre3/src/CalibCalorimetry/EcalWeightsTools/interface/ComputeWeights.h"
+#include "CalibCalorimetry/EcalWeightsTools/interface/ComputeWeights.h" 
 
 #include <iostream>
 #include <iomanip>
 
+//#include <CLHEP/Matrix/Matrix.h>
+//#include <CLHEP/Matrix/SymMatrix.h>
+
+//int main()  // not sure if this is necessary or not.
+//{ 
+
 // Constructor. Call to create an object
+
+/*ComputeWeights::ComputeWeights(int, 
+			       bool, bool, 
+			       int, int) :
+  verbosity_(verbosity), doFitBaseline_(doFitBaseline),
+  doFitTime_(doFitTime), nPulseSamples_(nPulseSamples),
+  nPrePulseSamples_(nPrePulseSamples)
+*/
+
+/*
+bool doFitBaseline, doFitTime;
+int verbosity, nPulseSamples, nPrePulseSamples;
+
+ComputeWeights(verbosity, doFitBaseline, doFitTime, nPulseSamples, nPrePulseSamples) :
+  verbosity_(verbosity), doFitBaseline_(doFitBaseline),
+  doFitTime_(doFitTime), nPulseSamples_(nPulseSamples),
+  nPrePulseSamples_(nPrePulseSamples);
+*/
+
+// ':' allows you to initialize member variables. Variable(value)
+
+// if(c) means if (c != 0)
+
 ComputeWeights::ComputeWeights(int verbosity, 
 			       bool doFitBaseline, bool doFitTime, 
 			       int nPulseSamples, int nPrePulseSamples) :
@@ -33,12 +61,9 @@ ComputeWeights::ComputeWeights(int verbosity,
   doFitTime_(doFitTime), nPulseSamples_(nPulseSamples),
   nPrePulseSamples_(nPrePulseSamples)
 
-// ':' allows you to initialize member variables. Variable(value)
-
-// if(c) means if (c != 0)
 
 { 
-  // Tell user what has been done:
+  
   if (verbosity_) { 
     std::cout << "ComputeWeights::ComputeWeights: Constructing with setup:"
 	      << std::endl;
@@ -60,7 +85,7 @@ ComputeWeights::ComputeWeights(int verbosity,
 }//CONSTRUCTOR
 
 // Destructor
-// Destructs instance of a class (from memory?)
+// Destructs instance of a class from memory
 
 ComputeWeights::~ComputeWeights()
 {
@@ -315,3 +340,4 @@ double ComputeWeights::getChi2Matrix(int iSample1, int iSample2) const
   }
   return chi2_[iSample1][iSample2];
 }//Get chi2
+
