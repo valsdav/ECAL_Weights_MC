@@ -14,7 +14,7 @@
  */
 
 
-bool Correlation_Sim = true; // Set to false if don't want to simulate Correlation matrix
+bool Correlation_Sim = false; // Set to false if don't want to simulate Correlation matrix
 
 #include "ComputeWeights.h" 
 
