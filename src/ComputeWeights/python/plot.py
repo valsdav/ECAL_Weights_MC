@@ -21,7 +21,7 @@ all_rows = [[],[],[],[]] # [[raw],[samples],[weights],[amplitude]]
 # all_rows[3] = ampltiude values
 
 # Import data file
-with open('ten_pulses.txt', 'r') as f: # Create file object f by opening file with given path in read mode.
+with open('data.txt', 'r') as f: # Create file object f by opening file with given path in read mode.
     reader = csv.reader(f, delimiter = "\t") # Assuming tab delimited data
     for row in reader: # Loop over lines (pulses)
 	all_rows[0].append(row) # add raw data list for every row (pulse)
@@ -98,7 +98,7 @@ avg_amp = total / len(all_rows[3])
 
 pulses = len(all_rows[3])
 
-print "Amplitude = ",avg_amp, "averaged over ",pulses,"pulses."
+print "Amplitude = ",avg_amp, "averaged over",pulses,"pulses."
 
 # Plot average amplitude
 

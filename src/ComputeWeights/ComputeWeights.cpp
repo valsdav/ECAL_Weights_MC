@@ -13,12 +13,13 @@
 
  */
 
-bool Correlation_Sim = false; // Set to false if don't want to simulate Correlation matrix
+bool Correlation_Sim = true; // Set true to simulate Correlation Matrix
 
 #include "ComputeWeights.h" 
 
 #include <iostream>
 #include <iomanip>
+#include <cmath>
 
 // Constructor
 // Creates instance of class
@@ -46,9 +47,9 @@ ComputeWeights::ComputeWeights(int verbosity,
         std::cout << "  - time jitter weights are computed" << std::endl;
         std::cout << "  - the number of samples used to extract amplitude in the"
 	          << " pulse is " << nPulseSamples_ << std::endl; 
-	
-	// nPulseSamples_: # Samples to used to extract amplitude 
-	// nPrePulseSamples_: # Samples used to extract baseline (pedestal?)
+	// when running doFitTime_:
+	// nPulseSamples_: # Samples used to extract amplitude 
+	// nPrePulseSamples_: # Samples used to extract baseline
 
     if (doFitBaseline_)
         std::cout << "  - the number of samples used to extract baseline in the"
@@ -79,7 +80,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 {
 
   int nSamples = pulseShape.size(); // Number of samples (size of pulseShape vector)
-  int nParams = 1 + int(doFitBaseline_) + int(doFitTime_); // number of parameters. Add one if doing fitbaseline or fitting time.
+  int nParams = 1 + int(doFitBaseline_) + int(doFitTime_); // number of parameters. Add one if doing fitbaseline or time jitter
 
   // Check if nSamples is large enough
   // '||' = 'or'
@@ -115,7 +116,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 
   // DETERMINATION OF THE FIRST SAMPLE
   
-  int firstSample = int(tMax) - 1;
+  int firstSample = int(tMax) - 2; // -2 for now since 2 samples before peak in current data. Previously -1.
   if(nPulseSamples_ == 1) firstSample = int(tMax); // if only 1 sample -> the max sample is chosen
 
   if(verbosity_) {
@@ -129,7 +130,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 		<< firstSample << " because there are too few samples beyond." 
 		<< std::endl << "firstSample is set to "
 		<< nSamples - nPulseSamples_ << std::endl;
-    firstSample = nSamples - nPulseSamples_;
+    firstSample = nSamples - nPulseSamples_; // should it always be this?
   }//check max samples considered
 
   // pulseshape[] -> coef
@@ -196,12 +197,16 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 	if(verbosity_)
 	  std::cout << "ComputeWeights::compute: Simulating Correlation Matrix. " << std::endl;
 	
+	// Time Constant
+	double tau = 0.75;	
+
+
 	for (int iColumn = 0; iColumn < size; iColumn++) {
           for (int iRow = 0; iRow < size; iRow++) {
 	    //if((iRow == iColumn + 1) || ( iRow == iColumn - 1)) {
 	    if(iRow == (iColumn + 1 )) {
 		for ( int j = 0; j < (size - iColumn - 1); j++){ // extra -1 because iColumn starts at 0
-        	invCov[iRow + j][iColumn] = ((invCov[iColumn + j][iColumn]) / 2.0 );
+        	invCov[iRow + j][iColumn] = ((invCov[iColumn + j][iColumn]) * exp(-1*pow(tau,-1)));
 
 		}
 			

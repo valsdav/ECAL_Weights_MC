@@ -19,7 +19,13 @@ using namespace std;
 
 int main() {
 
+  int verbosity = 0;
 
+  cout << "Enter 1 or 0 for verbosity: ";
+  cin >> verbosity;
+  cout << "Verbosity = " << verbosity << endl;
+
+  // Import data
   cout << "Enter File Name: ";  
   std::string file = "Data/template_histograms_ECAL_Run2017_runs_304209_304292.txt" ;
 
@@ -40,11 +46,9 @@ int main() {
   
   // stop commentting out here
 
-
-  //cout << "parsing file: " << file;
-
   // Want to read from compilation 
   // ifstream inFile(argv[1]);
+
 
   ifstream inFile;
   inFile.open(file);
@@ -54,13 +58,7 @@ int main() {
         exit(1);  // terminate with error
   }
 
-  int verbosity = 0;
 
-  cout << "Enter 1 or 0 for verbosity: ";
-  cin >> verbosity;
-  cout << "Verbosity = " << verbosity << endl;
-
-  // dummy pulse shape derivative
   // calculate derivative with some method here precisely. 
 
   vector <double> pulseShapeDerivative;
@@ -75,13 +73,14 @@ int main() {
   pulseShapeDerivative.push_back(-0.25);
   pulseShapeDerivative.push_back(0.0);
 
-  int nSamples = 10; 
+  int nPulseSamples = 10;  // set to 10 if treating all samples as pulse samples
 
-  // time of 
-  double tMax = 4;
+  // time of peak
+  double tMax = 6;  // when nPulseSamples = 10, tMax = 6 with current data
 
   // Create instance of object ComputeWeights
-  ComputeWeights A(verbosity, false, false, nSamples,3);
+  // ComputeWeights::ComputeWeights(int verbosity, bool doFitBaseline, bool doFitTime, int nPulseSamples, int nPrePulseSamples) 
+  ComputeWeights A(verbosity, false, false, nPulseSamples,0);
 
   cout << "Reading from the file" << endl; 
 
@@ -89,9 +88,11 @@ int main() {
   std::string line;
 
   std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
-  std::chrono::system_clock::duration dtn = tp.time_since_epoch();
+  std::chrono::system_clock::duration dtn = tp.time_since_epoch(); // seconds since start of clock to avoid overwriting data.
   std::stringstream ss;
-  ss << "output/" << "output-" << dtn.count() << ".txt";
+
+  // Output Path
+  ss << "output/" << "data-" << dtn.count() << ".txt";
   std::ofstream output_file(ss.str());
 
   int max = 10; // max number of rows to read
@@ -103,6 +104,14 @@ int main() {
       // if want whole file checkvariable set to < 0 
       break;
     }
+
+      if (count%1000 == 0)
+        cout << " Reading line " << count << endl;
+
+      if (count > max){
+	cout << "Maximum desired lines reached." << endl;
+        break;
+	}
 
     std::stringstream s(line);
     double d1;
@@ -120,11 +129,13 @@ int main() {
     double d13;
     double d14;
 
-    // There are 14 numbers on each line, should check this with all data files 
+    // There are 14 numbers on each line, should check this with all data files. 
+    // Can also set this to read number of elements per line. Maybe. 
     if(s >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7 >> d8 >> d9 >> d10 >> d11 >> d12 >> d13 >> d14) {
       std::vector<double> pulseShape;
-      // Make sure to be setting the ones to zero that we want to
-      // set to zero and taking the data points that we want to be taking 
+
+      // 10 Samples from each line
+
       pulseShape.push_back(0);
       pulseShape.push_back(0);
       pulseShape.push_back(0);
@@ -138,14 +149,31 @@ int main() {
       pulseShape.push_back(d8);
       pulseShape.push_back(d9);
       //pulseShape.push_back(d10);
-      // pulseShape.push_back(d11);
-      // pulseShape.push_back(d12);
-      // pulseShape.push_back(d13);
-      // pulseShape.push_back(d14);
+      //pulseShape.push_back(d11);
+      //pulseShape.push_back(d12);
+      //pulseShape.push_back(d13);
+      //pulseShape.push_back(d14);
 
+
+      // Calculate derivatives with precise method here.
+
+      // Dummy derivative
+      vector <double> pulseShapeDerivative;
+      pulseShapeDerivative.push_back(0.0);
+      pulseShapeDerivative.push_back(0.0);
+      pulseShapeDerivative.push_back(0.05);
+      pulseShapeDerivative.push_back(0.1);
+      pulseShapeDerivative.push_back(0.35);
+      pulseShapeDerivative.push_back(0.25);
+      pulseShapeDerivative.push_back(-0.25);
+      pulseShapeDerivative.push_back(-0.25);
+      pulseShapeDerivative.push_back(-0.25);
+      pulseShapeDerivative.push_back(0.0);
+
+      // Compute Weights
       A.compute(pulseShape,pulseShapeDerivative,tMax);
 
-      if (verbosity > 0) {
+      if (verbosity) {
         cout << "verbosity_ = " << A.GetVerbosity() << endl;
         cout << "doFitBaseline_ = " << A.GetDoFitBaseline() << endl;
         cout << "doFitTime_ = " << A.GetDoFitTime() << endl;
@@ -157,44 +185,37 @@ int main() {
       }
 
       // someFunction(row)
-      rows.push_back(pulseShape);
+      //rows.push_back(pulseShape);
    
       //saving pulseshape and the weights to output file
       //file format:
-      //[pulsenumber samplept1 samplept2 samplept3 ......samplept10 weightpt1 weightpt2 ...... weightpt10]
+      //[pulsenumber samplept1 samplept2 samplept3 ......samplept10 weightpt1 weightpt2 ...... weightpt10] by choice of extracting 10 samples from data lines
 
-      output_file << d2 << "\t";
+      output_file << d2 << "\t"; // pulsenumber. Might be cut off by numerical precision.
 
+      // Samples
       for(int i = 0; i < pulseShape.size(); i ++){
 
         output_file << pulseShape[i] << "\t";
 	
       }
+
+      // Weights
       for(int i = 0; i < pulseShape.size(); i ++){
 	if (i == (pulseShape.size() - 1)){
-	  output_file << A.getAmpWeight(i);
+	  output_file << A.getAmpWeight(i); // Make line end with value, not tab
 	}
 	else{
         output_file << A.getAmpWeight(i) << "\t";
 	}
       }
 
-      // pulseShape.insert(pulseShape.begin(), d2);
+      output_file << "\n"; 
 
-      output_file << "\n";
-
-      if (count%1000 ==0)
-        cout << " Line = " << count << endl;
-
-      if (count > max){
-	cout << "breaking." << endl;
-        break;
-	}
-
-    } // Looking at Row
+    } // Extracting samples and weights from row
 
       
-  } // While still rows left
+  } // Loop while still lines left and desired maximum hasn't been reached
     
   inFile.close();
 }
