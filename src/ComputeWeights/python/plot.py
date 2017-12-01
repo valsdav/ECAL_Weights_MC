@@ -1,39 +1,42 @@
 # Abe Tishleman-Charny
 # November 2017
-# The purpose of this code is to plot results from ComputeWeights
+# The purpose of this code is to plot results from Calculate.cpp
+
+# Import multiple data files, each corresponding to different correlation matrix
+# Calculate average amplitude for each, plot average ampltiude vs. noise 
+# Want to plot weight distributions
+# Can do things like calculate average ampltiude, plot samples & weights.
 
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Can do things like average amplitude 
+# Sample numbers 
+xdata = np.asarray([0,1,2,3,4,5,6,7,8,9]) # Assuming 10 samples. Should eventually obtain from data files.
+all_rows = [[],[],[],[]] # [[raw],[samples],[weights],[amplitude]]
 
-# sample number 
-xdata = np.asarray([0,1,2,3,4,5,6,7,8,9])
-
-# all_rows[1] = pulse arrays
-# all_rows[2] = weights arrays
-# all_rows[3] = ampltiude arrays
-
-all_rows = [[],[],[],[]] # [[all],[pulses],[weights],[amplitude]]
+# all_rows[0] = raw data lists
+# all_rows[1] = sample lists
+# all_rows[2] = weight lists
+# all_rows[3] = ampltiude values
 
 # Import data file
-
-with open('ten_pulses.txt', 'r') as f:  # Create file object f by opening file in read mode.
+with open('ten_pulses.txt', 'r') as f: # Create file object f by opening file with given path in read mode.
     reader = csv.reader(f, delimiter = "\t") # Assuming tab delimited data
-    for row in reader: # Loop over lines
-	all_rows[0].append(row) # add list for every line (pulse
+    for row in reader: # Loop over lines (pulses)
+	all_rows[0].append(row) # add raw data list for every row (pulse)
 
 # Convert all data from strings -> float
-# Might need to apply this to pulses and weights later
-#for i in all_rows[0]:
-#	i = np.asarray(i) # lists -> arrays
-#	i = i.astype(np.float) # string arrays -> float arrays
+# Might need to apply this to pulses and weights later. 
+# Might not need to do this until add/sub or mult/div elements.
 
-# Want to plot set of samples with weights
-# Want to plot weight distributions
+"""
+for i in all_rows[0]:
+	i = np.asarray(i) # lists -> arrays
+	i = i.astype(np.float) # string arrays -> float arrays
+"""
 
-# Extract samples and weights from all pulses
+# raw data -> samples & weights
 
 # Go through j pulses
 for j in range(len(all_rows[0])):
@@ -42,15 +45,14 @@ for j in range(len(all_rows[0])):
 
 	c1 = 0
 	c2 = 0
-	#print "all_rows[1] = ",all_rows[1]
 
-	# go through i elements in the jth pulse
+	# Go through i elements in the jth pulse
 	for i in range(len(all_rows[0][j])):	
 
-		# Extract pulse samples
+		# Extract samples
 		if ((i > 0) and (i < 11)):
 			all_rows[1][j].append([])
-			all_rows[1][j][c1] = (all_rows[0][j][i]) # all_rows[1][j] = jth pulse list
+			all_rows[1][j][c1] = (all_rows[0][j][i]) # all_rows[1][j] = jth sample list
 			c1 += 1
 
 		# Extract weights 
@@ -73,13 +75,7 @@ for i in all_rows[2]:
 #	[float(i) for i in all_rows[1][j]]
 #	[float(i) for i in all_rows[2][j]]
 
-# Average ampltiude
-
-# Amplitude = sum over elements signal * weight 
-
-
-
-print "range(len(all_rows[1]))",range(len(all_rows[1]))
+# Compute ampltiude values
 for j in range(len(all_rows[1])):
 	all_rows[3].append([])
 	total = 0.0
@@ -91,7 +87,18 @@ for j in range(len(all_rows[1])):
 	# after summing over i
 	all_rows[3][j] = total # Amplitude of jth pulse
 
-print "all_rows[3] = ",all_rows[3]
+# Average Ampltiudes
+total = 0.0
+avg_amp = 0.0
+
+for j in range(len(all_rows[3])):
+	total += all_rows[3][j]
+
+avg_amp = total / len(all_rows[3])
+
+pulses = len(all_rows[3])
+
+print "Amplitude = ",avg_amp, "averaged over ",pulses,"pulses."
 
 # Plot average amplitude
 
