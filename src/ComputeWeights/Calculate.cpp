@@ -4,11 +4,16 @@ Abe Tishelman-Charny
 Test file for extracting weights from sample waveform.
 */
 using namespace std; 
+
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <iterator>
+#include <string>
+#include <chrono>
+
 
 #include "ComputeWeights.h"
 
@@ -32,7 +37,7 @@ int main() {
   // stop commentting out here
 
 
-  cout << "parsing file: " << file;
+  //cout << "parsing file: " << file;
 
   ifstream inFile;
   inFile.open(file);
@@ -47,7 +52,6 @@ int main() {
   cout << "Enter 1 or 0 for verbosity: ";
   cin >> verbosity;
   cout << "Verbosity = " << verbosity << endl;
-  cout << "Create weights from pulse shape " << endl;  
 
     // dummy pulse shape derivative
 
@@ -64,7 +68,6 @@ int main() {
   pulseShapeDerivative.push_back(0.0);
 
   int nSamples = 10; 
-
   double tMax = 10;
 
   // Create instance of object ComputeWeights
@@ -75,8 +78,20 @@ int main() {
   std::vector<std::vector<double> > rows;
   std::string line;
 
+  std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
+  std::chrono::system_clock::duration dtn = tp.time_since_epoch();
+  std::stringstream ss;
+  ss << "output/" << "output-" << dtn.count() << ".txt";
+  std::ofstream output_file(ss.str());
+
+  int count = 0;
   while(std::getline(inFile, line)) {
-    // cout << "line: " << line << endl;
+    count = count +1;
+    if (count == -1) {
+      // if want whole file checkvariable set to < 0 
+      break;
+    }
+
     std::stringstream s(line);
     double d1;
     double d2;
@@ -92,10 +107,9 @@ int main() {
     double d12;
     double d13;
     double d14;
-    // cout << s << endl;
+
     // There are 14 numbers on each line, should check this with all data files 
     if(s >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7 >> d8 >> d9 >> d10 >> d11 >> d12 >> d13 >> d14) {
-      // cout << "adding to rows" << endl;
       std::vector<double> pulseShape;
       // Make sure to be setting the ones to zero that we want to
       // set to zero and taking the data points that we want to be taking 
@@ -103,7 +117,7 @@ int main() {
       pulseShape.push_back(0);
       pulseShape.push_back(0);
       //pulseShape.push_back(d1);
-      //pulseShape.push_back(d2);
+      //pulseShape.push_back(d2)
       //pulseShape.push_back(d3);
       pulseShape.push_back(d4);
       pulseShape.push_back(d5);
@@ -119,6 +133,9 @@ int main() {
 
 
       A.compute(pulseShape,pulseShapeDerivative,tMax);
+
+      pulseShape.insert(pulseShape.begin(), d2);
+
       if (verbosity > 0) {
         cout << "verbosity_ = " << A.GetVerbosity() << endl;
         cout << "doFitBaseline_ = " << A.GetDoFitBaseline() << endl;
@@ -131,61 +148,24 @@ int main() {
       }
 
       // someFunction(row)
-      rows.push_back(row);
+      rows.push_back(pulseShape);
 
+      
+      //saving pulseshape and the weights to output file
+      //file format:
+      //[pulsenumber samplept1 samplept2 samplept3 ......samplept10 weightpt1 weightpt2 ...... weightpt10]
 
+      for(int count = 0; count < pulseShape.size(); count ++){
+        output_file << pulseShape[count] << "\t";
+      }
+      for(int count = 0; count < pulseShape.size(); count ++){
+        output_file << A.getAmpWeight(count) << "\t";
+      }
+
+      output_file << "\n";
     }
+
+      
   }
     inFile.close();
-
-
-
-  // int R = 1;
-  // int k = 0;
-  // for(int i = 0; i < rows.size(); ++i)
-    //std::cout << rows[i][0] << " " << rows[i][1] << " " << rows[i][2] <<  " " << rows[i][3] <<  " " << rows[i][4] <<  " " << rows[i][5] << '\n';
-
-
-    
-//     while(k < 10){
-// //read the data from the file and display it.
-//       num[k] = rows[R][k];
-//       cout << num[k] << endl;
-
-//       k = k + 1;
-//    }
-  
-
-   // close the opened file.
-  // write the data at the screen.
-
-
-
-
-  // Extra print messages: Set verbosity = 1
-
-  
-  // // dummy pulse shape
-  // int j = 0;
-  // while(j < 10){
-  //     pulseShape.push_back(num[j]);
-  //     cout << pulseShape[j][] << endl;
-  //     j = j + 1;
-
-  // }
-
-  // cout << pulseShape.size() << endl;
-
-
-  /*pulseShape.push_back(0.0);
-  pulseShape.push_back(0.0);
-  pulseShape.push_back(0.1);
-  pulseShape.push_back(0.3);
-  pulseShape.push_back(1.0);
-  pulseShape.push_back(0.8);
-  pulseShape.push_back(0.7);
-  pulseShape.push_back(0.3);
-  pulseShape.push_back(0.2); 
-  */
-  
 }

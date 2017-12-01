@@ -27,6 +27,7 @@ ComputeWeights::ComputeWeights(int verbosity,
   nPrePulseSamples_(nPrePulseSamples)
 
 { 
+  // cout << verbosity_ << "verbosity" << endl;
   // if (c != 0)
   if (verbosity_) { 
     std::cout << "ComputeWeights::ComputeWeights: Constructing with setup:"
@@ -213,34 +214,34 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   if (doFitBaseline_) {
     for (int iColumn = 0; iColumn < nPrePulseSamples_; iColumn++) {
       for (int iRow = 0; iRow < nParams; iRow++)
-  weights_[iRow][iColumn] = weights[iRow][iColumn + nPulseSamples_];
+        weights_[iRow][iColumn] = weights[iRow][iColumn + nPulseSamples_];
       for (int iRow = 0; iRow < nPrePulseSamples_; iRow++)
-  chi2_[iRow][iColumn] = chi2[iRow + nPulseSamples_] 
+        chi2_[iRow][iColumn] = chi2[iRow + nPulseSamples_] 
            [iColumn + nPulseSamples_];
     }
 
- //CLHEP::HepMatrix v = weights*coef;
- //std::cout << " v "<< v << std::endl;
-/*
-    v = CLHEP::HepMatrix(nSamples, nSamples, 0); // Fill matrices with zeros. Set size to nSamples x nSamples, if isn't already true.
+    //CLHEP::HepMatrix v = weights*coef;
+    //std::cout << " v "<< v << std::endl;
+    /*
+      v = CLHEP::HepMatrix(nSamples, nSamples, 0); // Fill matrices with zeros. Set size to nSamples x nSamples, if isn't already true.
 
-for (int iColumn = 0; iColumn < nPulseSamples_; iColumn++) {
-  for (int iRow = 0; iRow < nParams; iRow++)
-
-
-   float temp;
-   temp = weights[iRow][iColumn]*coef;
-   v[iRow][iColumn] = temp;
-}
+    for (int iColumn = 0; iColumn < nPulseSamples_; iColumn++) {
+    for (int iRow = 0; iRow < nParams; iRow++)
 
 
+     float temp;
+     temp = weights[iRow][iColumn]*coef;
+     v[iRow][iColumn] = temp;
+    }
 
-std::transform( weights.std::begin()+1, weights.std::end(),
-                coef.std::begin()+1, v.std::begin(),  // assumes v1,v2 of same size > 1, 
-                                          //       v one element smaller
-                std::multiplies<double>() ); // assumes values are 'int'
-   std::cout << " v "<< v << std::endl;
-*/
+
+
+    std::transform( weights.std::begin()+1, weights.std::end(),
+                  coef.std::begin()+1, v.std::begin(),  // assumes v1,v2 of same size > 1, 
+                                            //       v one element smaller
+                  std::multiplies<double>() ); // assumes values are 'int'
+     std::cout << " v "<< v << std::endl;
+    */
   }
 
   // Copy matrices into class members
