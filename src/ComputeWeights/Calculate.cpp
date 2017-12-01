@@ -90,8 +90,8 @@ int main() {
   std::vector<std::vector<double> > rows;
   std::string line;
 
-  int iterations = 0;
-  bool foo = false;
+  //int iterations = 0;
+  //bool foo = false;
 
   while(std::getline(inFile, line)) {
 
@@ -147,11 +147,13 @@ int main() {
       A.compute(row,pulseShapeDerivative,tMax);
 
       vector <double> weights;
-      cout << "row.size() = " << row.size() << endl;
+      //cout << "row.size() = " << row.size() << endl;
 
-      for (int i = 0; 9; i++){
-	//cout << "i = " << i << endl;
+      for (int i = 0; i < 10; i++){
+	cout << "i = " << i << endl;
+        //double weight = A.getAmpWeight(i);
         weights.push_back(A.getAmpWeight(i));
+	//cout << "weight = " << weight << endl;
 	cout << "weights[" << i << "] = " << weights[i] << endl;
 	}
 
@@ -179,7 +181,7 @@ int main() {
   
   inFile.close();
 
-
+  //cout << "all_weights = " << all_weights << endl;
 
   // int R = 1;
   // int k = 0;

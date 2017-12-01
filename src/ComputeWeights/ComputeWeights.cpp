@@ -13,7 +13,8 @@
 
  */
 
-// Header Files 
+
+bool Correlation_Sim = true; // Set to false if don't want to simulate Correlation matrix
 
 #include "ComputeWeights.h" 
 
@@ -22,38 +23,46 @@
 
 // Constructor
 // Creates instance of class
+
 ComputeWeights::ComputeWeights(int verbosity, 
 			       bool doFitBaseline, bool doFitTime, 
 			       int nPulseSamples, int nPrePulseSamples) :
   verbosity_(verbosity), doFitBaseline_(doFitBaseline),
   doFitTime_(doFitTime), nPulseSamples_(nPulseSamples),
-  nPrePulseSamples_(nPrePulseSamples)
+  nPrePulseSamples_(nPrePulseSamples) // Set private member variables equal to arguments
 
 { 
   // if (c != 0)
-  if (verbosity_) { 
-    std::cout << "ComputeWeights::ComputeWeights: Constructing with setup:"
-	      << std::endl;
+  if (verbosity_) 
+  	{ 
+    	
+  	std::cout << "ComputeWeights::ComputeWeights: Constructing with setup:"
+	          << std::endl;
     if (doFitBaseline_)
-      std::cout << "  - baseline weights are computed" << std::endl;
+
+      	std::cout << "  - baseline weights are computed" << std::endl;
+
     if (doFitTime_)
-      std::cout << "  - time jitter weights are computed" << std::endl;
-    std::cout << "  - the number of samples used to extract amplitude in the"
-	      << " pulse is " << nPulseSamples_ << std::endl; 
+
+        std::cout << "  - time jitter weights are computed" << std::endl;
+        std::cout << "  - the number of samples used to extract amplitude in the"
+	          << " pulse is " << nPulseSamples_ << std::endl; 
 	
 	// nPulseSamples_: # Samples to used to extract amplitude 
 	// nPrePulseSamples_: # Samples used to extract baseline (pedestal?)
 
     if (doFitBaseline_)
-      std::cout << "  - the number of samples used to extract baseline in the"
-		<< " pre-pulse is " << nPrePulseSamples_ << std::endl; 
-    std::cout << "___________________________________" << std::endl;
-  } // verbosity
+        std::cout << "  - the number of samples used to extract baseline in the"
+  	<< " pre-pulse is " << nPrePulseSamples_ << std::endl; 
+        std::cout << "___________________________________" << std::endl;
+
+  	} // verbosity
 
 }// Constructor
 
 // Destructor
 // Destructs instance of a class from memory
+
 ComputeWeights::~ComputeWeights()
 {
   if (verbosity_)
@@ -61,38 +70,49 @@ ComputeWeights::~ComputeWeights()
 }
 
 // Compute weights from an input pulse shape
-// Call member function 'compute' from class ComputeWeights. Try this with sample shape first.
+
 bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 			     const std::vector<double>& pulseShapeDerivative,
 			     const double tMax)
 {
+
   int nSamples = pulseShape.size(); // Number of samples (size of pulseShape vector)
   int nParams = 1 + int(doFitBaseline_) + int(doFitTime_); // number of parameters. Add one if doing fitbaseline or fitting time.
 
   // Check if nSamples is large enough
   // '||' = 'or'
   if (nSamples < nPulseSamples_ || (doFitBaseline_ && 
-      nSamples < (nPulseSamples_ + nPrePulseSamples_) ) ) {
-    std::cout << "ComputeWeights::compute: Error: nSamples = "
-	      << nSamples << " is too small" << std::endl;
-    return false;
-  }//check samples
+      nSamples < (nPulseSamples_ + nPrePulseSamples_) ) ) 
+  	{
+    	std::cout << "ComputeWeights::compute: Error: nSamples = "
+	          << nSamples << " is too small" << std::endl;
+    	return false;
+  	} // check samples
 
   // INITIALIZE WEIGHTS MATRICES
-  if (weights_.num_row() != nSamples) { 
-    weights_ = CLHEP::HepMatrix(nSamples, nSamples, 0); // Fill matrices with zeros. Set size to nSamples x nSamples, if isn't already true.
-    chi2_ = CLHEP::HepSymMatrix(nSamples, 0); // Initialize with zeros 
-  } else {
-    for (int iColumn = 0; iColumn < nSamples; iColumn++) {
-      for (int iRow = 0; iRow < nParams; iRow++)
-	weights_[iRow][iColumn] = 0.;
-      for (int iRow = 0; iRow < nSamples; iRow++)
-	chi2_[iRow][iColumn] = 0.; // Fill with zeros if matrix already exists
-    }
-  }
+  if (weights_.num_row() != nSamples) 
+  	{ 
+
+    	weights_ = CLHEP::HepMatrix(nSamples, nSamples, 0); // Fill matrices with zeros. Set size to nSamples x nSamples, if isn't already true.
+    	chi2_ = CLHEP::HepSymMatrix(nSamples, 0); // Initialize with zeros 
+
+  	} 
+  else 
+	{
+
+    	for (int iColumn = 0; iColumn < nSamples; iColumn++) 
+		{
+     		for (int iRow = 0; iRow < nParams; iRow++)
+			weights_[iRow][iColumn] = 0.;
+
+      		for (int iRow = 0; iRow < nSamples; iRow++)
+			chi2_[iRow][iColumn] = 0.; // Fill with zeros if matrix already exists
+    		}
+  	}
 
 
   // DETERMINATION OF THE FIRST SAMPLE
+  
   int firstSample = int(tMax) - 1;
   if(nPulseSamples_ == 1) firstSample = int(tMax); // if only 1 sample -> the max sample is chosen
   std::cout << "FIRST SAMPLE = " << firstSample << std::endl;
@@ -110,6 +130,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   // pulseshape[] -> coef
 
   // Fill coef matrix
+
   int size = nPulseSamples_;
   if (doFitBaseline_) size += nPrePulseSamples_;
   CLHEP::HepMatrix coef(size, nParams);
@@ -158,17 +179,41 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   	std::cout<<" tcoef ="<< tCoef << std::endl;
 
   // Covariance matrix
-  CLHEP::HepSymMatrix  invCov(size, 1); // By default, set it to identity (1)
+  CLHEP::HepSymMatrix  invCov(size, 1); // If no noise correlation, set it to identity (1)
   invCov = 1.0*invCov; 
+
+
+  if (Correlation_Sim)
+  	{
+
+	std::cout << "ComputeWeights::compute: Simulating Correlation Matrix. " << std::endl;
+	
+	for (int iColumn = 0; iColumn < size; iColumn++) {
+          for (int iRow = 0; iRow < size; iRow++) {
+	    //if((iRow == iColumn + 1) || ( iRow == iColumn - 1)) {
+	    if(iRow == (iColumn + 1 )) {
+		for ( int j = 0; j < (size - iColumn - 1); j++){ // extra -1 because iColumn starts at 0
+        	invCov[iRow + j][iColumn] = ((invCov[iColumn + j][iColumn]) / 2.0 );
+
+		}
+			
+	      }
+	    }
+ 	  }
+
+	}
+
 
   if (verbosity_)
   	std::cout<<" invCov = "<< invCov <<std::endl;
-
   // Variance matrix = [tCoef * invCov * coef]^-1
   CLHEP::HepMatrix tCoeffInvCov = tCoef*invCov;
+  //std::cout << "about to invert variance" << std::endl;
   CLHEP::HepMatrix variance = tCoeffInvCov*coef;
   int ierr;
+
   variance.invert(ierr);
+
   if (ierr) {
     std::cout << "ComputeWeights::compute: Error: impossible to invert "
 	      << "variance matrix." << std::endl;
@@ -176,8 +221,8 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
     return false;
   }//check inversion
 
-  if (verbosity_)
-  	std::cout<<" tCoeffInvCov ="<< tCoeffInvCov << std::endl;
+  //if (verbosity_)
+  // 	std::cout<<" tCoeffInvCov ="<< tCoeffInvCov << std::endl;
 
   if (verbosity_)
   	std::cout<<" variance ="<< variance << std::endl;
@@ -195,8 +240,8 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   CLHEP::HepMatrix tDeltaInvCov = tDelta*invCov;
   CLHEP::HepMatrix chi2 = tDeltaInvCov*delta;
 
-  if (verbosity_)
-  	std::cout<<" variancetCoef ="<< variancetCoef << std::endl;
+  //if (verbosity_)
+  //	std::cout<<" variancetCoef ="<< variancetCoef << std::endl;
 
   //if (verbosity_)
   // 	std::cout<<" coef ="<< coef << std::endl;
@@ -230,7 +275,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
       weights_[iRow][iColumn] = weights[iRow][iColumn];
       //std::cout<<"weights_["<<iRow<<"]["<<iColumn<<"]="<<weights_[iRow][iColumn]<<";"<<std::endl;
     for (int iRow = 0; iRow < size; iRow++)
-      chi2_[iRow][iColumn] = chi2[iRow][iColumn]; // equate chi2_ and chi2
+      chi2_[iRow][iColumn] = chi2[iRow][iColumn]; 
   }
 
 
@@ -244,9 +289,13 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   }
 */
 
-  //std::cout<<" chi2_=" << chi2_ << std::endl;
-  //std::cout<<" chi2=" << chi2 << std::endl;
-  //std::cout<<" weights_ "<< weights_ << std::endl;
+  if(verbosity_)
+  	{
+  	std::cout<<" chi2_=" << chi2_ << std::endl;
+  	std::cout<<" weights_ "<< weights_ << std::endl;
+	}
+
+  std::cout<<" chi2=" << chi2 << std::endl;
   std::cout << " weights "<< weights << std::endl;
 
   return true;
@@ -270,7 +319,7 @@ double ComputeWeights::getAmpWeight(int iSample) const
     return 0.;
   }
   return weights_[0][iSample];
-}//Get Amplitude Weights
+} // Get Amplitude Weights
 
 // Get weight used to compute dynamic pedestal
 double ComputeWeights::getPedWeight(int iSample) const
@@ -289,7 +338,7 @@ double ComputeWeights::getPedWeight(int iSample) const
     return 0.;
   }
   return weights_[1][iSample]; // pedestal weight
-}//Get Pedestal Weights
+} // Get Pedestal Weights
 
 // Get weight used to compute time jitter
 double ComputeWeights::getTimeWeight(int iSample) const
@@ -324,5 +373,5 @@ double ComputeWeights::getChi2Matrix(int iSample1, int iSample2) const
     return 0.;
   }
   return chi2_[iSample1][iSample2];
-}//Get chi2
+} // Get chi2
 
