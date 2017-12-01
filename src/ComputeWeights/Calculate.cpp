@@ -43,6 +43,9 @@ int main() {
 
   //cout << "parsing file: " << file;
 
+  // Want to read from compilation 
+  // ifstream inFile(argv[1]);
+
   ifstream inFile;
   inFile.open(file);
 
@@ -57,7 +60,8 @@ int main() {
   cin >> verbosity;
   cout << "Verbosity = " << verbosity << endl;
 
-    // dummy pulse shape derivative
+  // dummy pulse shape derivative
+  // calculate derivative with some method here precisely. 
 
   vector <double> pulseShapeDerivative;
   pulseShapeDerivative.push_back(0.0);
@@ -72,6 +76,8 @@ int main() {
   pulseShapeDerivative.push_back(0.0);
 
   int nSamples = 10; 
+
+  // time of 
   double tMax = 4;
 
   // Create instance of object ComputeWeights

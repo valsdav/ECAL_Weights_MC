@@ -13,7 +13,6 @@
 
  */
 
-
 bool Correlation_Sim = false; // Set to false if don't want to simulate Correlation matrix
 
 #include "ComputeWeights.h" 
@@ -70,6 +69,9 @@ ComputeWeights::~ComputeWeights()
 }
 
 // Compute weights from an input pulse shape
+// tmax only used to figure out first sample
+// pulseshape derivative used for dofittime (finding time jitter weights) (see documentation)
+// might want to create matrices by hand, will need inverse of 10x10, need to take transposes, multiply matrices.
 
 bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 			     const std::vector<double>& pulseShapeDerivative,
@@ -185,6 +187,8 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   CLHEP::HepSymMatrix  invCov(size, 1); // If no noise correlation, set it to identity (1)
   invCov = 1.0*invCov; 
 
+  // Want to simulate different expoential fall offs of noise correlation, and plot different average amplitudes
+  // This corresponds to expected noise.
 
   if (Correlation_Sim)
   	{
