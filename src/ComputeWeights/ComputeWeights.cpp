@@ -115,8 +115,11 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   
   int firstSample = int(tMax) - 1;
   if(nPulseSamples_ == 1) firstSample = int(tMax); // if only 1 sample -> the max sample is chosen
-  std::cout << "FIRST SAMPLE = " << firstSample << std::endl;
-  std::cout << "nParameters = " << nParams << std::endl;
+
+  if(verbosity_) {
+    std::cout << "FIRST SAMPLE = " << firstSample << std::endl;
+    std::cout << "nParameters = " << nParams << std::endl;
+    }
 
   if (firstSample + nPulseSamples_ > nSamples) {
     if (verbosity_)
@@ -186,7 +189,8 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   if (Correlation_Sim)
   	{
 
-	std::cout << "ComputeWeights::compute: Simulating Correlation Matrix. " << std::endl;
+	if(verbosity_)
+	  std::cout << "ComputeWeights::compute: Simulating Correlation Matrix. " << std::endl;
 	
 	for (int iColumn = 0; iColumn < size; iColumn++) {
           for (int iRow = 0; iRow < size; iRow++) {
@@ -293,10 +297,10 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   	{
   	std::cout<<" chi2_=" << chi2_ << std::endl;
   	std::cout<<" weights_ "<< weights_ << std::endl;
-	}
+  	std::cout<<" chi2=" << chi2 << std::endl;
+  	std::cout << " weights "<< weights << std::endl;
 
-  std::cout<<" chi2=" << chi2 << std::endl;
-  std::cout << " weights "<< weights << std::endl;
+	}
 
   return true;
 } // ComputeWeights::compute

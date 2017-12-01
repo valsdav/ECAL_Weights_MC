@@ -1,35 +1,31 @@
-/*
-
+/* 
 November 18, 2017
 Abe Tishelman-Charny
-
 Test file for extracting weights from sample waveform.
-
 */
 using namespace std; 
+
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
-#include <cstdlib>
+#include <iterator>
+#include <string>
+#include <chrono>
+
 
 #include "ComputeWeights.h"
 
 int main() {
 
-  int verbosity = 0;
 
-  cout << "Enter 1 or 0 for verbosity: ";
-  cin >> verbosity;
-  cout << "Verbosity = " << verbosity << endl;
-  cout << "Create weights from pulse shape " << endl;   
+  cout << "Enter File Name: ";  
+  std::string file = "Data/template_histograms_ECAL_Run2017_runs_304209_304292.txt" ;
 
-  std::string file = "Data/test.txt" ;
+  // comment this out for no file input
 
-  // comment this out for no file input  
-/*
-  cout << "Enter File Name: "; 
+/*  
 
   std::string input;
   std::cin >> input;
@@ -38,31 +34,34 @@ int main() {
   if ( !input.empty() ) {
       std::istringstream istr( input );
       istr >> file;
-  }  
+  }
+
 */
+  
   // stop commentting out here
 
 
-  cout << "parsing file: " << file;
+  //cout << "parsing file: " << file;
 
-  // input file stream class 
   ifstream inFile;
-  
-  // Input/output operations performed on file
-  inFile.open(file.c_str());
+  inFile.open(file);
 
   if (!inFile) {
         cout << "Unable to open file ";
         exit(1);  // terminate with error
   }
 
-  //cin.getline(data, 100);
+  int verbosity = 0;
 
-  // dummy pulse shape derivative
+  cout << "Enter 1 or 0 for verbosity: ";
+  cin >> verbosity;
+  cout << "Verbosity = " << verbosity << endl;
+
+    // dummy pulse shape derivative
 
   vector <double> pulseShapeDerivative;
-  pulseShapeDerivative.push_back(0.1);
-  pulseShapeDerivative.push_back(0.1);
+  pulseShapeDerivative.push_back(0.0);
+  pulseShapeDerivative.push_back(0.0);
   pulseShapeDerivative.push_back(0.05);
   pulseShapeDerivative.push_back(0.1);
   pulseShapeDerivative.push_back(0.35);
@@ -73,33 +72,31 @@ int main() {
   pulseShapeDerivative.push_back(0.0);
 
   int nSamples = 10; 
-
-  double tMax = 5;
-
-  // Create vector to store all event weights 
-  vector < vector < double > > all_weights;
+  double tMax = 4;
 
   // Create instance of object ComputeWeights
-
-  //ComputeWeights::ComputeWeights(int verbosity, bool doFitBaseline, bool doFitTime, int nPulseSamples, int nPrePulseSamples)
-
-  ComputeWeights A(verbosity, false, false, nSamples, 3);
+  ComputeWeights A(verbosity, false, false, nSamples,3);
 
   cout << "Reading from the file" << endl; 
 
   std::vector<std::vector<double> > rows;
   std::string line;
 
-  //int iterations = 0;
-  //bool foo = false;
+  std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
+  std::chrono::system_clock::duration dtn = tp.time_since_epoch();
+  std::stringstream ss;
+  ss << "output/" << "output-" << dtn.count() << ".txt";
+  std::ofstream output_file(ss.str());
 
+  int max = 10; // max number of rows to read
+
+  int count = 0;
   while(std::getline(inFile, line)) {
-
-    //if(iterations == 2){
-	//foo = true;
-	//}
-
-    // cout << "line: " << line << endl;
+    count = count +1;
+    if (count == -1) {
+      // if want whole file checkvariable set to < 0 
+      break;
+    }
 
     std::stringstream s(line);
     double d1;
@@ -116,46 +113,31 @@ int main() {
     double d12;
     double d13;
     double d14;
-    // cout << s << endl;
-    // parsing line 
+
+    // There are 14 numbers on each line, should check this with all data files 
     if(s >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7 >> d8 >> d9 >> d10 >> d11 >> d12 >> d13 >> d14) {
+      std::vector<double> pulseShape;
+      // Make sure to be setting the ones to zero that we want to
+      // set to zero and taking the data points that we want to be taking 
+      pulseShape.push_back(0);
+      pulseShape.push_back(0);
+      pulseShape.push_back(0);
+      //pulseShape.push_back(d1);
+      //pulseShape.push_back(d2)
+      pulseShape.push_back(d3);
+      pulseShape.push_back(d4);
+      pulseShape.push_back(d5);
+      pulseShape.push_back(d6);
+      pulseShape.push_back(d7);
+      pulseShape.push_back(d8);
+      pulseShape.push_back(d9);
+      //pulseShape.push_back(d10);
+      // pulseShape.push_back(d11);
+      // pulseShape.push_back(d12);
+      // pulseShape.push_back(d13);
+      // pulseShape.push_back(d14);
 
-      // Create pulseShape vector
-      std::vector<double> row;
-
-      // Hardcoding three pedestal values
-      row.push_back(0);
-      row.push_back(0);
-      row.push_back(0);
-      //row.push_back(d1);
-      //row.push_back(d2);
-      row.push_back(d3); // first post pedestal sample
-      row.push_back(d4);
-      row.push_back(d5); // peak
-      row.push_back(d6);
-      row.push_back(d7);
-      row.push_back(d8);
-      row.push_back(d9);
-      //row.push_back(d10); // Extra samples, not including for now 
-      //row.push_back(d11);
-      //row.push_back(d12);
-      //row.push_back(d13); 
-      //row.push_back(d14); 
-
-      // Should Calculate pulseShapeDerivative here
-
-      A.compute(row,pulseShapeDerivative,tMax);
-
-      vector <double> weights;
-      //cout << "row.size() = " << row.size() << endl;
-
-      for (int i = 0; i < 10; i++){
-	cout << "i = " << i << endl;
-        //double weight = A.getAmpWeight(i);
-        weights.push_back(A.getAmpWeight(i));
-	//cout << "weight = " << weight << endl;
-	cout << "weights[" << i << "] = " << weights[i] << endl;
-	}
+      A.compute(pulseShape,pulseShapeDerivative,tMax);
 
       if (verbosity > 0) {
         cout << "verbosity_ = " << A.GetVerbosity() << endl;
@@ -168,38 +150,45 @@ int main() {
         cout << "A.getChi2Matrix(5,5) returns: " << A.getChi2Matrix(5,5) << endl;
       }
 
-      // add data to vector of vectors
-      rows.push_back(row);
+      // someFunction(row)
+      rows.push_back(pulseShape);
+   
+      //saving pulseshape and the weights to output file
+      //file format:
+      //[pulsenumber samplept1 samplept2 samplept3 ......samplept10 weightpt1 weightpt2 ...... weightpt10]
 
-      all_weights.push_back(weights);
+      output_file << d2 << "\t";
 
-    }
- 
-  //iterations += 1;
+      for(int i = 0; i < pulseShape.size(); i ++){
 
-  }
-  
-  inFile.close();
+        output_file << pulseShape[i] << "\t";
+	
+      }
+      for(int i = 0; i < pulseShape.size(); i ++){
+	if (i == (pulseShape.size() - 1)){
+	  output_file << A.getAmpWeight(i);
+	}
+	else{
+        output_file << A.getAmpWeight(i) << "\t";
+	}
+      }
 
-  //cout << "all_weights = " << all_weights << endl;
+      // pulseShape.insert(pulseShape.begin(), d2);
 
-  // int R = 1;
-  // int k = 0;
-  // for(int i = 0; i < rows.size(); ++i)
-    //std::cout << rows[i][0] << " " << rows[i][1] << " " << rows[i][2] <<  " " << rows[i][3] <<  " " << rows[i][4] <<  " " << rows[i][5] << '\n';
+      output_file << "\n";
 
+      if (count%1000 ==0)
+        cout << " Line = " << count << endl;
 
+      if (count > max){
+	cout << "breaking." << endl;
+        break;
+	}
+
+    } // Looking at Row
+
+      
+  } // While still rows left
     
-//     while(k < 10){
-// //read the data from the file and display it.
-//       num[k] = rows[R][k];
-//       cout << num[k] << endl;
-
-//       k = k + 1;
-//    }
-  
-
-   // close the opened file.
-  // write the data at the screen.
-
+  inFile.close();
 }
