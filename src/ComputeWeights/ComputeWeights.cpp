@@ -26,10 +26,10 @@ bool Correlation_Sim = true; // Set true to simulate Correlation Matrix
 
 ComputeWeights::ComputeWeights(int verbosity, 
 			       bool doFitBaseline, bool doFitTime, 
-			       int nPulseSamples, int nPrePulseSamples) :
+			       int nPulseSamples, int nPrePulseSamples, double tau) :
   verbosity_(verbosity), doFitBaseline_(doFitBaseline),
   doFitTime_(doFitTime), nPulseSamples_(nPulseSamples),
-  nPrePulseSamples_(nPrePulseSamples) // Set private member variables equal to arguments
+  nPrePulseSamples_(nPrePulseSamples), tau_(tau) // Set private member variables equal to arguments
 
 { 
   // if (c != 0)
@@ -198,7 +198,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 	  std::cout << "ComputeWeights::compute: Simulating Correlation Matrix. " << std::endl;
 	
 	// Time Constant
-	double tau = 0.75;	
+	// double tau = 0.75;	
 
 
 	for (int iColumn = 0; iColumn < size; iColumn++) {
@@ -206,7 +206,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 	    //if((iRow == iColumn + 1) || ( iRow == iColumn - 1)) {
 	    if(iRow == (iColumn + 1 )) {
 		for ( int j = 0; j < (size - iColumn - 1); j++){ // extra -1 because iColumn starts at 0
-        	invCov[iRow + j][iColumn] = ((invCov[iColumn + j][iColumn]) * exp(-1*pow(tau,-1)));
+        	invCov[iRow + j][iColumn] = ((invCov[iColumn + j][iColumn]) * exp(-1*pow(tau_,-1)));
 
 		}
 			

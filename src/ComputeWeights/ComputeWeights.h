@@ -26,7 +26,7 @@ class ComputeWeights
 
   // Constructor
   ComputeWeights(int verbosity, bool doFitBaseline, bool doFitTime, 
-		 int nPulseSamples, int nPrePulseSamples);
+		 int nPulseSamples, int nPrePulseSamples, double tau);
 
   // Destructor
   ~ComputeWeights(); 
@@ -95,6 +95,7 @@ class ComputeWeights
   bool doFitTime_;       //< Fit time jitter or not
   int nPulseSamples_;    //< Number of samples in the pulse
   int nPrePulseSamples_; //< Number of samples in the pre-pulse
+  double tau_; // Time constant for correlation matrix simulations
   CLHEP::HepMatrix weights_; // Type CLHEP, class HepMatrix, instance weights
   CLHEP::HepSymMatrix chi2_;
 

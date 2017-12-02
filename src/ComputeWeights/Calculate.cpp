@@ -19,11 +19,18 @@ using namespace std;
 
 int main() {
 
+  double tau_min = 0.1;
+  double tau_max = 10;
+  double tau_int = 0.1; // tau interval
+
+
+  for (double k = tau_min; k < tau_max; k += tau_int){
+
   int verbosity = 0;
 
-  cout << "Enter 1 or 0 for verbosity: ";
-  cin >> verbosity;
-  cout << "Verbosity = " << verbosity << endl;
+  //cout << "Enter 1 or 0 for verbosity: ";
+  //cin >> verbosity;
+  //cout << "Verbosity = " << verbosity << endl;
 
   // Import data
   cout << "Enter File Name: ";  
@@ -78,9 +85,11 @@ int main() {
   // time of peak
   double tMax = 6;  // when nPulseSamples = 10, tMax = 6 with current data
 
+  //double tau = 0.5; // Time constant for correlation matrix simulations
+
   // Create instance of object ComputeWeights
   // ComputeWeights::ComputeWeights(int verbosity, bool doFitBaseline, bool doFitTime, int nPulseSamples, int nPrePulseSamples) 
-  ComputeWeights A(verbosity, false, false, nPulseSamples,0);
+  ComputeWeights A(verbosity, false, false, nPulseSamples, 0, k);
 
   cout << "Reading from the file" << endl; 
 
@@ -92,10 +101,10 @@ int main() {
   std::stringstream ss;
 
   // Output Path
-  ss << "output/" << "data-" << dtn.count() << ".txt";
+  ss << "python/" << "data-tau_" << k << "-"<< dtn.count() << ".txt";
   std::ofstream output_file(ss.str());
 
-  int max = 10; // max number of rows to read
+  int max = 10000; // max number of rows to read
 
   int count = 0;
   while(std::getline(inFile, line)) {
@@ -130,7 +139,7 @@ int main() {
     double d14;
 
     // There are 14 numbers on each line, should check this with all data files. 
-    // Can also set this to read number of elements per line. Maybe. 
+    // Can also set this to read number of elements per line in data files. Maybe. 
     if(s >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7 >> d8 >> d9 >> d10 >> d11 >> d12 >> d13 >> d14) {
       std::vector<double> pulseShape;
 
@@ -191,7 +200,9 @@ int main() {
       //file format:
       //[pulsenumber samplept1 samplept2 samplept3 ......samplept10 weightpt1 weightpt2 ...... weightpt10] by choice of extracting 10 samples from data lines
 
-      output_file << d2 << "\t"; // pulsenumber. Might be cut off by numerical precision.
+      // output_file << d2 << "\t"; // pulsenumber. Might be cut off by numerical precision.
+
+      output_file << k << "\t"; // time constant for correlation matrix simulation
 
       // Samples
       for(int i = 0; i < pulseShape.size(); i ++){
@@ -218,4 +229,7 @@ int main() {
   } // Loop while still lines left and desired maximum hasn't been reached
     
   inFile.close();
+
+  } // tau loop
+
 }
