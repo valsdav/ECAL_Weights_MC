@@ -112,8 +112,8 @@ for i in paths:
 				all_rows[2][j][c2] = (all_rows[0][j][k]) # all_rows[2][j] = jth weights list 
 				c2 += 1	
 
-	print "all_rows[1] = ",all_rows[1]
-	print "all_rows[2] = ",all_rows[2]
+	#print "all_rows[1] = ",all_rows[1]
+	#print "all_rows[2] = ",all_rows[2]
 
 	"""for i in all_rows[1]:
 		i = np.asarray(i) # lists -> arrays
@@ -135,30 +135,6 @@ for i in paths:
 
 		data[1][file_number].append([]) # add average sample index
 		data[2][file_number].append([]) # the file_number'th average ampltiude list
-
-	"""avg_samp = []
-
-	# for each pulse index j
-	for j in range(len(all_rows[1][0])):
-		
-		total = 0
-		# for each pulse k
-
-		for k in range(len(all_rows[1])):
-
-			#print "all_rows[1][i][j] = ",all_rows[1][i][j]
-			total += float(all_rows[1][k][j])
-
-		avg = ( total / len(all_rows[1]) )
-
-		avg_samp.append(avg)
-
-		data[1][file_number][j] = avg_samp[j]		
-	
-		#print "range(len(all_rows[1][0])) = ",range(len(all_rows[1][0]))
-		#print "all_rows[1][0] = ",all_rows[1][0]
- 
-		"""
 
 	# sample index total
 	totals = []
@@ -203,31 +179,6 @@ for i in paths:
 				totals[k] = totals[k] / totals[5] # Normalize to peak
 				data[2][file_number][k] = totals[k]
 				
-
-	# Amplitudes
-	
-	"""avg_samp = []
-
-	# for each pulse index j
-	for j in range(len(all_rows[1][0])):
-		
-		total = 0
-		# for each pulse k
-
-		for k in range(len(all_rows[1])):
-
-			#print "all_rows[1][i][j] = ",all_rows[1][i][j]
-			total += float(all_rows[1][k][j])
-
-		avg = ( total / len(all_rows[1]) )
-
-		avg_samp.append(avg)
-
-		data[1][file_number][j] = avg_samp[j]		
-	
-		#print "range(len(all_rows[1][0])) = ",range(len(all_rows[1][0]))
-		#print "all_rows[1][0] = ",all_rows[1][0] """
-
 			
 	#print "totals = ",totals
 
@@ -238,10 +189,12 @@ for i in paths:
 
 	# Compute total ampltiude values
 	for j in range(len(all_rows[1])):
-		all_rows[3].append([])
+		#all_rows[3].append([])
+		#all_rows[3].append(0)
 		total = 0.0
 
 		for k in range(len(all_rows[1][j])): #all_rows[1][j] size diff from all_rows[0] size because sample and weights are size 10.
+			all_rows[3].append(0)
 			# determine jth total ampltiude
 			total += float(all_rows[1][j][k])*float(all_rows[2][j][k]) # Summing over S_i X w_i		
 
@@ -253,6 +206,7 @@ for i in paths:
 	avg_amp = 0.0
 
 	for j in range(len(all_rows[3])):
+		print "j = ",j ," all_rows[3][j] = ",all_rows[3][j]
 		total += all_rows[3][j]
 
 	avg_amp = total / len(all_rows[3])
@@ -282,10 +236,9 @@ data_y = [y for _,y in sorted(zip(tau,average_pulses))]
 #print "tau = ",tau
 #print "average_pulses = ",average_pulses
 
-#print "data_x = ",data_x
-#print "data_y = ",data_y
+print "data_x = ",data_x
+print "data_y = ",data_y
 
-"""
 # Plot
 amplitude = plt.scatter(tau,average_pulses, color = 'b') 
 plt.plot(tau,average_pulses, color = 'b')
@@ -298,10 +251,11 @@ plt.title(r'$\hat{\bar{\mathcal{A}}}$ vs. $\tau$', fontsize = 28)
 #figtitle = 
 plt.savefig("ampvstau")
 
-plt.show() """
+plt.show() 
 
 print "data = ",data
 
+"""
 # Plot
 samples = plt.scatter(xdata,data[1][0], color = 'b') # Plot avg samples of 0th file
 amplitudes = plt.scatter(xdata,data[2][0], color = 'r')  # Plot avg Amp (per point) of 0th file
@@ -316,7 +270,7 @@ plt.title(r'$\hat{\bar{\mathcal{A}}}$ vs. $\tau$', fontsize = 28)
 #figtitle = 
 plt.savefig("output_plot.png")
 
-plt.show()
+plt.show()"""
 
 
 
