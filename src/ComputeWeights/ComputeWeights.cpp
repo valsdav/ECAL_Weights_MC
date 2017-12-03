@@ -13,13 +13,14 @@
 
  */
 
-bool Correlation_Sim = true; // Set true to simulate Correlation Matrix
 
 #include "ComputeWeights.h" 
 
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+
+bool Correlation_Sim = true; // Set true to simulate Correlation Matrix
 
 // Constructor
 // Creates instance of class
@@ -32,6 +33,9 @@ ComputeWeights::ComputeWeights(int verbosity,
   nPrePulseSamples_(nPrePulseSamples), tau_(tau) // Set private member variables equal to arguments
 
 { 
+
+  std::cout << "Correlation_Sim = " << Correlation_Sim << std::endl;
+
   // if (c != 0)
   if (verbosity_) 
   	{ 
@@ -200,13 +204,14 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 	// Time Constant
 	// double tau = 0.75;	
 
-
 	for (int iColumn = 0; iColumn < size; iColumn++) {
           for (int iRow = 0; iRow < size; iRow++) {
 	    //if((iRow == iColumn + 1) || ( iRow == iColumn - 1)) {
 	    if(iRow == (iColumn + 1 )) {
 		for ( int j = 0; j < (size - iColumn - 1); j++){ // extra -1 because iColumn starts at 0
+
         	invCov[iRow + j][iColumn] = ((invCov[iColumn + j][iColumn]) * exp(-1*pow(tau_,-1)));
+		// invCov[iRow + j][iColumn] = ((invCov[iColumn + j][iColumn]) * (tau_) );
 
 		}
 			
@@ -216,6 +221,13 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 
 	}
 
+  std::cout << "invCov = " << invCov << std::endl;
+
+  int ierr;
+
+  //invCov.invert(ierr);
+  
+  //std::cout << "invCov after inv = " << invCov << std::endl;
 
   if (verbosity_)
   	std::cout<<" invCov = "<< invCov <<std::endl;
@@ -223,7 +235,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   CLHEP::HepMatrix tCoeffInvCov = tCoef*invCov;
   //std::cout << "about to invert variance" << std::endl;
   CLHEP::HepMatrix variance = tCoeffInvCov*coef;
-  int ierr;
+  //int ierr;
 
   variance.invert(ierr);
 
@@ -237,7 +249,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   //if (verbosity_)
   // 	std::cout<<" tCoeffInvCov ="<< tCoeffInvCov << std::endl;
 
-  if (verbosity_)
+  //if (verbosity_)
   	std::cout<<" variance ="<< variance << std::endl;
 
   // Weights matrix = variance * tCoef * invCov
@@ -277,8 +289,8 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   }
 
   // Copy matrices into class members
-  chi2[3][3]=0.;
-  chi2[9][9]=0.;
+  //chi2[3][3]=0.;
+  //chi2[9][9]=0.;
 
   int iColumn = 0;
   int iRow = 0;
@@ -310,6 +322,8 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   	std::cout << " weights "<< weights << std::endl;
 
 	}
+
+  std::cout<<" chi2=" << chi2 << std::endl;
 
   return true;
 } // ComputeWeights::compute

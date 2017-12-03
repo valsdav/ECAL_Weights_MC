@@ -19,10 +19,23 @@ using namespace std;
 
 int main() {
 
+  double chi2 = 0;
+
   double tau_min = 0.1;
   double tau_max = 10;
   double tau_int = 0.1; // tau interval
 
+  cout << "tau_min = ";
+  cin >> tau_min;
+  cout << "tau_min = " << tau_min << endl;
+
+  cout << "tau_max = ";
+  cin >> tau_max;
+  cout << "tau_max = " << tau_max << endl;
+
+  cout << "tau_int = ";
+  cin >> tau_int;
+  cout << "tau_int = " << tau_int << endl;
 
   for (double k = tau_min; k < tau_max; k += tau_int){
 
@@ -104,7 +117,11 @@ int main() {
   ss << "python/" << "data-tau_" << k << "-"<< dtn.count() << ".txt";
   std::ofstream output_file(ss.str());
 
-  int max = 10000; // max number of rows to read
+  int max = 10; // max number of rows to read
+
+  cout << "Enter number of pulses to read per file: ";
+  cin >> max;
+  cout << "max pulses = "<< max << endl;
 
   int count = 0;
   while(std::getline(inFile, line)) {
@@ -192,6 +209,18 @@ int main() {
         cout << "A.getAmpWeight(5) returns: " << A.getAmpWeight(5) << endl;
         cout << "A.getChi2Matrix(5,5) returns: " << A.getChi2Matrix(5,5) << endl;
       }
+
+      chi2 = 0;
+
+      for (int i = 0; i < (pulseShape.size() / 2); i++){
+	for (int j = 0; j < (pulseShape.size()/2); j++){
+	  {
+          chi2 += A.getChi2Matrix(i,j);
+	  }
+	}
+      }
+
+      cout << "chi2 = " << chi2 << endl;
 
       // someFunction(row)
       //rows.push_back(pulseShape);
