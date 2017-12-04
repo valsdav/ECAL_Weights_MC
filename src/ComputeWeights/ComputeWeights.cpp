@@ -8,7 +8,10 @@
  * $Revision: 1.2 $
  * Updated by Alex Zabi.
   Modified by Abe Tishelman-Charny
+              Megan Stark
   November 1, 2017
+
+  Other files required:ComputeWeights.h and CLHEP dir. 
  */
 
 // Header Files 
@@ -16,6 +19,7 @@ using namespace std;
 #include "ComputeWeights.h" 
 #include <iostream>
 #include <iomanip>
+
 
 // Constructor
 // Creates instance of class
@@ -27,7 +31,7 @@ ComputeWeights::ComputeWeights(int verbosity,
   nPrePulseSamples_(nPrePulseSamples)
 
 { 
-  // cout << verbosity_ << "verbosity" << endl;
+
   // if (c != 0)
   if (verbosity_) { 
     std::cout << "ComputeWeights::ComputeWeights: Constructing with setup:"
@@ -114,19 +118,19 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   for (int iRow = 0; iRow < nPulseSamples_; iRow++)
     for (int iColumn = 0; iColumn < nParams; iColumn++) {
       if (iColumn == 0)
-  coef[iRow][iColumn] = pulseShape[firstSample + iRow];
+        coef[iRow][iColumn] = pulseShape[firstSample + iRow];
       else if (iColumn == 1 && doFitBaseline_)
-  coef[iRow][iColumn] = 1.;
-      else // doFitTime_ || nParams == 3
-  coef[iRow][iColumn] = pulseShapeDerivative[firstSample + iRow];
+        coef[iRow][iColumn] = 1.;
+      else //doFitTime_ || nParams == 3
+        coef[iRow][iColumn] = pulseShapeDerivative[firstSample + iRow];
     }
 
   for (int iRow = nPulseSamples_; iRow < size; iRow++)
     for (int iColumn = 0; iColumn < nParams; iColumn++) {
       if (iColumn == 1)
-  coef[iRow][iColumn] = 1.;
+        coef[iRow][iColumn] = 1.;
       else
-  coef[iRow][iColumn] = 0.;
+        coef[iRow][iColumn] = 0.;
 
     }
 
@@ -181,6 +185,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
     std::cout<<" variance ="<< variance << std::endl;
 
   // Weights matrix = variance * tCoef * invCov
+  // Variance matrix = [tCoef * invCov * coef]^-1
   CLHEP::HepMatrix variancetCoef = variance*tCoef;
   CLHEP::HepMatrix weights = variancetCoef*invCov;
 
@@ -211,7 +216,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
     for (int iRow = 0; iRow < nPulseSamples_; iRow++)
       chi2_[firstSample + iRow][firstSample + iColumn] = chi2[iRow][iColumn];
   }
-  if (doFitBaseline_) {
+  if (doFitTime_) {
     for (int iColumn = 0; iColumn < nPrePulseSamples_; iColumn++) {
       for (int iRow = 0; iRow < nParams; iRow++)
         weights_[iRow][iColumn] = weights[iRow][iColumn + nPulseSamples_];
@@ -220,28 +225,6 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
            [iColumn + nPulseSamples_];
     }
 
-    //CLHEP::HepMatrix v = weights*coef;
-    //std::cout << " v "<< v << std::endl;
-    /*
-      v = CLHEP::HepMatrix(nSamples, nSamples, 0); // Fill matrices with zeros. Set size to nSamples x nSamples, if isn't already true.
-
-    for (int iColumn = 0; iColumn < nPulseSamples_; iColumn++) {
-    for (int iRow = 0; iRow < nParams; iRow++)
-
-
-     float temp;
-     temp = weights[iRow][iColumn]*coef;
-     v[iRow][iColumn] = temp;
-    }
-
-
-
-    std::transform( weights.std::begin()+1, weights.std::end(),
-                  coef.std::begin()+1, v.std::begin(),  // assumes v1,v2 of same size > 1, 
-                                            //       v one element smaller
-                  std::multiplies<double>() ); // assumes values are 'int'
-     std::cout << " v "<< v << std::endl;
-    */
   }
 
   // Copy matrices into class members
@@ -258,22 +241,6 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
     for (int iRow = 0; iRow < size; iRow++)
       chi2_[iRow][iColumn] = chi2[iRow][iColumn]; // equate chi2_ and chi2
   }
-
-
-  /*
-    for(int i=0;i<10;i++)
-    {
-      for(int j =0 ; j<10; j++)
-      {
-        std::cout<<"b["<<i<<"]["<<j<<"]="<< chi2_[i][j]<<";"<<std::endl;
-      }
-    }
-  */
-
-  //std::cout<<" chi2_=" << chi2_ << std::endl;
-  //std::cout<<" chi2=" << chi2 << std::endl;
-  //std::cout<<" weights_ "<< weights_ << std::endl;
-  
 
   {
     return true;
@@ -341,6 +308,7 @@ double ComputeWeights::getTimeWeight(int iSample) const
   return weights_[1][iSample];
 } //Get Time Weights
 
+
 // Get chi2 matrix
 double ComputeWeights::getChi2Matrix(int iSample1, int iSample2) const
 {
@@ -353,7 +321,6 @@ double ComputeWeights::getChi2Matrix(int iSample1, int iSample2) const
     return 0.;
   }
   return chi2_[iSample1][iSample2];
-
 
 
 }//Get chi2

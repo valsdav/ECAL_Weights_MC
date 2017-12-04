@@ -10,6 +10,7 @@
   */
 
 // Revised by Abe Tishelman-Charny
+//            Megan Stark 
 // November 8, 2017
 
 #include <vector>
