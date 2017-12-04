@@ -20,6 +20,7 @@ using namespace std;
 int main() {
 
   double chi2 = 0;
+  int max = 10; // max number of rows to read
 
   double tau_min = 0.1;
   double tau_max = 10;
@@ -36,6 +37,10 @@ int main() {
   cout << "tau_int = ";
   cin >> tau_int;
   cout << "tau_int = " << tau_int << endl;
+
+  cout << "Enter number of pulses to read per file: ";
+  cin >> max;
+  cout << "max pulses = "<< max << endl;  
 
   for (double k = tau_min; k < tau_max; k += tau_int){
 
@@ -117,12 +122,6 @@ int main() {
   ss << "python/" << "data-tau_" << k << "-"<< dtn.count() << ".txt";
   std::ofstream output_file(ss.str());
 
-  int max = 10; // max number of rows to read
-
-  cout << "Enter number of pulses to read per file: ";
-  cin >> max;
-  cout << "max pulses = "<< max << endl;
-
   int count = 0;
   while(std::getline(inFile, line)) {
     count = count +1;
@@ -162,9 +161,9 @@ int main() {
 
       // 10 Samples from each line
 
-      pulseShape.push_back(0);
-      pulseShape.push_back(0);
-      pulseShape.push_back(0);
+      pulseShape.push_back(0.0);
+      pulseShape.push_back(0.0); // Simulating a pedestal of 0.0
+      pulseShape.push_back(0.0);
       //pulseShape.push_back(d1);
       //pulseShape.push_back(d2)
       pulseShape.push_back(d3);
