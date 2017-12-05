@@ -60,9 +60,8 @@ int main() {
   cin >> verbosity;
   cout << "Verbosity = " << verbosity << endl;
 
-  int shift = 0;
   int nSamples = 10; 
-  double tMax = 10;
+  double tMax = 4;
 
   // Create instance of object ComputeWeights
   // ComputeWeights(verbosity,doFitBaseline, doFitTime, nPulseSamples, nPrePulseSamples)
