@@ -121,7 +121,10 @@ plt.plot(xdata,all_rows[2][0])
 plt.xlabel('Sample Number')
 plt.legend((pulse, weights), ('pulse', 'weights'))
 plt.ylabel('Normalized Pulse')
+plt.title('Samples and Weights, One Waveform')
 
-plt.show()
+#plt.show()
+
+plt.savefig('plot.png')
 
 f.close() # close file 
