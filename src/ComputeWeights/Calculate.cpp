@@ -51,7 +51,7 @@ int main() {
   //cout << "Verbosity = " << verbosity << endl;
 
   // Import data
-  cout << "Enter File Name: ";  
+  // cout << "Enter File Name: ";  
   std::string file = "Data/template_histograms_ECAL_Run2017_runs_304209_304292.txt" ;
 
   // comment this out for no file input

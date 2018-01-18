@@ -231,6 +231,7 @@ for i in paths:
 
 	#data[3][file_number].append(0)
 	for j in range(len(data[1][file_number])):
+		print "difference loop."
 		print "j = ",j
 		data[3][file_number] += abs(float(data[2][file_number][j]) - float(data[1][file_number][j]))
 
@@ -248,8 +249,6 @@ for i in paths:
 
 data_x = [x for x,_ in sorted(zip(tau,data[2]))]
 data_y = [y for _,y in sorted(zip(tau,data[2]))]
-
-
 
 #tau.sort()
 #average_pulses.sort()
@@ -276,6 +275,7 @@ plt.savefig("ampvstau")
 
 plt.show() """
 
+# time in ns
 xdata = np.asarray([0,25,50,75,100,125,150,175,200,225]) # Assuming 10 samples. Should eventually obtain from data files.
 
 all_x_data = []
