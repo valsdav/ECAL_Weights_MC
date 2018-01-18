@@ -3,6 +3,7 @@ November 18, 2017
 Abe Tishelman-Charny
 Test file for extracting weights from sample waveform.
 */
+
 using namespace std; 
 
 #include <vector>
@@ -77,6 +78,12 @@ int main() {
 
   int nSamples = 10; 
 
+  int max = 0; // max number of rows to read
+
+  cout << "Enter number of pulses to read per file: ";
+  cin >> max;
+  cout << "max pulses = "<< max << endl;
+
   // time of 
   double tMax = 4;
 
@@ -91,10 +98,9 @@ int main() {
   std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
   std::chrono::system_clock::duration dtn = tp.time_since_epoch();
   std::stringstream ss;
-  ss << "output/" << "output-" << dtn.count() << ".txt";
-  std::ofstream output_file(ss.str());
 
-  int max = 10; // max number of rows to read
+  ss << "python/" << "output-" << dtn.count() << ".txt"; // Path of output file with current time since epoch 
+  std::ofstream output_file(ss.str());
 
   int count = 0;
   while(std::getline(inFile, line)) {
@@ -187,7 +193,7 @@ int main() {
         cout << " Line = " << count << endl;
 
       if (count > max){
-	cout << "breaking." << endl;
+	cout << "All lines read." << endl;
         break;
 	}
 

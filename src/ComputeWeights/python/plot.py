@@ -21,10 +21,22 @@ all_rows = [[],[],[],[]] # [[raw],[samples],[weights],[amplitude]]
 # all_rows[3] = ampltiude values
 
 # Import data file
-with open('ten_pulses.txt', 'r') as f: # Create file object f by opening file with given path in read mode.
+with open('output-1516207044516402191.txt', 'r') as f: # Create file object f by opening file with given path in read mode.
     reader = csv.reader(f, delimiter = "\t") # Assuming tab delimited data
     for row in reader: # Loop over lines (pulses)
 	all_rows[0].append(row) # add raw data list for every row (pulse)
+
+# Uncomment below to search for all files ending in ".txt"
+
+#paths = []
+
+# Find all files in current working directory ending in ".txt"
+#for file in os.listdir(str(os.getcwd())): # current working directory
+#    if file.endswith(".txt"):
+#        print(os.path.join(file))
+#	paths.append(os.path.join(file))
+
+#print "paths = ",paths
 
 # Convert all data from strings -> float
 # Might need to apply this to pulses and weights later. 
