@@ -61,11 +61,13 @@ int main() {
   cout << "Verbosity = " << verbosity << endl;
 
   int nSamples = 10; 
+  int nPrePulseSamples = 3; 
   double tMax = 4;
+
 
   // Create instance of object ComputeWeights
   // ComputeWeights(verbosity,doFitBaseline, doFitTime, nPulseSamples, nPrePulseSamples)
-  ComputeWeights A(verbosity, false, true, nSamples,3);
+  ComputeWeights A(verbosity, true, false, nSamples-nPrePulseSamples,nPrePulseSamples);
 
 
   cout << "Reading from the file" << endl; 
@@ -154,8 +156,14 @@ int main() {
         //cout << pulseShape[i] << endl;
         pulseShapeDerivative[i] =  (pulseShape[i-1] - pulseShape[i]);
         //cout << pulseShapeDerivative[i] << endl;
+
+      
+        // cout << " pulseShapeDerivative = " << pulseShapeDerivative[i] << endl;
         }
-     
+      for(int i = 0; i < pulseShape.size() ; i ++){
+         cout << " pulseShape = " << pulseShape[i] << endl;
+        }
+
       A.compute(pulseShape,pulseShapeDerivative,tMax);
 
       //pulseShape.insert(pulseShape.begin(), d2);

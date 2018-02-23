@@ -80,6 +80,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
     return false;
   }//check samples
 
+
   // INITIALIZE WEIGHTS MATRICES
   if (weights_.num_row() != nSamples) { 
     weights_ = CLHEP::HepMatrix(nSamples, nSamples, 0); // Fill matrices with zeros. Set size to nSamples x nSamples, if isn't already true.

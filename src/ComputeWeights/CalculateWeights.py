@@ -9,11 +9,13 @@ import sys
 import csv
 import numpy as np
 
-# Import multiple data files, each corresponding to different correlation matrix
-# Calculate average amplitude for each, plot average ampltiude vs. noise 
-# Want to plot weight distributions
-# Can do things like calculate average ampltiude, plot samples & weights.
-# import search path 
+#File for extracting weights with time jitter for reconstruction of pulse from 10 data points .
+#Reads text file wtih 14 tab delineated data points.
+#Set jitter to True if you want the jitter corrected weights, otherwise jitter = False
+
+
+#read in sample 
+all_rows = [] # [samples]
 
 #preallocation
 S = np.zeros(shape=(len(all_rows),10))
@@ -67,6 +69,7 @@ for row in range(len(all_rows)):
     coef = np.zeros(shape=(len(S[row]),2))
 
     #if timejitter = true: #changes the size of coef
+    #jitter accounts for time jitter around Tmax and requires a more complex method of deriving the weights
     if jitter:
         for j in range(len(S[row])):
             coef[j][0] = S[row][j]
@@ -88,8 +91,10 @@ for row in range(len(all_rows)):
     #incovariance matrix 
     invcovar = np.identity(10)
 
+    # variance matrix
     variance = np.matrix(np.matmul(tcoef, coef))
 
+    # inverse of the variance matrix. Numpy is cool. 
     inv_variance = variance.I
     
     #calculate weights 
