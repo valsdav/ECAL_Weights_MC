@@ -183,7 +183,7 @@ int main() {
 
       double factor = 0;
 
-      cout << "Choose factor to multiply sample vector by:" ;
+      cout << "Choose factor to multiply sample vector by: " ;
       cin >> factor;
       cout << "factor = "<< factor << endl;
 

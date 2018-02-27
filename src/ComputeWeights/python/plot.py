@@ -21,7 +21,7 @@ all_rows = [[],[],[],[]] # [[raw],[samples],[weights],[amplitude]]
 # all_rows[3] = ampltiude values
 
 # Import data file
-with open('output-1516207044516402191.txt', 'r') as f: # Create file object f by opening file with given path in read mode.
+with open('outputfile.txt', 'r') as f: # Create file object f by opening file with given path in read mode.
     reader = csv.reader(f, delimiter = "\t") # Assuming tab delimited data
     for row in reader: # Loop over lines (pulses)
 	all_rows[0].append(row) # add raw data list for every row (pulse)

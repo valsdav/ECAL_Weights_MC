@@ -235,7 +235,8 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   if (verbosity_)
   	std::cout<<" variance ="<< variance << std::endl;
 
-  // Weights matrix = variance * tCoef * invCov
+  // Weights matrix = variance * tCoef * invCov 
+  // from eq. A.6 in documentation
   CLHEP::HepMatrix variancetCoef = variance*tCoef;
   CLHEP::HepMatrix weights = variancetCoef*invCov;
 
