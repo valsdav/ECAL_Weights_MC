@@ -107,50 +107,44 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
     << firstSample << " because there are too few samples beyond." 
     << std::endl << "firstSample is set to "
     << nSamples - nPulseSamples_ << std::endl;
-    firstSample = nSamples - nPulseSamples_;
+    firstSample = nSamples - nPulseSamples_; 
   }//check max samples considered
 
   // pulseshape[] -> coef
 
   // Fill coef matrix
+  //does this cover all scenarios? what about just dofittime and no dofitbaseline? then it would be nparams == 2 but not 
+  // the else if statement? on line 127? 
   int size = nPulseSamples_;
-  if (doFitBaseline_) size += nPrePulseSamples_;
-  CLHEP::HepMatrix coef(size, nParams);
-  for (int iRow = 0; iRow < nPulseSamples_; iRow++)
+  if (doFitBaseline_) size += nPrePulseSamples_; //if dobaselinefit == true then size = nsamples 
+  CLHEP::HepMatrix coef(size, nParams); //npulse samples by nparams or nsamples by nparams depending on baselinefit == false/true
+  for (int iRow = 0; iRow < nPulseSamples_; iRow++) 
     for (int iColumn = 0; iColumn < nParams; iColumn++) {
       if (iColumn == 0)
-        coef[iRow][iColumn] = pulseShape[firstSample + iRow];
+        //coef[iRow][iColumn] = pulseShape[firstSample + iRow];
+        coef[iRow][iColumn] = pulseShape[iRow];
       else if (iColumn == 1 && doFitBaseline_)
         coef[iRow][iColumn] = 1.;
       else //doFitTime_ || nParams == 3
         coef[iRow][iColumn] = pulseShapeDerivative[firstSample + iRow];
+        // why do i want zeros at the end rather than the prepulse samples? why start with first sample rather than 0?
     }
 
+//what are these lines doing that is not being done above? 
+  // i think filling in holes with 1 and 0 as needed for the last row 
+  // what should the coef matrix be in each scenario above? 
+  // colume 0 always pulse shape, column 1 can be time or baselinefit what should it be then? 2 will always be time 
+  // if baselinefit want column 1 to be ones? check this!!!!!!!!
   for (int iRow = nPulseSamples_; iRow < size; iRow++)
     for (int iColumn = 0; iColumn < nParams; iColumn++) {
       if (iColumn == 1)
         coef[iRow][iColumn] = 1.;
       else
         coef[iRow][iColumn] = 0.;
+      // why do i want zeros at the end rather than the prepulse samples? 
 
     }
 
-  // Fill coef matrix
-
-/*
-  int size = 10;
-  CLHEP::HepMatrix coef(size, nParams); // (size x nParams) matrix
-  for (int iRow = 0; iRow < size; iRow++)
-    for (int iColumn = 0; iColumn < nParams; iColumn++) {
-      if (iRow==3 || iRow==9)continue; // Skip filling 3rd and 9th row
-      if (iColumn == 0) // Fill zeroth column with pulseShape
-  coef[iRow][iColumn] = pulseShape[iRow];
-      else if (iColumn == 1 && doFitBaseline_)
-  coef[iRow][iColumn] = 1.;
-      else // doFitTime_ || nParams == 3
-  coef[iRow][iColumn] = pulseShapeDerivative[iRow];
-    }
-*/
 
   CLHEP::HepMatrix tCoef = coef.T(); // transpose coef
 

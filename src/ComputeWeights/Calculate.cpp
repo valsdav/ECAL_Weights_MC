@@ -29,9 +29,9 @@ int main() {
   //user prompt for file name
   cout << "Enter File Name: ";  
   std::string file = "/Users/meganstark/Computation*/PHYS7321_Project/Data/template_histograms_ECAL_Run2017_runs_305814_305814.txt" ;
-
+ /*
    comment this out for no file input and will run file listed adove
-  /*
+ 
   std::string input;
   std::cin >> input;
   cin.ignore(100, '\n');
@@ -40,9 +40,9 @@ int main() {
       std::istringstream istr( input );
       istr >> file;
   }
-  */
+  
    stop commentting out here
-
+*/
   cout << "parsing file: " << file;
 
   ifstream inFile;
@@ -87,11 +87,13 @@ int main() {
   while(std::getline(inFile, line)) {
     count = count +1;
     //cout << count << endl;
-    if (count == 10) {
+    if (count == 2) {
       // if want whole file checkvariable set to < 0 
       // i.e. if want 10 lines read set line 79 to "if(count == 10){"
       break;
     }
+
+
 
     //reading the 14 columns from the data files
     std::stringstream s(line);
@@ -115,11 +117,11 @@ int main() {
       std::vector<double> pulseShape;
       // setting first three data points to zero since this is the pedastal counts 
       // want a total of 10 counts so taking next 7 counts 
-      pulseShape.push_back(0);
-      pulseShape.push_back(0);
-      pulseShape.push_back(0);
-      //pulseShape.push_back(d1);
-      //pulseShape.push_back(d2);
+      //pulseShape.push_back(0);
+      //pulseShape.push_back(0);
+      //pulseShape.push_back(0.0);
+      pulseShape.push_back(0.04); // if adding a pedastal, put value here in place of the 0
+      pulseShape.push_back(0.09);
       pulseShape.push_back(d3);
       pulseShape.push_back(d4);
       pulseShape.push_back(d5);
