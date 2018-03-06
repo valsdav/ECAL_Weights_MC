@@ -3,7 +3,6 @@
 # The purpose of this code is to plot results from Calculate.cpp
 
 # Import multiple data files, each corresponding to different correlation matrix
-# Calculate average amplitude for each, plot average ampltiude vs. noise 
 # Want to plot weight distributions
 # Can do things like calculate average ampltiude, plot samples & weights.
 
@@ -38,6 +37,7 @@ average_pulses = []
 tau = []
 
 data = [[],[],[],[]]
+weights = []
 
 # data[0] = file number
 # data[1] = avg sample values # turns out this is actually the same for all tau values since the weights are what changes.
@@ -117,7 +117,9 @@ for i in paths:
 				c2 += 1	
 
 	#print "all_rows[1] = ",all_rows[1]
-	#print "all_rows[2] = ",all_rows[2]
+	print "all_rows[2] = ",all_rows[2]
+
+	weights.append(all_rows[2][0])
 
 	"""for i in all_rows[1]:
 		i = np.asarray(i) # lists -> arrays
@@ -203,7 +205,7 @@ for i in paths:
 			#print "Amp[",k,"] = ",float(all_rows[1][j][k])*float(all_rows[2][j][k])
 
 		# after summing over k
-		print "Total amp = ",total
+		# print "Total amp = ",total
 		all_rows[3][j] = total # Total Amplitude of jth pulse
 
 	# Average Ampltiudes
@@ -231,11 +233,11 @@ for i in paths:
 
 	#data[3][file_number].append(0)
 	for j in range(len(data[1][file_number])):
-		print "difference loop."
-		print "j = ",j
+		#print "difference loop."
+		#print "j = ",j
 		data[3][file_number] += abs(float(data[2][file_number][j]) - float(data[1][file_number][j]))
 
-	print "float(data[2][file_number][5]) = ",float(data[2][file_number][5])
+	# print "float(data[2][file_number][5]) = ",float(data[2][file_number][5])
 
 	#data[3][file_number] = 
 
@@ -245,21 +247,29 @@ for i in paths:
 
 	f.close() # close file 
 
-# print "tau = ",tau
+print "tau = ",tau
 
-data_x = [x for x,_ in sorted(zip(tau,data[2]))]
-data_y = [y for _,y in sorted(zip(tau,data[2]))]
+data_x = [x for x,_ in sorted(zip(tau,all_rows[2][0]))] # all_rows[2][0] = weights for the 0th set of normalized samples (f(t))
+data_y = [y for _,y in sorted(zip(tau,all_rows[2][0]))]
+
+tau_sorted = data_x
+
+print "data_x now = ", data_x
+
+print "All weights: ", weights
+
+print "range(len(data_x)) = ",range(len(data_x))
+
+for i in range(len(data_x)):
+	data_x[i] = float(data_x[i])
+
+data_y = weights # Set y data to weights 
+
+print "data_x = ", data_x
+print "data_y = ", data_y 
 
 #tau.sort()
 #average_pulses.sort()
-
-#print "tau = ",tau
-#print "average_pulses = ",average_pulses
-
-print "data_x = ",data_x
-print "data_y = ",data_y
-
-print "pulses_per_file = ",pulses_per_file
 
 """
 # Plot
@@ -274,6 +284,17 @@ plt.title(r'$\hat{\bar{\mathcal{A}}}$ vs. $\tau$', fontsize = 28)
 plt.savefig("ampvstau")
 
 plt.show() """
+
+# Want to plot 'n' sets of weights for 'n' tau values. Start with 3.
+
+# For each tau value, find set of weights for 0th waveform f(t) 
+
+# 0th tau:
+
+#xdata__ append tau value 
+
+xdata = np.asarray([])
+
 
 # time in ns
 xdata = np.asarray([0,25,50,75,100,125,150,175,200,225]) # Assuming 10 samples. Should eventually obtain from data files.
@@ -296,59 +317,49 @@ for i in data[2]:
 
 # Calculate total difference here
 
-"""
-# Plot
-samples = plt.scatter(xdata,data[1][0], color = 'b') # Plot avg samples of 0th file. Might be same for all files
-amp1 = plt.scatter(all_x_data[0],data[2][0], color = 'r')  # Plot avg Amp (per point) of 0th file
-amp2 = plt.scatter(all_x_data[0],data[2][-1], color = 'g')
-plt.plot(all_x_data[0],data[1][0], color = 'b') # 0th file samples
-plt.plot(all_x_data[0],data[2][0], color = 'r') 
-plt.plot(all_x_data[0],data[2][-1], color = 'g') 
-#amp1 = plt.plot(all_x_data[0],data[2][0], color = 'r') # 0th file amplitudes
-#amp2 = plt.plot(all_x_data[0],data[2][1], color = 'g') # 0th file amplitudes
-#plt.plot(all_x_data[0],data[2][2], color = 'c') # 0th file amplitudes
-#plt.plot(all_x_data[0],data[2][3], color = 'y') # 0th file amplitudes
-plt.xlabel('Time (ns)')
+#data_x2 = [0, 1, 2, 3, 4]
+#data_y2 = [1, 2, 3, 4, 5]
 
-title1 = 'Tau = ' + str(data_x[0])
-title2 = 'Tau = ' + str(data_x[-1])
+# make legend for tau values
+# low tau, red. Increase color frequency towards blue. 
 
-plt.legend((samples, amp1, amp2), ('samples', title1, title2))
-plt.ylabel('Normalized ADC')
-title_ = 'Data Averaged Over ' + str(pulses_per_file[0]) +' Pulses, Tau = [' + str(data_x[0]) + ', ' + str(data_x[-1]) + ']'
-plt.title(title_, fontsize = 18)
-figtitle = "output_" + str(int(time.time())) + ".png"
-plt.savefig(figtitle)
-
-plt.show()"""
-
-# Plot
-
-print "len(data[0]) = ",len(data[0])
-print "len(data[3]) = ",len(data[3])
-
-print "data[0] = ",data[0]
-print "data[3] = ",data[3]
-
-
-differences = plt.scatter(data_x, data[3], color = 'b') # Plot avg samples of 0th file. Might be same for all files
+#differences = plt.scatter(data_x, data[3], color = 'b') # Plot avg samples of 0th file. Might be same for all files
 #amp1 = plt.scatter(all_x_data[0],data[2][0], color = 'r')  # Plot avg Amp (per point) of 0th file
 #amp2 = plt.scatter(all_x_data[0],data[2][-1], color = 'g')
-plt.plot(data_x,data[3], color = 'b') # 0th file samples
+
+print "data_y[0] = ",data_y[0]
+
+# label maker
+
+def labelmaker(element):
+  label = "tau = " + str(element) 
+  return label
+
+tau0 = plt.scatter(xdata,data_y[0], color = 'r')
+tau1 = plt.scatter(xdata,data_y[1], color = 'y')
+tau1 = plt.scatter(xdata,data_y[2], color = 'g')
+tau1 = plt.scatter(xdata,data_y[3], color = 'b')
+plt.plot(xdata,data_y[0],'r', label = labelmaker(tau_sorted[0]))  # 0th file samples
+plt.plot(xdata, data_y[1], 'y', label = labelmaker(tau_sorted[1]))
+plt.plot(xdata, data_y[2], 'g', label = labelmaker(tau_sorted[2]))
+plt.plot(xdata, data_y[3], 'b', label = labelmaker(tau_sorted[3]))
+plt.legend()
+
 #plt.plot(all_x_data[0],data[2][0], color = 'r') 
 #plt.plot(all_x_data[0],data[2][-1], color = 'g') 
 #amp1 = plt.plot(all_x_data[0],data[2][0], color = 'r') # 0th file amplitudes
 #amp2 = plt.plot(all_x_data[0],data[2][1], color = 'g') # 0th file amplitudes
 #plt.plot(all_x_data[0],data[2][2], color = 'c') # 0th file amplitudes
 #plt.plot(all_x_data[0],data[2][3], color = 'y') # 0th file amplitudes
-plt.xlabel('Time Constant')
+plt.xlabel('Time (ns)')
 
 #title1 = 'Tau = ' + str(data_x[0])
 #title2 = 'Tau = ' + str(data_x[-1])
 
 #plt.legend((differences),('Differences'))
-plt.ylabel('Normalized ADC')
-title_ = 'Data Averaged Over ' + str(pulses_per_file[0]) +' Pulses, Tau = [' + str(data_x[0]) + ', ' + str(data_x[-1]) + ']'
+plt.ylabel('Weight Value')
+#title_ = 'Data Averaged Over ' + str(pulses_per_file[0]) +' Pulses, Tau = [' + str(data_x[0]) + ', ' + str(data_x[-1]) + ']'
+title_ = "Weights for different Tau's"
 plt.title(title_, fontsize = 16)
 figtitle = "output_" + str(int(time.time())) + ".png"
 plt.savefig(figtitle)

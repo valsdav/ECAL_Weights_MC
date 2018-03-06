@@ -218,16 +218,15 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 	      }
 	    }
  	  }
-
 	}
 
   std::cout << "invCov = " << invCov << std::endl;
 
   int ierr;
 
-  //invCov.invert(ierr);
+  invCov.invert(ierr);
   
-  //std::cout << "invCov after inv = " << invCov << std::endl;
+  std::cout << "invCov after inv = " << invCov << std::endl;
 
   if (verbosity_)
   	std::cout<<" invCov = "<< invCov <<std::endl;
