@@ -286,15 +286,9 @@ plt.savefig("ampvstau")
 plt.show() """
 
 # Want to plot 'n' sets of weights for 'n' tau values. Start with 3.
-
 # For each tau value, find set of weights for 0th waveform f(t) 
 
-# 0th tau:
-
-#xdata__ append tau value 
-
 xdata = np.asarray([])
-
 
 # time in ns
 xdata = np.asarray([0,25,50,75,100,125,150,175,200,225]) # Assuming 10 samples. Should eventually obtain from data files.
@@ -337,31 +331,34 @@ def labelmaker(element):
 
 tau0 = plt.scatter(xdata,data_y[0], color = 'r')
 tau1 = plt.scatter(xdata,data_y[1], color = 'y')
-tau1 = plt.scatter(xdata,data_y[2], color = 'g')
-tau1 = plt.scatter(xdata,data_y[3], color = 'b')
+tau2 = plt.scatter(xdata,data_y[2], color = 'g')
+tau3 = plt.scatter(xdata,data_y[3], color = 'b')
 plt.plot(xdata,data_y[0],'r', label = labelmaker(tau_sorted[0]))  # 0th file samples
 plt.plot(xdata, data_y[1], 'y', label = labelmaker(tau_sorted[1]))
 plt.plot(xdata, data_y[2], 'g', label = labelmaker(tau_sorted[2]))
 plt.plot(xdata, data_y[3], 'b', label = labelmaker(tau_sorted[3]))
 plt.legend()
 
-#plt.plot(all_x_data[0],data[2][0], color = 'r') 
-#plt.plot(all_x_data[0],data[2][-1], color = 'g') 
-#amp1 = plt.plot(all_x_data[0],data[2][0], color = 'r') # 0th file amplitudes
-#amp2 = plt.plot(all_x_data[0],data[2][1], color = 'g') # 0th file amplitudes
-#plt.plot(all_x_data[0],data[2][2], color = 'c') # 0th file amplitudes
-#plt.plot(all_x_data[0],data[2][3], color = 'y') # 0th file amplitudes
+# Want to plot for same tau, different f(t)'s
+
+#data_y = [y for _,y in sorted(zip(tau,all_rows[2][0]))]
+
+#tau0 = plt.scatter(xdata,data_y[0], color = 'r')
+#tau1 = plt.scatter(xdata,data_y[1], color = 'y')
+#tau2 = plt.scatter(xdata,data_y[2], color = 'g')
+#tau3 = plt.scatter(xdata,data_y[3], color = 'b')
+#plt.plot(xdata,data_y[0],'r', label = labelmaker(tau_sorted[0]))  # 0th file samples
+#plt.plot(xdata, data_y[1], 'y', label = labelmaker(tau_sorted[1]))
+#plt.plot(xdata, data_y[2], 'g', label = labelmaker(tau_sorted[2]))
+#plt.plot(xdata, data_y[3], 'b', label = labelmaker(tau_sorted[3]))
+#plt.legend()
+
 plt.xlabel('Time (ns)')
-
-#title1 = 'Tau = ' + str(data_x[0])
-#title2 = 'Tau = ' + str(data_x[-1])
-
-#plt.legend((differences),('Differences'))
 plt.ylabel('Weight Value')
+
 #title_ = 'Data Averaged Over ' + str(pulses_per_file[0]) +' Pulses, Tau = [' + str(data_x[0]) + ', ' + str(data_x[-1]) + ']'
 title_ = "Weights for different Tau's"
-plt.title(title_, fontsize = 16)
+plt.title(title_, fontsize = 20)
 figtitle = "output_" + str(int(time.time())) + ".png"
 plt.savefig(figtitle)
-
 plt.show()
