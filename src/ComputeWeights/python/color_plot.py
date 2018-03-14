@@ -171,7 +171,7 @@ def fn_to_tau(fn):
 
   return tau[fn]
 
-plt.scatter()
+#plt.scatter()
 
 
 # Might need to convert to float for color plot to work
@@ -240,7 +240,7 @@ plt.scatter()
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
-surf = ax.plot_surface(tau_o, Y, chosen_weights_o, rstride=1, cstride=1, cmap=cm.jet, linewidth=0)
+surf = ax.plot_surface(tau_o, functions_o, chosen_weights_o, rstride=1, cstride=1, cmap=cm.jet, linewidth=0)
 fig.colorbar(surf)
 
 title = ax.set_title("plot_surface: given X, Y and Z as 2D:")
@@ -255,7 +255,8 @@ ax.yaxis.set_major_locator(MaxNLocator(6))
 ax.zaxis.set_major_locator(MaxNLocator(5))
 
 fig.tight_layout()
-fig.savefig('plot.png')
+plt.show()
+#fig.savefig('plot.png')
 
 """fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')

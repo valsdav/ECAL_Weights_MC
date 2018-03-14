@@ -18,7 +18,7 @@ from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import rc 
 
-import numpy 
+import numpy as np
 from numpy.random import randn, shuffle
 from scipy import linspace, meshgrid, arange, empty, concatenate, newaxis, shape
 
@@ -54,6 +54,18 @@ pulses_per_file = []
 chosen_weights = []
 file_numbers = []
 #functions = []
+
+# sample number
+n = 5
+
+samples = []
+
+for i in range(10):
+	samples.append(i)
+
+print "samples = ",samples
+
+#for n in 
 
 file_number = -1
 
@@ -112,15 +124,13 @@ for i in paths:
 
 	#print "all_rows[0] = ",all_rows[0]
 	#print "all_rows[1] = ",all_rows[1]
-	#print "all_rows[2] = ",all_rows[2]
+	print "all_rows[2] = ",all_rows[2]
 	print "tau = ",float(all_rows[0][0][0])
 	
 	# To append weights of 0th waveform:
 	# weights.append(all_rows[2][0])
 
 	chosen_weights.append([])
-
-	n = 5
 
 	# Take nth weight from all j functions
 
@@ -159,7 +169,7 @@ print 'chosen_weights = ',chosen_weights
 tau_o = [x for _,x,_,_ in sorted(zip(file_numbers,tau,functions,chosen_weights))] 
 functions_o = [y for _,_,y,_ in sorted(zip(file_numbers,tau,functions,chosen_weights))]
 chosen_weights_o = [z for _,_,_,z in sorted(zip(file_numbers,tau,functions,chosen_weights))]
-file_numbers_o = [f for f,_,_,z in sorted(zip(file_numbers,tau,functions,chosen_weights))]
+file_numbers_o = [f for f,_,_,_ in sorted(zip(file_numbers,tau,functions,chosen_weights))]
 
 print 'tau_o = ',tau_o
 print 'functions_o = ',functions_o
@@ -183,10 +193,38 @@ def labelmaker(element):
   label = "Function " + str(element) 
   return label
 
-print 'tau_o = ',tau_o
-print 'chosen_weights[:][0] = ',chosen_weights[:][1]
+t = []
+f = []
+w = []
 
-tau0 = plt.scatter(tau_o,chosen_weights[:][1], color = 'r')
+for i in range(len(chosen_weights_o)):
+	for j in range(len(chosen_weights_o[0])):
+		t.append(tau_o[i])
+		f.append(functions_o[j])
+		w.append(chosen_weights_o[i][j])
+		
+# Lists -> Arrays
+w_a = np.asarray(w)
+#tau_o_a = np.asarray(tau_o)
+#functions_o_a = np.asarray(functions_o)
+
+#plt.scatter(t,f, c = w)
+#plt.scatter(t,f, c = w)
+
+#array 
+#w_a = np.
+
+print 't = ',t
+print 'f = ',f
+print 'chosen_weights_o = ',chosen_weights_o
+
+#plt.scatter(t, f, c = chosen_weights_o)
+#plt.colorbar()
+
+plt.contourf(tau_o, functions_o, chosen_weights_o)
+plt.colorbar()
+
+#tau0 = plt.scatter(tau_o,chosen_weights[:][1], color = 'r')
 #tau1 = plt.scatter(tau_o,chosen_weights[:][1], color = 'orange')
 #tau2 = plt.scatter(data_x,data_y[2], color = 'g')
 #tau3 = plt.scatter(data_x,data_y[3], color = 'b')
@@ -196,10 +234,10 @@ tau0 = plt.scatter(tau_o,chosen_weights[:][1], color = 'r')
 #plt.plot(data_x, data_y[3], 'b', label = labelmaker(tau_sorted[3]))
 #plt.legend()
 plt.xlabel('Tau')
-plt.ylabel('Weight Value')
+plt.ylabel('Function')
 title_ = "Peak Sample Weight"
 plt.title(title_, fontsize = 20)
 figtitle = str(data_folder) + '/' + "output/" + str(int(time.time())) + ".png"
-#plt.savefig(figtitle)
+plt.savefig(figtitle)
 plt.show()
 
