@@ -88,7 +88,8 @@ int main() {
   double tMax = 4;
 
   // Create instance of object ComputeWeights
-  ComputeWeights A(verbosity, false, false, nSamples,3);
+  //   ComputeWeights(int verbosity, bool doFitBaseline, bool doFitTime, int nPulseSamples, int nPrePulseSamples);
+  ComputeWeights A(verbosity, true, false, nSamples,3);
 
   cout << "Reading from the file" << endl; 
 
