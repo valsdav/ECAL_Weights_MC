@@ -9,8 +9,8 @@
 void params_reco(){
  
   // Choose normalization conditions 
-  bool normalized_A = false;
-  bool normalized_t0 = false;
+  bool normalized_A = true;
+  bool normalized_t0 = true;
 
   //bool normalized_t0 = false;
 
@@ -50,7 +50,7 @@ void params_reco(){
     exit(1); // terminate with error
   }
 
-  int max_rows = 50; // < 0 to read all rows 
+  int max_rows = 200; // < 0 to read all rows 
 
   string line; 
   double samples[10];
@@ -231,8 +231,8 @@ void params_reco(){
 
   // Save plot as png and root files.
   ostringstream oss1, oss2;
-  oss1 << "plots/Plot_" << result << ".png";
-  oss2 << "plots/Plot_" << result << ".root"; 
+  oss1 << "bin/Plot_" << result << ".png";
+  oss2 << "bin/Plot_" << result << ".root"; 
 
   TString plot_title1 = oss1.str();
   TString plot_title2 = oss2.str();
