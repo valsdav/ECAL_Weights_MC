@@ -1,14 +1,29 @@
-void plot_params(){
+void param_plot(){
+
+// https://root.cern.ch/doc/master/classTLatex.html
+
+  bool normalized_A = false;
+  bool normalized_t0 = false;
+  int max_rows = -1;
 
   // Create Histogram
   int bins = 100000;
   //int min = 0;
   //int max = 150;
 
-  TH1F *h1 = new TH1F("h1","Amplitude",bins,0.2,0.3);
-  TH1F *h2 = new TH1F("h2","t_0",bins,120,125);
-  TH1F *h3 = new TH1F("h3","Alpha",bins,1.1,1.3);
-  TH1F *h4 = new TH1F("h4","Beta",bins,39,42);
+  //TH1F *h1 = new TH1F("h1","Amplitude",bins,0.2,0.3);
+  //TH1F *h2 = new TH1F("h2","t_0",bins,120,125);
+  //TH1F *h3 = new TH1F("h3","Alpha",bins,1.1,1.3);
+  //TH1F *h4 = new TH1F("h4","Beta",bins,39,42);
+
+  TLatex Tl;
+  Tl.SetTextSize(1);
+  //Tl.DrawLatex(0.1,0.8,"A");
+
+  TH1F *h1 = new TH1F("A","notlatex",bins,0.21,0.25);
+  TH1F *h2 = new TH1F("t_{0}","t_{0}",bins,114,130);
+  TH1F *h3 = new TH1F("#alpha","#bf{#alpha}",bins,1,1.7);
+  TH1F *h4 = new TH1F("#beta","#bf{#beta}",bins,34,44);
 
   // Open File
   TString File("crystal_parameters.txt");
@@ -21,7 +36,6 @@ void plot_params(){
     exit(1); // terminate with error
   }
   
-  int max_rows = 100;
   string line;
 
   int count = -1;
@@ -33,19 +47,22 @@ void plot_params(){
         break;
 	}
 
-    cout << " Reading line " << count << endl;
+    if ((count%1000) == 0){
+      cout << " Reading line " << count << endl;
+    }
 
     stringstream s(line); // stringstream 's' operates on string 'line'
     double d1, d2, d3, d4, d5;
+    
 
     if(s >> d1 >> d2 >> d3 >> d4 >> d5){
  
     // d1 = ID, d2 = A, d3 = t_0, d4 = alpha, d5 = beta     
     
-    cout << "d2 = " << d2 << endl;    
-    cout << "d3 = " << d3 << endl;    
-    cout << "d4 = " << d4 << endl;
-    cout << "d5 = " << d5 << endl;
+    //cout << "d2 = " << d2 << endl;    
+    //cout << "d3 = " << d3 << endl;    
+    //cout << "d4 = " << d4 << endl;
+    //cout << "d5 = " << d5 << endl;
 
     h1->Fill(d2);
     h2->Fill(d3);
@@ -113,6 +130,7 @@ void plot_params(){
 
   }
 
+/*
   cout << "minxval1 = " << minxval1 << "\n" << endl;
   cout << "minxval2 = " << minxval2 << "\n" << endl;
   cout << "minxval3 = " << minxval3 << "\n" << endl;
@@ -130,5 +148,49 @@ void plot_params(){
 
   h1->GetXaxis()->SetRangeUser(minxval1,maxxval1);
   h1->Draw();
+*/
+
+  // Create Canvas
+
+  double width = 1500.;
+  double height = 1500.;
+
+  TCanvas *c1 = new TCanvas("c1","c1", width, height);
+  c1->Divide(2,2);
+  c1->Draw();
+  c1->cd(1); // Change to first subpad of canvas
+  h1->Draw();
+  c1->cd(2); 
+  h2->Draw();
+  c1->cd(3);
+  h3->Draw();
+  c1->cd(4);
+  h4->Draw();
+
+  time_t result = time(0); // save with time since epoch to avoid overwriting files
+
+  // Save plot as png and root files.
+  ostringstream oss1, oss2;
+  oss1 << "bin/Plot_" << result;
+  oss2 << "bin/Plot_" << result; 
+
+  if (normalized_A == true){
+    oss1 << "Normalized_A";
+    oss2 << "Normalized_A";
+    }
+
+  if (normalized_t0 == true){
+    oss1 << "Normalized_t0";
+    oss2 << "Normalized_t0";
+    } 
+
+  oss1 << ".png";
+  oss2 << ".root"; 
+
+  TString plot_title1 = oss1.str();
+  TString plot_title2 = oss2.str();
+
+  c1->SaveAs(plot_title1);
+  c1->SaveAs(plot_title2);
 
 }
