@@ -83,17 +83,18 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 
   // INITIALIZE WEIGHTS MATRICES
   if (weights_.num_row() != nSamples) { 
-    weights_ = CLHEP::HepMatrix(nSamples, nSamples, 0); // Fill matrices with zeros. Set size to nSamples x nSamples, if isn't already true.
+      //2/26 changed nsamples by nsamples to nsamples by nparams in weights matrix line 87
+    weights_ = CLHEP::HepMatrix(nParams, nSamples, 0); // Fill matrices with zeros. Set size to nSamples x nParams,  if isn't already true.
     chi2_ = CLHEP::HepSymMatrix(nSamples, 0); // Initialize with zeros 
   } else {
     for (int iColumn = 0; iColumn < nSamples; iColumn++) {
       for (int iRow = 0; iRow < nParams; iRow++)
-  weights_[iRow][iColumn] = 0.;
+        weights_[iRow][iColumn] = 0.;
+      
       for (int iRow = 0; iRow < nSamples; iRow++)
-  chi2_[iRow][iColumn] = 0.; // Fill with zeros if matrix already exists
+        chi2_[iRow][iColumn] = 0.; // Fill with zeros if matrix already exists
     }
   }
-
 
   // DETERMINATION OF THE FIRST SAMPLE
   int firstSample = int(tMax) - 1;
@@ -118,7 +119,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   int size = nPulseSamples_;
   if (doFitBaseline_) size += nPrePulseSamples_; //if dobaselinefit == true then size = nsamples 
   CLHEP::HepMatrix coef(size, nParams); //npulse samples by nparams or nsamples by nparams depending on baselinefit == false/true
-  for (int iRow = 0; iRow < nPulseSamples_; iRow++) 
+  for (int iRow = 0; iRow < size; iRow++) 
     for (int iColumn = 0; iColumn < nParams; iColumn++) {
       if (iColumn == 0)
         //coef[iRow][iColumn] = pulseShape[firstSample + iRow];
@@ -130,12 +131,13 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
         // why do i want zeros at the end rather than the prepulse samples? why start with first sample rather than 0?
     }
 
+/*
 //what are these lines doing that is not being done above? 
   // i think filling in holes with 1 and 0 as needed for the last row 
   // what should the coef matrix be in each scenario above? 
   // colume 0 always pulse shape, column 1 can be time or baselinefit what should it be then? 2 will always be time 
   // if baselinefit want column 1 to be ones? check this!!!!!!!!
-  for (int iRow = nPulseSamples_; iRow < size; iRow++)
+  for (int iRow = nPulseSamples_; iRow < size; iRow++) //adding zeros here????
     for (int iColumn = 0; iColumn < nParams; iColumn++) {
       if (iColumn == 1)
         coef[iRow][iColumn] = 1.;
@@ -144,6 +146,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
       // why do i want zeros at the end rather than the prepulse samples? 
 
     }
+    */
 
 
   CLHEP::HepMatrix tCoef = coef.T(); // transpose coef
@@ -163,7 +166,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 
   // Variance matrix = [tCoef * invCov * coef]^-1
   CLHEP::HepMatrix tCoeffInvCov = tCoef*invCov;
-  CLHEP::HepMatrix variance = tCoeffInvCov*coef;
+  CLHEP::HepMatrix variance = tCoeffInvCov*coef; 
   int ierr;
   variance.invert(ierr);
   if (ierr) {
@@ -171,7 +174,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
         << "variance matrix." << std::endl;
     std::cout << variance;
     return false;
-  }//check inversion
+  }//check inversion 
 
   if (verbosity_)
     std::cout<<" tCoeffInvCov ="<< tCoeffInvCov << std::endl;

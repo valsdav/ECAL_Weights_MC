@@ -28,7 +28,7 @@ int main() {
 
   //user prompt for file name
   cout << "Enter File Name: ";  
-  std::string file = "/Users/meganstark/Computation*/PHYS7321_Project/Data/template_histograms_ECAL_Run2017_runs_305814_305814.txt" ;
+  std::string file = "/Users/meganstark/Computation*/PHYS7321_Project/output/new14.csv" ;
  /*
    comment this out for no file input and will run file listed adove
  
@@ -120,17 +120,21 @@ int main() {
       //pulseShape.push_back(0);
       //pulseShape.push_back(0);
       //pulseShape.push_back(0.0);
-      pulseShape.push_back(0.04); // if adding a pedastal, put value here in place of the 0
-      pulseShape.push_back(0.09);
-      pulseShape.push_back(d3);
-      pulseShape.push_back(d4);
-      pulseShape.push_back(d5);
-      pulseShape.push_back(d6);
-      pulseShape.push_back(d7);
-      pulseShape.push_back(d8);
-      pulseShape.push_back(d9);
-      //pulseShape.push_back(d10);
-      // pulseShape.push_back(d11);
+    pulseShape.push_back(0.0015);
+   pulseShape.push_back(0.0018);
+   pulseShape.push_back(0.0271319 );
+   pulseShape.push_back(0.290197 );
+   pulseShape.push_back(0.774628 );
+   pulseShape.push_back(1.00000 ); 
+pulseShape.push_back(0.824822 );
+   pulseShape.push_back(0.501923 );
+   pulseShape.push_back(0.245093 );
+   pulseShape.push_back(0.101305);
+
+
+
+
+      //pulseShape.push_back(d11);
       // pulseShape.push_back(d12);
       // pulseShape.push_back(d13);
       // pulseShape.push_back(d14);

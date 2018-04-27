@@ -1,7 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-
 @author: meganstark
 """
 import matplotlib.pyplot as plt
@@ -25,12 +24,10 @@ Tmax = []
 nsamples = []
 A = []
 
-#read in sample 
-all_rows = [] # [samples]
+
 
 # Import data file
 with open('/Users/meganstark/Computation*/PHYS7321_Project/template_histograms_ECAL_Run2017_runs_304209_304292.txt', 'r') as f: # Create file object f by opening file with given path in read mode.
-#with open('/Users/meganstark/Computation*/PHYS7321_Project/template_histograms_ECAL_Run2017_runs_304209_304292.txt', 'r') as f: # Create file object f by opening file with given path in read mode.
     reader = csv.reader(f, delimiter = "\t") # Assuming tab delimited data
     for row in reader: # Loop over lines (pulses)
         all_rows.append(row) # add raw data list for every row (pulse)
@@ -40,27 +37,14 @@ with open('/Users/meganstark/Computation*/PHYS7321_Project/template_histograms_E
 all_rows = all_rows[0:11]
 
 for row in range(len(all_rows)):
-    #S.append(np.zeros(10))
     limited_values = all_rows[row][2:9]
     for i in range(len(limited_values)):
-        #print("limited_values", limited_values)
         S[row][i+3] = limited_values[i]
-        #print(S[row])
     
-    #calculate number of pulses len(sample)
-    nsamples.append(0)
-    nsamples[row] = 10 #would like to use len(S[row])
-    #print(nsamples[row]) #output all as 15...perfect 
-    
-    #computer derivative of sample , change in sample divided by 25 ns
+    #computer derivative of sample, change in sample divided by 25 ns
     dS[row][0] = 0
-    for i in range(1,nsamples[row]):
-        #print( S[row][i-1] ,S[row][i]  )
+    for i in range(1,10):
         dS[row][i] =  S[row][i-1] - S[row][i] 
-        #print(dS[row])
-     
-    # calculate Tmax = x(max(sample))
-    Tmax = 5 
  
     #fill coef matrix [samples, samplederivatives]
     #sample derivatives only added for time jitter weights     
