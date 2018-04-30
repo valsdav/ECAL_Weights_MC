@@ -130,8 +130,10 @@ void phi_reco(){
   TString *name = new TString("function_alphabeta");
   TString *formula = new TString("( (1 + (x-[1]) / ([2]*[3]) ) > 0.0)*([0] * pow( 1 + (x-[1]) / ([2]*[3]) , [2] ) * exp ( - (x-[1]) / [3])) + ((1 + (x-[1]) / ([2]*[3]) <= 0.0 ))*(0)");
 
-  double dt = alpha*beta/2.0;
-  double xmin = (-1.0)*alpha*beta + t_0 + dt; // time of first non-imaginary value + dt
+  //double dt = alpha*beta/2.0;
+  double dt = 25;
+  //double xmin = (-1.0)*alpha*beta + t_0 + dt; // time of first non-imaginary value + dt
+  double xmin = t_0 - dt;
   double xmax = t_0 + 4*dt;
 
   TF1 *function_alphabeta = new TF1(*name,*formula,xmin,xmax);

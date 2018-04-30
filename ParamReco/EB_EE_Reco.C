@@ -1,18 +1,26 @@
 // 
 // Abe Tishelman-Charny 
-// 13 April 2018
+// 24 April 2018
 //
-// The purpose of this macro is to plot the average reconstructed amplitude for each eta averaged over 360 phi, 
+// The purpose of this macro is to plot the average reconstructed amplitude 
 
-void eta_reco(){
- 
+void EB_EE_Reco(){
+
+  int max_rows = -1; // < 0 to read all rows 
+
   // Choose normalization conditions 
   bool normalized_A = true;
   bool normalized_t0 = true;
 
-  ostringstream etatitle;
+  /*ostringstream etatitle, phititle;
   etatitle << "Average Amplitude vs. ieta"; // relies on data ordered by cmsswId
+  phititle << "Average Amplitude vs. iphi";
   TString etatitle_(etatitle.str());
+  TString phititle(phititle.str());
+  */
+
+  TH1F *h1 = new TH1F("h1", "EB Reconstructed Amplitude", 1000, 0.96, 1.04); // EB
+  TH1F *h2 = new TH1F("h2", "EE Reconstructed Amplitude", 1000, 0.96, 1.04); // EE
 
   // Each eta has 360 phi 
   // ieta range is -85 to 85, from negative z side to positive z 
@@ -20,12 +28,17 @@ void eta_reco(){
   // ieta[0] => ieta = -1 ... ieta[84] => ieta = -85 ... ieta[85] => ieta = 1 ... ieta[169] => ieta = 85
   // this is currently useful as it's the order of eta's in the current data text file. 
 
-  // Create x and y arrays to later plot 
-  Int_t n = 170; // 85+85 psuedorapidity values
-  Double_t ieta[170]; // Eta index or value
-  Double_t ieta_amp[170]; // corresponding reconstructed amplitude for certain # of events 
-  for (Int_t i = 0; i < n; i++) {
-     
+  // Create x, y and z arrays 
+  //Int_t n = 170; // 85+85 psuedorapidity values
+  //Double_t ieta[170]; // Eta index or value
+  //int ieta[170], iphi[360];
+  //double etaphiamp[61200];
+  //double phiamp[360];
+  //Double_t ieta_amp[170]; // corresponding reconstructed amplitude for certain # of events 
+
+/* 
+  for (Int_t i = 0; i < n; i++) {   
+
      if (i < 85) {
        ieta[i] = (-1.0*i) - 1.0; 
        //cout << "ieta[" << i << "] = " << ieta[i] << "\n" << endl;
@@ -38,10 +51,21 @@ void eta_reco(){
 
      ieta_amp[i] = 0.0;
      } 
- 
+
+  for (int i = 0; i < 360; i++){
+
+    phiamp[i] = 0.0;
+
+    }
+
+  int plot_index = 0;
+  int x_plot[61200];
+  int y_plot[61200];
+  double etaphiamp[61200];
 
   // Barrel: 838861313 - 838970216 inclusive
   // Endcap: 838970216 and up
+*/
 
   // Open File
   TString File("crystal_parameters.txt");
@@ -54,14 +78,12 @@ void eta_reco(){
     exit(1); // terminate with error
   }
 
-  int max_rows = 360; // < 0 to read all rows 
-
   string line; 
   double samples[10];
 
-  int count = 0;
-  int ietacounter = 0;
-  int iphicounter = 0;  
+  int count = 0; // Start on zeroeth line
+  //int ietacounter = 0;
+  //int iphicounter = 0;  
 
   // Read each line of file
   //int count = -1;
@@ -138,7 +160,7 @@ void eta_reco(){
     samples[k] = 0.;
     }
 
-  for(double j = xmin; j < xmax; j += dt){
+  for(double j = xmin; j < xmax; j += dt){ // don't include xmax b/c 10th weight is 0
 
     samples[samp_number] = function_alphabeta->Eval(j);
 
@@ -150,25 +172,53 @@ void eta_reco(){
     amp += samples[k]*w[k]; 
     }
 
+  // Add to Histo
+
+  // Barrel: 838861313 - 838970216 inclusive
+  // Endcap: 838970216 and up
+
+  //cout << "amp = " << amp << "\n" << endl;
+
+  if ((d1 >= 838861313) && (d1 <= 838970216)){
+
+    h1->Fill(amp);
+
+  }
+
+  if (d1 >= 872415401 ){
+
+    h2->Fill(amp);
+
+  }
+
+  //phiamp[iphicounter] += amp;
+
+  // Update Array Values, don't need to be ordered.
+  //x_plot[plot_index] = ieta[ietacounter];
+  //y_plot[plot_index] = iphicounter;
+  //etaphiamp[plot_index] = amp;
+  
+  //plot_index += 1;
+
   // Add phi amp value, average after going through all rows
 
-  ieta_amp[ietacounter] += amp; // do 360 times for each ietacounter 
+  //ieta_amp[ietacounter] += amp; // do 360 times for each ietacounter 
 
   // Update counters
 
-  iphicounter += 1;
+  //iphicounter += 1;
 
   // started at 0, so if counter is at 360th after getting one added just now, it just read its 360th line 
-  if (iphicounter == 360) { 
+ // if (iphicounter == 360) { 
 
-    cout << "ietacounter = " << ietacounter << "\n" << endl;
-    cout << "ieta[" << ietacounter << "] = " << ieta[ietacounter] << "\n"  << endl;
-    cout << "ieta_amp[" << ietacounter << "] = " << ieta_amp[ietacounter] << "\n"  << endl;
-    cout << "count = " << count << "\n" << endl;
+    //cout << "ietacounter = " << ietacounter << "\n" << endl;
+    //cout << "ieta[" << ietacounter << "] = " << ieta[ietacounter] << "\n"  << endl;
+    //cout << "ieta_amp[" << ietacounter << "] = " << ieta_amp[ietacounter] << "\n"  << endl;
+    //cout << "count = " << count << "\n" << endl;
     
-    iphicounter = 0;
-    ietacounter += 1;
-    }
+    //iphicounter = 0;
+    //ietacounter += 1;
+    //}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -177,17 +227,19 @@ void eta_reco(){
   count = count +1; 
 
   // Check if all eta's are filled 
-  if (ietacounter == 170){
+  /*if (ietacounter == 170){
 
     //last_ID = d1;
     break;
 
-    }
+    }*/
 
   } // Loop while still lines left and desired maximum hasn't been reached
 
   inFile.close();
 
+
+/*
   // Divide by 360 to average over phi
   for (Int_t i = 0; i < n; i++) {
      
@@ -195,9 +247,11 @@ void eta_reco(){
 
      } 
 
+*/
+
   // Order data by increasing x
 
-  double x[170], y[170];
+  /*double x[170], y[170];
 
   for (int i = 0; i < n; i++){
 
@@ -213,9 +267,11 @@ void eta_reco(){
       }
 
 
-    }
+    }*/
 
   // Plot
+
+/*
   TGraph* gr = new TGraph(n,x,y);
   gr->GetYaxis()->SetRangeUser(0.9,1.1);
   gr->GetXaxis()->SetRangeUser(-85,85);
@@ -224,6 +280,56 @@ void eta_reco(){
   gr->SetMarkerStyle(8);
   gr->SetMarkerSize(1);
   gr->Draw("ap"); // a to plot axis, p to plot as points 
+*/
+
+  /*for (int i; i < 170; i++){ // for each eta
+    // for each set of phi's, fill eta value
+    for (int j; j < 360; j++){
+      //x_plot[j*(i+1)] = 
+      //y_plot[];     
+
+      }
+
+    }
+*/
+
+  //cout << "x_plot = " << *x_plot << "\n" << endl;
+
+
+/*
+  //TGraph2D *gr2 = new TGraph2D(2,x_plot,y_plot,etaphiamp);
+  TGraph2D *gr2 = new TGraph2D();
+  gr2->SetTitle("Reconstructed Amplitude; Eta; Phi; Amplitude");
+
+  int np = max_rows, x, y;
+  double z;
+
+  for (int N = 0; N < np; N++) {
+      x = x_plot[N];
+      y = y_plot[N];
+      //cout << "x [" << N << "] = " << x_plot[N] << "\n" << endl;
+      z = etaphiamp[N];
+      gr2->SetPoint(N,x,y,z);
+      }
+
+  //gStyle->SetPalette(55);
+  //gr2->Draw("colz");
+  //gr2->Draw("surf1");
+  gr2->GetZaxis()->SetRangeUser(0.9,1.1);
+
+  //c1->Update();
+  gr2->Draw("surf1");
+  //gr2->Draw("colz2");
+*/
+
+  Double_t width = 600, height = 800;
+  TCanvas *c1 = new TCanvas("c1", "Test title", width, height);
+  c1->SetBatch(kFALSE);
+  c1->Divide(2,1);
+  c1->cd(1);
+  h1->Draw();
+  c1->cd(2);
+  h2->Draw();
 
   time_t result = time(0); // save with time since epoch to avoid overwriting files
 

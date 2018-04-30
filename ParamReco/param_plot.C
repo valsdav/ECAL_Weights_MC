@@ -8,6 +8,7 @@ void param_plot(){
 
   // Create Histogram
   int bins = 100000;
+  //int bins = 100;
   //int min = 0;
   //int max = 150;
 
@@ -16,14 +17,29 @@ void param_plot(){
   //TH1F *h3 = new TH1F("h3","Alpha",bins,1.1,1.3);
   //TH1F *h4 = new TH1F("h4","Beta",bins,39,42);
 
-  TLatex Tl;
-  Tl.SetTextSize(1);
+  //TLatex Tl;
+  //Tl.SetTextSize(1);
   //Tl.DrawLatex(0.1,0.8,"A");
 
-  TH1F *h1 = new TH1F("A","notlatex",bins,0.21,0.25);
-  TH1F *h2 = new TH1F("t_{0}","t_{0}",bins,114,130);
-  TH1F *h3 = new TH1F("#alpha","#bf{#alpha}",bins,1,1.7);
-  TH1F *h4 = new TH1F("#beta","#bf{#beta}",bins,34,44);
+  // Barrel: 838861313 - 838970216 inclusive
+  // Endcap: 838970216 and up
+
+  TH1F *h1B = new TH1F("A Barrel","A Barrel",bins,0.235,0.25);
+  TH1F *h2B = new TH1F("t_{0} Barrel","t_{0} Barrel",bins,118,130);
+  TH1F *h3B = new TH1F("#alpha Barrel","#bf{#alpha Barrel}",bins,1,1.3);
+  TH1F *h4B = new TH1F("#beta Barrel","#bf{#beta Barrel}",bins,39,42.5);
+  TH1F *h1E = new TH1F("A Endcap","A Endcap",bins,0.21,0.24);
+  TH1F *h2E = new TH1F("t_{0} Endcap","t_{0} Endcap",bins,114,130);
+  TH1F *h3E = new TH1F("#alpha Endcap","#bf{#alpha} Endcap",bins,1.1,1.7);
+  TH1F *h4E = new TH1F("#beta Endcap","#bf{#beta Endcap}",bins,34,44);
+
+  /*h1->SetTitleFont(40);
+  h2->SetTitleFont(40);
+  h3->SetTitleFont(40);
+  h4->SetTitleFont(40);
+  */
+
+  // Plot EB and EE separately 
 
   // Open File
   TString File("crystal_parameters.txt");
@@ -64,16 +80,34 @@ void param_plot(){
     //cout << "d4 = " << d4 << endl;
     //cout << "d5 = " << d5 << endl;
 
-    h1->Fill(d2);
-    h2->Fill(d3);
-    h3->Fill(d4);
-    h4->Fill(d5);
+    // Barrel: 838861313 - 838970216 inclusive
+    // Endcap: 838970216 and up
+
+    if ((838861313 <= d1) && (d1 <= 838970216)){
+
+      h1B->Fill(d2);
+      h2B->Fill(d3);
+      h3B->Fill(d4);
+      h4B->Fill(d5);
+
+      }
+
+    if (d1 >= 838970216 ){
+
+      h1E->Fill(d2);
+      h2E->Fill(d3);
+      h3E->Fill(d4);
+      h4E->Fill(d5);
+
+      }
 
     } 
      
   } // Loop while still lines left and desired maximum hasn't been reached
 
   inFile.close();
+
+/*
 
   // configure histogram range
 
@@ -130,6 +164,8 @@ void param_plot(){
 
   }
 
+*/
+
 /*
   cout << "minxval1 = " << minxval1 << "\n" << endl;
   cout << "minxval2 = " << minxval2 << "\n" << endl;
@@ -155,24 +191,70 @@ void param_plot(){
   double width = 1500.;
   double height = 1500.;
 
+  ostringstream sstream;
+  sstream << "c";
+  //TString plot_title1 = sstream.str();
+
+  // want to save separate plots 
+
+  /*for(int i; i < 2; i++){
+
+    sstream << to_string(i);
+    cout << "to_string(" << i << ") = " << to_string(i) << "\n" << endl;
+
+    TString plotname = sstream.str();
+    TCanvas *plotname = new TCanvas(plotname,plotname, width, height);
+
+  }
+*/  
+    
+
   TCanvas *c1 = new TCanvas("c1","c1", width, height);
-  c1->Divide(2,2);
+  
+  
+  //ostringstream sstream;
+  //sstream << "";
+  //T////String plot_title1 = sstream.str();
+
+
+
+  //h1B->SetTitleFontSize(40);
+  c1->cd(0);
+  h4E->Draw();
+  c1->Draw();
+
+/*
+
+  c1->Divide(4,2);
   c1->Draw();
   c1->cd(1); // Change to first subpad of canvas
-  h1->Draw();
+  h1B->Draw();
   c1->cd(2); 
-  h2->Draw();
+  h1E->Draw(); // There's probably a more efficient way to do this
   c1->cd(3);
-  h3->Draw();
+  h2B->Draw();
   c1->cd(4);
-  h4->Draw();
+  h2E->Draw();
+  c1->cd(5); 
+  h3B->Draw();
+  c1->cd(6); 
+  h3E->Draw();
+  c1->cd(7);
+  h4B->Draw();
+  c1->cd(8);
+  h4E->Draw();
+
+*/
 
   time_t result = time(0); // save with time since epoch to avoid overwriting files
 
   // Save plot as png and root files.
   ostringstream oss1, oss2;
-  oss1 << "bin/Plot_" << result;
-  oss2 << "bin/Plot_" << result; 
+  //oss1 << "bin/Plot_" << result;
+  //oss2 << "bin/Plot_" << result; 
+
+  oss1 << "bin/Plot_" << "EE_beta";
+  oss2 << "bin/Plot_" << "EE_beta"; 
 
   if (normalized_A == true){
     oss1 << "Normalized_A";
