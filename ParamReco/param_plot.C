@@ -7,7 +7,8 @@ void param_plot(){
   int max_rows = -1;
 
   // Create Histogram
-  int bins = 100000;
+  //int bins = 100000;
+  int bins = (838970216-838861313);
   //int bins = 100;
   //int min = 0;
   //int max = 150;
@@ -24,6 +25,7 @@ void param_plot(){
   // Barrel: 838861313 - 838970216 inclusive
   // Endcap: 838970216 and up
 
+/*
   TH1F *h1B = new TH1F("A Barrel","A Barrel",bins,0.235,0.25);
   TH1F *h2B = new TH1F("t_{0} Barrel","t_{0} Barrel",bins,118,130);
   TH1F *h3B = new TH1F("#alpha Barrel","#bf{#alpha Barrel}",bins,1,1.3);
@@ -32,7 +34,10 @@ void param_plot(){
   TH1F *h2E = new TH1F("t_{0} Endcap","t_{0} Endcap",bins,114,130);
   TH1F *h3E = new TH1F("#alpha Endcap","#bf{#alpha} Endcap",bins,1.1,1.7);
   TH1F *h4E = new TH1F("#beta Endcap","#bf{#beta Endcap}",bins,34,44);
+*/
 
+  TH1F *h1 = new TH1F("ID Number","ID Number",bins,838861313,838970216);
+  
   /*h1->SetTitleFont(40);
   h2->SetTitleFont(40);
   h3->SetTitleFont(40);
@@ -83,21 +88,23 @@ void param_plot(){
     // Barrel: 838861313 - 838970216 inclusive
     // Endcap: 838970216 and up
 
+    h1->Fill(d1);
+
     if ((838861313 <= d1) && (d1 <= 838970216)){
 
-      h1B->Fill(d2);
-      h2B->Fill(d3);
-      h3B->Fill(d4);
-      h4B->Fill(d5);
+      //h1B->Fill(d2);
+      //h2B->Fill(d3);
+      //h3B->Fill(d4);
+      //h4B->Fill(d5);
 
       }
 
     if (d1 >= 838970216 ){
 
-      h1E->Fill(d2);
-      h2E->Fill(d3);
-      h3E->Fill(d4);
-      h4E->Fill(d5);
+      //h1E->Fill(d2);
+      //h2E->Fill(d3);
+      //h3E->Fill(d4);
+      //h4E->Fill(d5);
 
       }
 
@@ -220,7 +227,8 @@ void param_plot(){
 
   //h1B->SetTitleFontSize(40);
   c1->cd(0);
-  h4E->Draw();
+  //h4E->Draw();
+  h1->Draw();
   c1->Draw();
 
 /*

@@ -54,7 +54,7 @@ void eta_reco(){
     exit(1); // terminate with error
   }
 
-  int max_rows = 360; // < 0 to read all rows 
+  int max_rows = -1; // < 0 to read all rows 
 
   string line; 
   double samples[10];
@@ -161,10 +161,10 @@ void eta_reco(){
   // started at 0, so if counter is at 360th after getting one added just now, it just read its 360th line 
   if (iphicounter == 360) { 
 
-    cout << "ietacounter = " << ietacounter << "\n" << endl;
-    cout << "ieta[" << ietacounter << "] = " << ieta[ietacounter] << "\n"  << endl;
-    cout << "ieta_amp[" << ietacounter << "] = " << ieta_amp[ietacounter] << "\n"  << endl;
-    cout << "count = " << count << "\n" << endl;
+    //cout << "ietacounter = " << ietacounter << "\n" << endl;
+    //cout << "ieta[" << ietacounter << "] = " << ieta[ietacounter] << "\n"  << endl;
+    //cout << "ieta_amp[" << ietacounter << "] = " << ieta_amp[ietacounter] << "\n"  << endl;
+    //cout << "count = " << count << "\n" << endl;
     
     iphicounter = 0;
     ietacounter += 1;
@@ -179,7 +179,12 @@ void eta_reco(){
   // Check if all eta's are filled 
   if (ietacounter == 170){
 
-    //last_ID = d1;
+    last_ID = d1;
+    cout << "last_ID = " << d1 << "\n" << endl;
+    cout << "ietacounter = " << ietacounter << "\n" << endl;
+    cout << "ieta[" << ietacounter << "] = " << ieta[ietacounter] << "\n"  << endl;
+    cout << "ieta_amp[" << ietacounter << "] = " << ieta_amp[ietacounter] << "\n"  << endl;
+    cout << "count = " << count << "\n" << endl;
     break;
 
     }
