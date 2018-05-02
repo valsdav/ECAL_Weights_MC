@@ -1,21 +1,29 @@
 // Want to try searching crystal_parameters for d1, then searching XTAL_Info for eta value.
 
 void eta_plot(){
+
+  time_t initial = time(0); // save with time since epoch to avoid overwriting files
  
   // Plot average in red? line graph? line graph and dots?
   // Calc Average, separate scatter plot on same pad 
 
-  const int max_rows = -1; // < 0 to read all rows 
+  const int max_rows = 1000; // < 0 to read all rows 
 
   // Choose normalization conditions 
   bool normalized_A = true;
   bool normalized_t0 = true;
+  bool plot_eta = true;
+  bool plot_phi = false;
 
-  // const int array_size = max_rows+1;
   // note: may want to try vectors instead of arrays in future
 
-  double avg_amp[170] = {0.}; // for each ieta I'm an idiot 
-  double ieta_vals[170];
+  // x, y arrays for each ieta
+  double avg_amp[170] = {0.}; 
+  double ieta_vals[170]; 
+
+  // iphi
+  double iphi_amp[360] = {0.};
+  double iphi_vals[360];
 
   double xval[80000]; // more than max # crystals. prob better to use vector then convert to array for TGraph plot.
   double yval[80000]; // hardcoded for now
@@ -67,7 +75,7 @@ void eta_plot(){
         break;
 	}
 
-      if ((count%1000) == 0){
+      if ((count%500) == 0){
 
       cout << "Reading line " << count << endl;
       }
@@ -214,59 +222,71 @@ void eta_plot(){
   inFile.close();
 
   cout << "valcount = " << valcount << "\n" << endl;
-  int current_eta = -85;
+  //int current_eta = -85;
+
+  bool reached_zero = false;
 
   for (int i = 0; i < 170; i++){
 
-      ieta_vals[i] = (-85 + i);
-      current_eta += 1; 
+      if (i == 85){
+
+	  reached_zero = true;
+	  
+	}
+
+      ieta_vals[i] = (-85 + i + reached_zero);
+      //current_eta += 1; 
     }
 
   // Want to create average array from vals.
-  int zero_vals = 0;
+  //int zero_vals = 0;
   int value_counter[170] = {0};
 
-  //for (int i = 0; i < 170; i++){ // for each eta 
+  reached_zero = false;
 	
-        //cout << "Averaging eta value " << i << "\n" << endl;
+  for (int i = 0; i < 170; i++){
 
-	  for (int i = 0; i < 170; i++){
+      if (i == 85){
 
-		  for (int a = 0; a < valcount; a++){ // number of amplitudes 
+	  reached_zero = true;
+	  
+	}
 
-		  if ( (xval[a] == (-85 + i)) && (yval[a] != 0) ) {
-		    cout << "in loop\n" << endl;
-		    avg_amp[i] += yval[a]; 
-		    value_counter[i] += 1; 
-		    //cout << "value_counter[" << i << "] = " << value_counter[i] << "\n" << endl;
-	            
-		  }
-		  //cout << "value_counter[" << i << "] = " << value_counter[i] << "\n" << endl;
-		  if (int(yval[a]) == 0){
-	
-		    zero_vals += 1;
-		  }
+    for (int a = 0; a < valcount; a++){ // number of amplitudes 
+
+      if ( (xval[a] == (-85 + i + int(reached_zero))) && (yval[a] != 0) ) {
+	    //cout << "in loop\n" << endl;
+	    avg_amp[i] += yval[a]; 
+	    value_counter[i] += 1; 
+	    //cout << "value_counter[" << i << "] = " << value_counter[i] << "\n" << endl;
+            
+	  }
+	  //cout << "value_counter[" << i << "] = " << value_counter[i] << "\n" << endl;
+	  //if (int(yval[a]) == 0){
+
+	   // zero_vals += 1;
+	  //}
 
 
-	  } // values
+  } // values
 
-          if (value_counter[i] != 0){
-	
-	      avg_amp[i] /= value_counter[i];
+  if (value_counter[i] != 0){
 
-	    }
+      avg_amp[i] /= value_counter[i];
+      cout << "avg_amp[" << i << "] = " << avg_amp[i] << "\n" << endl;
+    }
 
-	} // etas
+  } // etas
 
   //zero_vals /= valcount;
 
   //cout << "zero_vals = " << zero_vals << "\n" << endl;
 
-  for ( int k = 84; k < 85; k++){//k < 170; k++){
+  /*for ( int k = 84; k < 85; k++){//k < 170; k++){
       cout << "value_counter[" << k << "] = " << value_counter[k] << "\n" << endl;
       cout << "ieta_vals[" << k << "] = " << ieta_vals[k] << "\n" << endl;
       cout << "avg_amp[" << k << "] = " << avg_amp[k] << "\n" << endl;
-    }
+    }*/
 
   /*for ( int k = 0; k < 30; k++){//k < 170; k++){
       cout << "value_counter[" << k << "] = " << value_counter[k] << "\n" << endl;
@@ -276,41 +296,81 @@ void eta_plot(){
 
   // Plot
 
-  // plot 60494 - zero_vals average vals
+  TMultiGraph *mg = new TMultiGraph();
+  mg->SetTitle("Reconstructed Amplitude vs. iEta; iEta; Recon. Amp."); // Don't know why this isn't working 
 
-  TGraph* avg = new TGraph(170,ieta_vals,avg_amp);
   TGraph* gr = new TGraph(valcount,xval,yval);
+  TGraph* avg = new TGraph(170,ieta_vals,avg_amp);
   //gr->GetYaxis()->SetRangeUser(0.9,1.1);
   //gr->GetXaxis()->SetRangeUser(-85,85);
   //gr->SetTitle(etatitle_);
   gr->SetMarkerColor(1); // Black
-  gr->SetMarkerStyle(8);
+  gr->SetMarkerStyle(1);
 
-  avg->SetMarkerStyle(8);
-  avg->SetMarkerColor(2); // Red
-
+  avg->SetMarkerStyle(7);  // marker customization is for scatter plots
+  avg->SetMarkerColor(4); // line ' ' for line plots 
+  avg->SetLineColor(2);
+  //avg->SetLineStyle(9);
   //gr->SetMarkerSize(1);
 
-  TMultiGraph *mg = new TMultiGraph();
-  mg->SetTitle("Recon. Amp. vs. eta");
-
   TCanvas *c1 = new TCanvas("c1","c1",800,600);
-  //c1->SetBatch(kTRUE);
-  //c1->DrawFrame();
-  //gr->Draw("ap"); // a to plot axis, p to plot as points 
-  //avg->Draw("SAME");
-  //c1->cd();
-  //gr->Draw("ap"); //cater axis to values
-  //c1->cd();
-  //avg->Draw("ap same");
-  //c1->SetBatch(kFALSE);
-  //c1->cd();
-  //c1->Draw();
 
-  mg->Add(gr);
-  mg->Add(avg);
+  mg->Add(gr,"AP"); // scatter plot, draw axis where scatter plot data is 
+  mg->Add(avg,"P"); // line plot 
 
-  mg->Draw("AP");
+  // Fit
+
+  // https://root.cern.ch/doc/master/classTGraph.html#aa978c8ee0162e661eae795f6f3a35589
+  TFitResultPtr r = avg->Fit("pol4","S");
+  //TMatrixDSym cov = r->GetCovarianceMatrix();  //  to access the covariance matrix
+  //Double_t chi2   = r->Chi2(); // to retrieve the fit chi2
+  Double_t par0   = r->Value(0); // retrieve the value for the parameter 0
+  Double_t par1   = r->Value(1); // retrieve the value for the parameter 0
+  Double_t par2   = r->Value(2); // retrieve the value for the parameter 0
+  Double_t par3   = r->Value(3); // retrieve the value for the parameter 0
+  cout << "par0 = " << par0 << "\n" << endl;
+  cout << "par1 = " << par1 << "\n" << endl;
+  cout << "par2 = " << par2 << "\n" << endl;
+  cout << "par3 = " << par3 << "\n" << endl;
+
+  TString *fitname = new TString("fitfunc");
+  TString *fitformula = new TString("[0] + [1]*x + [2]*x^2 + [3]*x^3");
+
+  double fitx[170];
+  double fity[170];
+
+  TF1 *fitfunc = new TF1(*fitname,*fitformula,-85,85);
+  fitfunc->SetParameter (0, par0);    
+  fitfunc->SetParameter (1, par1);   
+  fitfunc->SetParameter (2, par2);  
+  fitfunc->SetParameter (3, par3); 
+
+  reached_zero = false;
+
+  for (int i = 0; i < 170; i++){
+
+    //skip = false;
+
+    if (i == 85){
+	
+	reached_zero = true;
+    }
+
+
+	 fitx[i] = ieta_vals[i + reached_zero];
+	 fity[i] = fitfunc->Eval(-85 + i + reached_zero); 
+	 //cout << "fity[" << i << "] = " << fity[i] << "\n" << endl;
+	 //cout << "fitfunc->Eval(" << i << ") = " << fitfunc->Eval(i) << "\n" << endl;
+
+  } 
+
+  //TGraph *fit = new TGraph(170,fitx,fity); // don't include iEta = 0
+  //fit->SetLineColor(4); // blue
+  //mg->Add(fit,"L");
+
+  mg->Draw();
+
+  //c1->BuildLegend();
 
   // TGraphPolar for phi plots 
 
@@ -327,11 +387,15 @@ void eta_plot(){
   c1->SaveAs(plot_title1);
   c1->SaveAs(plot_title2);
 
+  time_t difference = result - initial;
+  double minutes = double(difference) / 60.;
 
- // For phi plotting
+  cout << "That took " << minutes << " minutes.\n" << endl;
+  
+  // For phi plotting
 /*
-   
-   auto c46 = new TCanvas("c46","c46",500,500);
+     
+   TCanvas *c2 = new TCanvas("c2","c2",800,600);
    TGraphPolar * grP1 = new TGraphPolar();
    grP1->SetTitle("TGraphPolar example");
    grP1->SetPoint(0, (1*TMath::Pi())/4., 0.05);
@@ -348,7 +412,7 @@ void eta_plot(){
    grP1->SetLineColor(4);
    grP1->Draw("ALP");
    // Update, otherwise GetPolargram returns 0
-   c46->Update();
+   c2->Update();
    grP1->GetPolargram()->SetToRadian();
 
 */
