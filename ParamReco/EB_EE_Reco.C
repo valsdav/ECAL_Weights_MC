@@ -6,7 +6,7 @@
 
 void EB_EE_Reco(){
 
-  int max_rows = -1; // < 0 to read all rows 
+  int max_rows = 100; // < 0 to read all rows 
 
   // Choose normalization conditions 
   bool normalized_A = true;
