@@ -47,7 +47,7 @@ void param_plot(){
   // Plot EB and EE separately 
 
   // Open File
-  TString File("crystal_parameters.txt");
+  TString File("data/crystal_parameters.txt");
 
   ifstream inFile; // Input File stream class object  
   inFile.open(File);

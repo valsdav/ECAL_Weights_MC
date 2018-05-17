@@ -1,28 +1,34 @@
 // Want to try searching crystal_parameters for d1, then searching XTAL_Info for eta value.
 
-void phi_plot(){
+void eta_plot(){
 
   time_t initial = time(0); // save with time since epoch to avoid overwriting files
 
-  const int max_rows = -1; // < 0 to read all rows 
+  const int max_rows = 500; // < 0 to read all rows 
 
   // Choose normalization conditions 
   bool normalized_A = true;
   bool normalized_t0 = true;
-  //bool plot_eta = true;
-  //bool plot_phi = false;
+  bool plot_eta = true;
+  bool plot_phi = false;
 
   // note: may want to try vectors instead of arrays in future
 
-  // x, y arrays for each iphi
+  // x, y arrays for each ieta
+  double avg_amp[170] = {0.}; 
+  double ieta_vals[170]; 
+
   // iphi
-  const int phirange = 360;
   double iphi_amp[360] = {0.};
   double iphi_vals[360];
 
   double xval[80000]; // more than max # crystals. prob better to use vector then convert to array for TGraph plot.
   double yval[80000]; // hardcoded for now
   int valcount = 0;
+
+  ostringstream etatitle;
+  etatitle << "Average Amplitude vs. ieta"; // relies on data ordered by cmsswId
+  TString etatitle_(etatitle.str());
 
   // Each eta has 360 phi 
   // ieta range is -85 to 85, from negative z side to positive z 
@@ -36,7 +42,7 @@ void phi_plot(){
 
   // Open File
 
-  TString File("crystal_parameters.txt");
+  TString File("data/crystal_parameters.txt");
 
   ifstream inFile; // Input File stream class object  
   inFile.open(File);
@@ -45,6 +51,8 @@ void phi_plot(){
     cout << "Unable to open file ";
     exit(1); // terminate with error
   }
+
+// get d1, skip certain number of lines of eta values based on d1 value so don't have to read every line 
 
   string line; 
   double samples[10];
@@ -80,7 +88,7 @@ void phi_plot(){
 
 	if ((d1 >= 838861313) && (d1 <= 838970216)){ // Only have data for EB rn
 
-		TString Parameters("XTAL_Info.txt");
+		TString Parameters("data/XTAL_Info.txt");
 		ifstream inparamFile; // Input File stream class object  
 		inparamFile.open(Parameters); // reopen each time to start over and skipped desired number of lines 
 
@@ -120,7 +128,7 @@ void phi_plot(){
 				if (d1 == d1_){ // can pair phi or eta value with this XTAL
 
 				  //cout << "ID's match\n" << endl;
-				  xval[valcount] = d4_; 
+				  xval[valcount] = d5_; 
 				  //cout << "xval[" << valcount << "] = " << d5_ << "\n" << endl;	
 				  // then make yval the amplitude which you can += and / for average or do whatever you want with 	
 				  leave = true;
@@ -213,23 +221,39 @@ void phi_plot(){
   cout << "valcount = " << valcount << "\n" << endl;
   //int current_eta = -85;
 
-  for (int i = 0; i < phirange; i++){
+  bool reached_zero = false;
 
-      iphi_vals[i] = (i);
+  for (int i = 0; i < 170; i++){
+
+      if (i == 85){
+
+	  reached_zero = true;
+	  
+	}
+
+      ieta_vals[i] = (-85 + i + reached_zero);
+      //current_eta += 1; 
     }
 
   // Want to create average array from vals.
   //int zero_vals = 0;
-  int value_counter[phirange] = {0};
-	
-  // Average
+  int value_counter[170] = {0};
 
-  for (int i = 0; i < phirange; i++){ // phivals
+  reached_zero = false;
+	
+  for (int i = 0; i < 170; i++){
+
+      if (i == 85){
+
+	  reached_zero = true;
+	  
+	}
+
     for (int a = 0; a < valcount; a++){ // number of amplitudes 
 
-      if ( (xval[a] == (i)) && (yval[a] != 0) ) {
+      if ( (xval[a] == (-85 + i + int(reached_zero))) && (yval[a] != 0) ) {
 	    //cout << "in loop\n" << endl;
-	    iphi_amp[i] += yval[a];  // avg_amp[i] 
+	    avg_amp[i] += yval[a]; 
 	    value_counter[i] += 1; 
 	    //cout << "value_counter[" << i << "] = " << value_counter[i] << "\n" << endl;
             
@@ -245,11 +269,15 @@ void phi_plot(){
 
   if (value_counter[i] != 0){
 
-      iphi_amp[i] /= value_counter[i];
-      cout << "iphi_amp[" << i << "] = " << iphi_amp[i] << "\n" << endl;
+      avg_amp[i] /= value_counter[i];
+      cout << "avg_amp[" << i << "] = " << avg_amp[i] << "\n" << endl;
     }
 
-  } // phi's
+  } // etas
+
+  //zero_vals /= valcount;
+
+  //cout << "zero_vals = " << zero_vals << "\n" << endl;
 
   /*for ( int k = 84; k < 85; k++){//k < 170; k++){
       cout << "value_counter[" << k << "] = " << value_counter[k] << "\n" << endl;
@@ -266,10 +294,10 @@ void phi_plot(){
   // Plot
 
   TMultiGraph *mg = new TMultiGraph();
-  //mg->SetTitle("Reconstructed Amplitude vs. iEta; iEta; Recon. Amp."); // Don't know why this isn't working 
+  mg->SetTitle("Reconstructed Amplitude vs. iEta; iEta; Recon. Amp."); // Don't know why this isn't working 
 
   TGraph* gr = new TGraph(valcount,xval,yval);
-  TGraph* avg = new TGraph(phirange,iphi_vals,iphi_amp);
+  TGraph* avg = new TGraph(170,ieta_vals,avg_amp);
   //gr->GetYaxis()->SetRangeUser(0.9,1.1);
   //gr->GetXaxis()->SetRangeUser(-85,85);
   //gr->SetTitle(etatitle_);
@@ -284,7 +312,6 @@ void phi_plot(){
 
   mg->Add(gr,"AP"); // scatter plot, draw axis where scatter plot data is 
   mg->Add(avg,"P"); // line plot 
-/*
 
   // Fit
 
@@ -306,8 +333,8 @@ void phi_plot(){
   TString *fitname = new TString("fitfunc");
   TString *fitformula = new TString("[0] + [1]*x + [2]*x^2 + [3]*x^3 + [4]*x^4");
 
-  double fitx[phirange];
-  double fity[phirange];
+  double fitx[170];
+  double fity[170];
 
   TF1 *fitfunc = new TF1(*fitname,*fitformula,-85,85);
   fitfunc->SetParameter (0, par0);    
@@ -332,13 +359,11 @@ void phi_plot(){
 	 //cout << "fity[" << i << "] = " << fity[i] << "\n" << endl;
 	 //cout << "fitfunc->Eval(" << i << ") = " << fitfunc->Eval(i) << "\n" << endl;
 
-  } 
+  } */
 
   //TGraph *fit = new TGraph(170,fitx,fity); // don't include iEta = 0
   //fit->SetLineColor(4); // blue
   //mg->Add(fit,"L");
-
-
 
   TCanvas *c1 = new TCanvas("c1","c1",800,600);
 
@@ -353,15 +378,15 @@ void phi_plot(){
   //gStyle->SetOptStat(kTRUE);
   legend->Draw();
 
-*/
-
+  //gStyle->SetOptStat(kFALSE);
   mg->Draw();
 
-  // TGraphPolar for phi plots?
+  //c1->BuildLegend();
+  // TGraphPolar for phi plots 
 
   time_t result = time(0); // save with time since epoch to avoid overwriting files
 
-  // Save as png and root 
+  // Save plot as png and root files.
   ostringstream oss1, oss2, oss3;
   oss1 << "bin/Canvas_" << result << ".png";
   oss2 << "bin/Canvas_" << result << ".root"; 
@@ -378,13 +403,11 @@ void phi_plot(){
   cout << "That took " << minutes << " minutes.\n" << endl;
   
   // For phi plotting
-  /*  
+/*
+     
    TCanvas *c2 = new TCanvas("c2","c2",800,600);
    TGraphPolar * grP1 = new TGraphPolar();
    grP1->SetTitle("TGraphPolar example");
-
-  
-
    grP1->SetPoint(0, (1*TMath::Pi())/4., 0.05);
    grP1->SetPoint(1, (2*TMath::Pi())/4., 0.10);
    grP1->SetPoint(2, (3*TMath::Pi())/4., 0.15);
@@ -401,6 +424,7 @@ void phi_plot(){
    // Update, otherwise GetPolargram returns 0
    c2->Update();
    grP1->GetPolargram()->SetToRadian();
+
 */
 
 }

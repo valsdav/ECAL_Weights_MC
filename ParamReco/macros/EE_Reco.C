@@ -1,14 +1,14 @@
 // Abe Tishelman-Charny
 // 7 May 2018
-
+//
 // The purpose of this macro is to plot reconstructed amplitude for EE XTALS as functions of desired variables.
 
 void EE_Reco(){
 
   time_t initial = time(0); // save with time since epoch to avoid overwriting files
 
-  bool time_cut = true; // Run file faster for testing 
-  const int max_rows = 2000; // < 0 to read all rows 
+  bool time_cut = false; // Run file faster for testing 
+  const int max_rows = -1; // < 0 to read all rows 
 
   // Choose normalization conditions 
   bool EE_Only = true; // Skip to row 60495 of crystal_parameters.txt
@@ -16,7 +16,7 @@ void EE_Reco(){
   bool normalized_t0 = true;
   bool side_filled = false;
 
-  // note: may want to try vectors instead of arrays in future
+  // may want to try vectors instead of arrays in future
 
   double xval1[20000]; // more than max # EE crystals. maybe better to use vector then convert to array for TGraph plot. This would allow dynamic size but would take longer to run. 
   double yval1[20000]; // hardcoded for now
@@ -28,13 +28,9 @@ void EE_Reco(){
   double ampval2[20000];
   int valcount2 = 0;
 
-  //ostringstream plottitle;
-  //plottitle << "Average Amplitude vs. ieta"; // relies on data ordered by cmsswId
-  //TString plottitle_(plottitle.str());
-
   // Open File
 
-  TString File("crystal_parameters.txt");
+  TString File("data/crystal_parameters.txt");
 
   ifstream inFile; // Input File stream class object  
   inFile.open(File);
@@ -65,7 +61,7 @@ void EE_Reco(){
   }
 
   if (time_cut){
-    int i = 6000;
+    int i = 7000; //7208 
     count += i;
     max_rows += i;
     while(i != 0){
@@ -75,7 +71,7 @@ void EE_Reco(){
 
   }
 
-    while((getline(inFile, line))) { // crystal_parameters.txt loop
+  while((getline(inFile, line))) { // crystal_parameters.txt loop
 
       // start on zeroeth row 
 
@@ -100,7 +96,7 @@ void EE_Reco(){
 
 	//if (d1 >= 872415401){ // EE only
 
-	TString Parameters("EE_Data.txt");
+	TString Parameters("data/EE_Data.txt");
 	ifstream inparamFile; // Input File stream class object  
 	inparamFile.open(Parameters); // reopen each time to start over and skipped desired number of lines 
 
@@ -125,6 +121,7 @@ void EE_Reco(){
 
 		// d4_ sides = +/- 1, each side has same xy coordinate system. Assuming -1 is negative z side, same side as negative eta.
 		// d1_ = cmsswId, d2_ = dbID, d3_ = hashedId, d4_ = side, d5_ = ix, d6_ = iy, ... there are more 
+
       		double d1_, d2_, d3_, d4_, d5_, d6_;
 
 		stringstream ss(param_line);
@@ -139,7 +136,7 @@ void EE_Reco(){
 
 			  //cout << "ID's match\n" << endl;
 
-			  // Put in either -1 side or +1 side arrays
+			  // See if finished filling first endcap
 			  if (!side_filled){
 
 			    if (d4_ == 1){
@@ -246,7 +243,6 @@ void EE_Reco(){
      
 
   count = count +1; 
-
   } // Loop while still lines left and desired maximum hasn't been reached
 
   inparamFile.close();
@@ -255,136 +251,135 @@ void EE_Reco(){
   cout << "valcount1 = " << valcount1 << "\n" << endl;
   cout << "valcount2 = " << valcount2 << "\n" << endl;
 
-/*
-  bool reached_zero = false;
+  //c1->Divide(2,1);
 
-  for (int i = 0; i < 170; i++){
+  // Find min and max
 
-      if (i == 85){
+  double minval1 = 1000., minval2 = 1000.;
+  double maxval1 = 0.0, maxval2 = 0.0;
 
-	  reached_zero = true;
-	  
-	}
+  for (int i = 0; i < valcount1; i++){
 
-      ieta_vals[i] = (-85 + i + reached_zero);
-      //current_eta += 1; 
+    if(ampval1[i] < minval1) ){
+      minval1 = ampval1[i];
     }
 
-  // Want to create average array from vals.
-  //int zero_vals = 0;
-  int value_counter[170] = {0};
-
-  reached_zero = false;
-	
-  for (int i = 0; i < 170; i++){
-
-      if (i == 85){
-
-	  reached_zero = true;
-	  
-	}
-
-    for (int a = 0; a < valcount; a++){ // number of amplitudes 
-
-      if ( (xval[a] == (-85 + i + int(reached_zero))) && (yval[a] != 0) ) {
-	    //cout << "in loop\n" << endl;
-	    avg_amp[i] += yval[a]; 
-	    value_counter[i] += 1; 
-	    //cout << "value_counter[" << i << "] = " << value_counter[i] << "\n" << endl;
-            
-	  }
-	  //cout << "value_counter[" << i << "] = " << value_counter[i] << "\n" << endl;
-	  //if (int(yval[a]) == 0){
-
-	   // zero_vals += 1;
-	  //}
-
-
-  } // values
-
-  if (value_counter[i] != 0){
-
-      avg_amp[i] /= value_counter[i];
-      cout << "avg_amp[" << i << "] = " << avg_amp[i] << "\n" << endl;
+    if(ampval1[i] > maxval1) ){
+      maxval1 = ampval1[i];
     }
 
-  } // etas
+  }
 
-*/
+  for (int i = 0; i < valcount2; i++){
 
+    if(ampval2[i] < minval2) ){
+      minval2 = ampval2[i];
+    }
 
-  //zero_vals /= valcount;
+    if(ampval2[i] > maxval2) ){
+      maxval2 = ampval2[i];
+    }
 
-  //cout << "zero_vals = " << zero_vals << "\n" << endl;
+  }
 
-  /*for ( int k = 84; k < 85; k++){//k < 170; k++){
-      cout << "value_counter[" << k << "] = " << value_counter[k] << "\n" << endl;
-      cout << "ieta_vals[" << k << "] = " << ieta_vals[k] << "\n" << endl;
-      cout << "avg_amp[" << k << "] = " << avg_amp[k] << "\n" << endl;
-    }*/
+  cout << "minval1 = " << minval1 << "\n" << endl;
+  cout << "maxval1 = " << maxval1 << "\n" << endl;
+  cout << "minval2 = " << minval2 << "\n" << endl;
+  cout << "maxval2 = " << maxval2 << "\n" << endl;
 
-  /*for ( int k = 0; k < 30; k++){//k < 170; k++){
-      cout << "value_counter[" << k << "] = " << value_counter[k] << "\n" << endl;
-      cout << "ieta_vals[" << k << "] = " << ieta_vals[k] << "\n" << endl;
-      cout << "avg_amp[" << k << "] = " << avg_amp[k] << "\n" << endl;
-    }*/
+  // Fine color gradient  
+  const Int_t NRGBs = 5;
+  const Int_t NCont = 255;
+
+  Double_t stops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
+  Double_t red[NRGBs]   = { 0.00, 0.00, 0.87, 1.00, 0.51 };
+  Double_t green[NRGBs] = { 0.00, 0.81, 1.00, 0.20, 0.00 };
+  Double_t blue[NRGBs]  = { 0.51, 1.00, 0.12, 0.00, 0.00 };
+  TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+  gStyle->SetNumberContours(NCont);
 
   TCanvas *c1 = new TCanvas("c1","c1",800,600);
-  gStyle->SetPalette(1);
-  c1->Divide(2,1);
-
-  /*for (int i = 0; i < max_rows; i++){
-
-    cout << "xval[" << i << "] = " << xval[i] << "\n" << endl;
-    cout << "yval[" << i << "] = " << yval[i] << "\n" << endl;
-    cout << "ampval[" << i << "] = " << ampval[i] << "\n" << endl;
-
-  }*/
 
   TGraph2D* gr1 = new TGraph2D(valcount1,xval1,yval1,ampval1);
   gr1->SetName("side_-1");
   gr1->SetTitle("side -1");
   gr1->GetXaxis()->SetTitle("ix");
   gr1->GetYaxis()->SetTitle("iy");
-  gr1->GetZaxis()->SetTitle("Recon. Amp.");
-  gr1->SetAxisRange(0,1,"Z");
+  //gr1->GetZaxis()->SetTitle("Recon. Amp.");
+  //gr1->SetAxisRange(0.9,1.3,"Z");
+  //gr1->GetZaxis()->SetRangeUser(minval1,maxval1);
+  gr1->Draw("colz");
+
+  //TH1F h = GetHistogram(gr1);
+  //h.Draw("colz");
+
+  TCanvas *c2 = new TCanvas("c2","c2",800,600);
 
   TGraph2D* gr2 = new TGraph2D(valcount2,xval2,yval2,ampval2);
   gr2->SetName("side_+1");
   gr2->SetTitle("side +1");
   gr2->GetXaxis()->SetTitle("ix");
   gr2->GetYaxis()->SetTitle("iy");
-  gr2->GetZaxis()->SetTitle("Recon. Amp.");
-
-  c1->SetBatch(kTRUE); // Don't show graphical display 
-
-  c1->cd(1);
-  gr1->Draw("colz");
-  //gr1->Draw("surf1");
-
-  c1->cd(2);
+  //gr2->GetZaxis()->SetTitle("Recon. Amp.");
+  //gr2->GetZaxis()->SetRangeUser(minval2,maxval2);
   gr2->Draw("colz");
-  //gr2->Draw("surf1");
 
-  c1->SetBatch(kFALSE); // Show graphical display 
-  c1->Draw();
+
+  //c1->SetBatch(kTRUE); // Don't show graphical display 
+
+  //c1->cd(1);
+  //gr1->Draw("cont4");
+  //gr1->Draw("surf1");
+  //gr1->Draw("colz");
+
+  //c1->cd(2);
+  //gr2->Draw("col");
+  //gr2->Draw("surf1");
+  //gr2->Draw("colz");
+
+  //c1->SetBatch(kFALSE); // Show graphical display 
+
+  //c1->Draw();
+  //c2->Draw();
 
   time_t result = time(0); // save with time since epoch to avoid overwriting files
 
   // Save plot as png and root files.
-  ostringstream oss1, oss2, oss3;
-  oss1 << "bin/Canvas_" << result << ".png";
-  oss2 << "bin/Canvas_" << result << ".root"; 
+  ostringstream oss1, oss2, oss3, oss4, oss5;
+  oss1 << "bin/Canvas1_" << result << ".png";
+  oss2 << "bin/Canvas1_" << result << ".root"; 
+
+  oss3 << "bin/Canvas2_" << result << ".png";
+  oss4 << "bin/Canvas2_" << result << ".root"; 
 
   TString plot_title1 = oss1.str();
   TString plot_title2 = oss2.str();
+  TString plot_title3 = oss3.str();
+  TString plot_title4 = oss4.str();
 
   c1->SaveAs(plot_title1);
   c1->SaveAs(plot_title2);
+  c2->SaveAs(plot_title3);
+  c2->SaveAs(plot_title4);
+
+  // output text file with min max 
+
+  oss5 << "bin/PlotParameters_" << result << ".txt";
+  TString param_title = oss5.str();
+  ofstream outputfile(param_title);
+
+  outputfile << "minval1 = " << minval1 << "\n";
+  outputfile << "maxval1 = " << maxval1 << "\n";
+  outputfile << "minval2 = " << minval2 << "\n";
+  outputfile << "maxval2 = " << maxval2 << "\n";
 
   time_t difference = result - initial;
   double minutes = double(difference) / 60.;
 
   cout << "That took " << minutes << " minutes.\n" << endl;
+
+  //ostringstream plottitle;
+  //plottitle << "Average Amplitude vs. ieta"; // relies on data ordered by cmsswId
+  //TString plottitle_(plottitle.str());
 
 }
