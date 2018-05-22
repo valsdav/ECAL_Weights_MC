@@ -3,13 +3,24 @@ void color_plot(){
   // Want to plot EB reconstructed amplitude as a function of iEta and iPhi 
   time_t initial = time(0); // initial time to calculate total time 
 
-  const int max_rows = 1000; // < 0 to read all rows 
+  const int max_rows = -1; // < 0 to read all rows 
 
-  // Choose normalization conditions 
+  double time_shift = +7.0; // Positive/Negative: shift waveform to Left/Right
+
+  // Set conditions 
+  bool EE_Only = true; // Skip to row 60495 of crystal_parameters.txt
   bool normalized_A = false;
   bool normalized_t0 = false;
+  bool side_filled = false;
 
-  TH2F *amps = new TH2F("Reconstructed Amplitude","Reconstructed Amplitude",170,-85,85,360,0,360);
+  ostringstream sss1, sss2;
+  sss1 << "Recon Amp / Peak Samp, - side," << " time_shift = " << time_shift << "ns"; 
+  sss2 << "Recon Amp / Peak Samp, + side," << " time_shift = " << time_shift << "ns"; 
+  TString histo_title1 = sss1.str();
+  TString histo_title2 = sss2.str();
+
+  TH2F *amps1 = new TH2F("-",histo_title1,100,0,100,100,0,100);
+  TH2F *amps2 = new TH2F("+",histo_title2,100,0,100,100,0,100);
 
   // Fill histo with (iEta, iPhi, reconamp)
 
@@ -44,6 +55,18 @@ void color_plot(){
   
   double min = 100., max = 0.0;
 
+  if (EE_Only == true){
+
+    int EE_Skip = 60494;
+    // skip to first EE row, aka skip 60494 rows
+ 
+    while(EE_Skip !=0){ // Skip 1000 characters or until new line 
+      inFile.ignore(1000,'\n'); // count is number of rows read before this one
+      EE_Skip -= 1;
+    }
+
+  }
+
     // Read line
 
     while((getline(inFile, line))) { // crystal_parameters.txt loop
@@ -51,6 +74,7 @@ void color_plot(){
 
       Double_t iphi = 0, ieta = 0;
       Double_t recon_amp = 0.0;
+      int ix = 0, iy = 0; // EE XTAL position indexes 
 
       // Check row
       if (count == max_rows){
@@ -72,9 +96,11 @@ void color_plot(){
 
         // Open XTAL_Info for eta(d1)
 
-	if ((d1 >= 838861313) && (d1 <= 838970216)){ // Only have data for EB rn
+	//if ((d1 >= 838861313) && (d1 <= 838970216)){ // Only have data for EB rn
+	  if (d1 >= 872415401){ // EE  
 
-		TString Parameters("data/XTAL_Info.txt");
+		//TString Parameters("data/XTAL_Info.txt");
+		TString Parameters("data/EE_Data.txt");
 		ifstream inparamFile; // Input File stream class object  
 		inparamFile.open(Parameters); // reopen each time to start over and skipped desired number of lines 
 
@@ -99,13 +125,15 @@ void color_plot(){
 		while( (getline(inparamFile, param_line)) && (leave == false)) { // read XTAL_Info.txt line
 
 			//double param_value;
-	      		double d1_, d2_, d3_, d4_, d5_;
+	      		double d1_, d2_, d3_, d4_, d5_, d6_;
 
-			// d1_ = ID, d4_ = iphi, d5_ = ieta
+			// d1_ = ID, d4_ = iphi, d5_ = ieta, Bigger data file 
+			// d5_ = ix, d6_ = iy, EE Data
 
 			stringstream ss(param_line);
 
-		        if(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_){ // if line has numbers, see if ID's match. 
+		        if(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_){ // if line has numbers, see if ID's match. 
+			  // d5_ = ix, d6_ = iy
 
 				//cout.precision(17);
 				//cout << "d1 = " << d1 << "\n" << endl;
@@ -113,11 +141,18 @@ void color_plot(){
 
 				if (d1 == d1_){ // can pair phi or eta value with this XTAL
 
-      				 //double iphi = 0, ieta = 0;
-     				 //double recon_amp = 0.0;
+				  // Check if finished filling first endcap
+				  if (!side_filled){
 
-				  iphi = d4_;
-				  ieta = d5_;
+				    if (d4_ == 1){ // if side = 1 (read all -1 rows)
+
+				      side_filled = true;
+	 			    }
+
+				  }
+
+				  ix = d5_; // ix
+				  iy = d6_; // iy
 
 				  //cout << "ID's match\n" << endl;
 				  //xval[valcount] = d5_; 
@@ -125,8 +160,6 @@ void color_plot(){
 				  // then make yval the amplitude which you can += and / for average or do whatever you want with 
 				  	
 				  leave = true;
-				  //cout << "d5_ = " << d5_ << '\n' << endl;
-				  //h->Fill(d5_);
 
 				}
 		        
@@ -136,7 +169,7 @@ void color_plot(){
 
 	  // Calculate Amplitude 
 
-        // /*
+          // /*
 
 	  Double_t A = d2, t_0 = d3, alpha = d4, beta = d5; 
 
@@ -150,57 +183,66 @@ void color_plot(){
 	      t_0 = 125.0; // 125 ns
 	      }
 
+	  // introduce time shift in formula. I guess just set t0 -> t0 + time_shift
+	  // time_shift
+
 	  TString *name = new TString("function_alphabeta");
 	  TString *formula = new TString("( (1 + (x-[1]) / ([2]*[3]) ) > 0.0)*([0] * pow( 1 + (x-[1]) / ([2]*[3]) , [2] ) * exp ( - (x-[1]) / [3])) + ((1 + (x-[1]) / ([2]*[3]) <= 0.0 ))*(0)");
 
 	  //double dt = alpha*beta/2.0;
-	  double dt = 25;
 	  //double xmin = (-1.0)*alpha*beta + t_0 + dt; // time of first non-imaginary value + dt
-	  double xmin = t_0 - dt;
-	  double xmax = t_0 + 4*dt;
+	  //double xmin = t_0 - dt;
+	  //double xmax = t_0 + 4*dt;
+	  double xmin = 100.; // Start Sampling at 100ns
+	  double xmax = 250.; // End Sampling at 250ns 
+	  double dt = 25;
 
 	  TF1 *function_alphabeta = new TF1(*name,*formula,xmin,xmax);
 
 	  function_alphabeta->SetParameter (0, A);    
-	  function_alphabeta->SetParameter (1, t_0);   
+	  function_alphabeta->SetParameter (1, t_0 + time_shift); // time shift here    
 	  function_alphabeta->SetParameter (2, alpha);  
 	  function_alphabeta->SetParameter (3, beta);  
 
 	  // weights 
-	  double w[10] = {-0.3812788, -0.3812788, -0.3812788, 0, 0.235699, 0.4228363, 0.3298652, 0.1575187, -0.002082776, 0}; // ECAL weights 
+	  double w[10] = {-0.3812788, -0.3812788, -0.3812788, 0, 0.235699, 0.4228363, 0.3298652, 0.1575187, -0.002082776, 0}; // EB weights 
 	  int samp_number = 4; // assuming first four samples are zero (pedestal) and problem with -nan fourth sample. Also, fourth weight is zero so this sample isn't considered anyway.
 
-	  // Samples
+	  // Initialize Samples
 
 	  for (int k = 0; k < 10; k++){
 
 	    samples[k] = 0.;
 	    }
 
+	  // Extract Samples From Waveform
 	  for(double j = xmin; j < xmax; j += dt){
 
 	    samples[samp_number] = function_alphabeta->Eval(j);
 	    samp_number++ ;    
 	    }
 
+	  // Calculate Amplitude
 	  for (int k = 0; k < 10; k++ ){
 
 	    recon_amp += samples[k]*w[k]; 
 	    }
 
-	  if (recon_amp < min){ min = recon_amp;}
-	  if (recon_amp > max){ max = recon_amp;}
+	  //double ratio = recon_amp / samples[5];
+	  double ratio = recon_amp / d2;
+	  //cout << "ratio = " << ratio << "\n" << endl;
+
+	  if (ratio < min){ min = ratio;}
+	  if (ratio > max){ max = ratio;}
 
 	  //amps->Fill(iphi,ieta,recon_amp);
 	  //amps->Fill(1,1,1.0);
 
-	  //double ratio = amp / d2;
+          //  */        
+	  if (!side_filled){ amps1->Fill(ix,iy,ratio); }
+	  if (side_filled){ amps2->Fill(ix,iy,ratio); }
 
-	  //yval[valcount] = amp;
-	  //yval[valcount] = ratio;
-
-       //  */        
-
+  	  //amps1->Fill(ieta,iphi,ratio);
 
 	  //yval[valcount] = d5; // A = d2, t_0 = d3, alpha = d4, beta = d5; 
 	  //valcount += 1;
@@ -210,12 +252,9 @@ void color_plot(){
 	  //amps->Fill(5,5,5);
     } // Do if on line with desired 's' stream extraction parameters
     
-  cout << "iphi = " << iphi << "\n" << endl;
-  cout << "ieta = " << ieta << "\n" << endl;
-  cout << "recon_amp = " << recon_amp << "\n" << endl;
- 
-  amps->Fill(iphi,ieta,recon_amp);
-  //amps->Fill(5,5,5);
+  //cout << "ix = " << ix << "\n" << endl;
+  //cout << "iy = " << iy << "\n" << endl;
+  //cout << "recon_amp = " << recon_amp << "\n" << endl;
 
   count = count + 1; 
 
@@ -289,8 +328,6 @@ void color_plot(){
 
  */
 
-
-
   // Plot
 
   //TMultiGraph *mg = new TMultiGraph();
@@ -319,21 +356,25 @@ void color_plot(){
   TCanvas *c1 = new TCanvas("c1","c1",800,600);
 
   c1->SetBatch(kFALSE);
-  c1->Update();
-  //c1->Divide(1,1);
-  //c1->cd(1);
-  amps->Draw("COLZ");
+  amps1->Draw();
   c1->Update();
 
-  //TLine *vertline = new TLine(1.0,0,1.0,c1_1->GetUymax()); // xmin, ymin, xmax, ymax 
-  amps->GetZaxis()->SetRangeUser(min,max);
-
-  amps->Draw("COLZ");
+  //amps1->GetZaxis()->SetRangeUser(min,max);
+  amps1->GetZaxis()->SetRangeUser(0.95,1.05);
+  amps1->Draw("COLZ");
 
   cout << "min = " << min << "\n" << endl;
   cout << "max = " << max << "\n" << endl;
 
-  //c1->SetBatch(kFALSE);
+  TCanvas *c2 = new TCanvas("c2","c2",800,600);
+
+  c2->SetBatch(kFALSE);
+  c2->cd();
+  amps2->Draw();
+  c2->Update();
+ 
+  amps2->GetZaxis()->SetRangeUser(0.99,1.02);
+  amps2->Draw("COLZ");
 
   //TLegend *legend = new TLegend(0.1,0.7,0.48,0.9);
   //legend->SetHeader("Legend","C"); // option "C" allows to center the header
@@ -363,8 +404,8 @@ void color_plot(){
 
   // Save plot as png and root files.
   ostringstream oss1, oss2, oss3;
-  oss1 << "bin/Canvas_" << result << ".pdf";
-  oss2 << "bin/Canvas_" << result << ".root"; 
+  oss1 << "bin/Canvas_" << result << "ts_" << time_shift << ".pdf";
+  oss2 << "bin/Canvas_" << result << "ts_" << time_shift << ".root"; 
 
   TString plot_title1 = oss1.str();
   TString plot_title2 = oss2.str();
