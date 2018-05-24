@@ -5,16 +5,12 @@
 
 void plot(double zmin, double zmax)
 {
-	  // /*
 
-	  // Color axis limits
-	  //double lower = 0.99, upper = 1.01; // for 0, 7 ns
-	  //double lower = 0.9, upper = 1.1; // for -7 ns
+	  //gStyle->SetOptStat(0); // no stats box
 
-	  //gStyle->SetOptStat(0); // no stats box, I think.
-/*
 	  TCanvas *c1 = new TCanvas("c1","c1",800,600);
 
+	  c1->cd();
 	  EB->Draw();
 	  c1->Update();
 	  EB->GetZaxis()->SetRangeUser(zmin,zmax);
@@ -22,7 +18,7 @@ void plot(double zmin, double zmax)
 
 	  EB->Draw("COLZ");
 
-*/
+/*
 
 	  //amps1->Draw("COLZ");
 	  //amps1->GetZaxis()->SetLabelSize(0.02);
@@ -40,17 +36,19 @@ void plot(double zmin, double zmax)
 	  //cout << "max = " << max << "\n" << endl;
 
 	  //----
+*/
 
+/*
 	  TCanvas *c2 = new TCanvas("c2","c2",800,600);
 
 	  c2->cd();
-	  EE1->Draw();
+	  EB->Draw();
 	  c2->Update();
-	  EE1->GetZaxis()->SetRangeUser(zmin,zmax);
+	  EB->GetZaxis()->SetRangeUser(zmin,zmax);
 	  //c1->SetBatch(kFALSE);
 
-	  EE1->Draw("COLZ");
-
+	  EB->Draw("COLZ");
+*/
 
 /*
 	  TCanvas *c3 = new TCanvas("c3","c3",800,600);

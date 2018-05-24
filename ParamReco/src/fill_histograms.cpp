@@ -2,7 +2,7 @@
 // 24 May 2018
 // The purpose of this function is to plot EB and EE metrics as functions of DOF
 
-void time_shift_plot(int max_rows, double time_shift, double EB_w[], double EE_w[], bool EB_Only, bool EE_Only, bool normalized_A, bool normalized_t0)
+void fill_histograms(int max_rows, double time_shift, double EB_w[], double EE_w[], bool EB_Only, bool EE_Only, bool normalized_A, bool normalized_t0)
 {
 
 	/*
@@ -42,7 +42,7 @@ void time_shift_plot(int max_rows, double time_shift, double EB_w[], double EE_w
   	TString histo_title2 = sss2.str();
 	TString histo_title3 = sss3.str();
 
-  	TH2F *EE1 = new TH2F("EE -",histo_title2,100,0,100,100,0,100); // (ix, iy)
+	TH2F *EE1 = new TH2F("EE -",histo_title2,100,0,100,100,0,100); // (ix, iy)
   	TH2F *EE2 = new TH2F("EE +",histo_title3,100,0,100,100,0,100);
 
   	//TH2F *ratios1 = new TH2F("Ratios -","0ns / -7ns - Side",100,0,100,100,0,100);
@@ -122,6 +122,8 @@ void time_shift_plot(int max_rows, double time_shift, double EB_w[], double EE_w
 
 		// EE Line
 		if (d1 >= 872415401){
+
+			//if (EB_Only) return;
 			EE_count += 1;
 			TString Parameters("data/EE_Info.txt");
 			int skip_count = EE_count;
@@ -227,7 +229,6 @@ void time_shift_plot(int max_rows, double time_shift, double EB_w[], double EE_w
 	  // EB 
 	  if ((d1 >= 838861313) && (d1 <= 838970216)) EB->Fill(ieta,iphi,ratio);
 
-
 	  // EE 
 	  if (d1 >= 872415401)
 	      {
@@ -242,7 +243,11 @@ void time_shift_plot(int max_rows, double time_shift, double EB_w[], double EE_w
 
 	  } // Loop while still lines left and desired maximum hasn't been reached
 
-	  //inparamFile.close();
-	  //inFile.close();
+	  inparamFile.close();
+	  inFile.close();
 	  
+	  // Currently, I need to draw EE1 and EE2 in this file. I don't understand why.
+
+	  //EE1->Draw("COLZ");
+
 }
