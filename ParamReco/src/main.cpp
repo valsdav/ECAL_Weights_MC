@@ -35,7 +35,7 @@ int main()
 	time_t initial_time = time(0); // initial time to calculate total time 
 
 	// Set Study Parameters
-	double time_shift = 0; // Move waveform +/- ns to right/left
+	double time_shift = 5; // Move waveform +/- ns to right/left
  	int max_rows = 3; // < 0 to read all rows of XTAL_Params.txt
 
 	// Define weights 

@@ -6,7 +6,9 @@
 void plot(double zmin, double zmax)
 {
 
-	  //gStyle->SetOptStat(0); // no stats box
+	  gStyle->SetOptStat(0); // no stats box
+
+/*
 
 	  TCanvas *c1 = new TCanvas("c1","c1",800,600);
 
@@ -14,9 +16,31 @@ void plot(double zmin, double zmax)
 	  EB->Draw();
 	  c1->Update();
 	  EB->GetZaxis()->SetRangeUser(zmin,zmax);
+	  EB->GetXaxis()->SetTitle("iEta");
+	  EB->GetXaxis()->SetTitleOffset(1.1);
+	  EB->GetYaxis()->SetTitle("iPhi");
+	  EB->GetYaxis()->SetTitleOffset(1.2);
 	  //c1->SetBatch(kFALSE);
 
 	  EB->Draw("COLZ");
+
+*/
+
+/*
+	  TCanvas *c2 = new TCanvas("c2","c2",800,600);
+
+	  c2->cd();
+	  EE1->Draw();
+	  c2->Update();
+	  EE1->GetZaxis()->SetRangeUser(zmin,zmax);
+	  EE1->GetXaxis()->SetTitle("ix");
+	  EE1->GetXaxis()->SetTitleOffset(1.1);
+	  EE1->GetYaxis()->SetTitle("iy");
+	  EE1->GetYaxis()->SetTitleOffset(1.2);
+	  //c1->SetBatch(kFALSE);
+
+	  EE1->Draw("COLZ");
+*/
 
 /*
 

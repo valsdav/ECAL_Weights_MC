@@ -65,7 +65,8 @@ double recon_amp(double A, double t_0, double time_shift, double alpha, double b
 	for(double i = xmin + time_shift; i < xmax + time_shift; i += dt){
 
 	  if ( i <= (t_0 + time_shift - alpha*beta) ) pulseShape.push_back(0);
-	  else pulseShape.push_back(function_alphabeta->Eval(i));
+	  else pulseShape.push_back(function_alphabeta->Eval(i)); 
+	  //else pulseShape.push_back(function_alphabeta->Eval(i) / A); // A makes peak of waveform 1.
 	
 	  cout << "ideal weight sample = " << pulseShape[count_] << "\n";
 	  count_ += 1;
@@ -80,8 +81,8 @@ double recon_amp(double A, double t_0, double time_shift, double alpha, double b
         cout << "nPulseSamples_ = " << A_.GetnPulseSamples() << endl;
         cout << "nPrePulseSamples_ = " << A_.GetnPrePulseSamples() << endl;
 
-        cout << "A.getAmpWeight(5) returns: " << A_.getAmpWeight(5) << endl;
-        cout << "A.getChi2Matrix(5,5) returns: " << A_.getChi2Matrix(5,5) << endl;
+        cout << "A*A_.getAmpWeight(5) returns: " << A*A_.getAmpWeight(5) << endl;
+        cout << "A_.getChi2Matrix(5,5) returns: " << A_.getChi2Matrix(5,5) << endl;
       }
 
 ////////////
@@ -112,12 +113,20 @@ double recon_amp(double A, double t_0, double time_shift, double alpha, double b
 	// Sum samples * weights
 
 	double recon_amp = 0.0;
+	double ideal_recon_amp = 0.0;
 
 	for (int k = 0; k < 10; k++ ){
 
-	  recon_amp += samples[k]*weights[k]; 
+	  //recon_amp += samples[k]*weights[k]; 
+	  //ideal_recon_amp += pulseShape[k]*A_.getAmpWeight(k);
+	    cout << "samples[" << k << "] = " << samples[k] << "\n";
+	    cout << "A_.getAmpWeight(" << k << ") = " << A_.getAmpWeight(k) << "\n";
+	    recon_amp += samples[k]*A_.getAmpWeight(k);
 	  }
 
+	cout << "recon_amp = " << recon_amp << "\n";
+
+	//return recon_amp;
 	return recon_amp;
 
 }
