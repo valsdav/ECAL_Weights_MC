@@ -6,6 +6,9 @@
 
 */
 
+// Current way to compile:
+// g++ -std=c++11 main.cpp ComputeWeights.cpp -lCLHEP
+
 using namespace std; 
 
 #include <vector>
