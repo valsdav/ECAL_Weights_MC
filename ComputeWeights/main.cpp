@@ -9,6 +9,10 @@
 // Current way to compile:
 // g++ -std=c++11 main.cpp ComputeWeights.cpp -lCLHEP
 
+// 2 July 2018: Want to obtain 5 weights to reconstruct amp of 1, signifying ideal weights since this is one way it's currently done with L1 Trigger. 
+// Want to obtain an Amp of 1 from (3,4,5,6,7) where (1,2,3) is when in-time energy deposity in XTAL did not happen yet, use for pedestal. At (4) energy deposity has happened, and (5,6,7,8,9,10) is when scintillation process and shaping creates the pulse.
+// I think I want 5 weights, for (3,4,5,6,7), where 6 is the peak. 
+
 using namespace std; 
 
 #include <vector>
@@ -55,14 +59,16 @@ int main() {
         exit(1);  // terminate with error
   }
 
-  int verbosity = 0;
+  int verbosity = 1;
 
-  cout << "Enter 1 or 0 for verbosity: ";
-  cin >> verbosity;
-  cout << "Verbosity = " << verbosity << endl;
+  //cout << "Enter 1 or 0 for verbosity: ";
+  //cin >> verbosity;
+  //cout << "Verbosity = " << verbosity << endl;
 
   // dummy pulse shape derivative
-  // calculate derivative with some method here precisely. 
+  // calculate derivative with some method here precisely.
+
+  // nSamples, nPulseSamples_ 
 
   vector <double> pulseShapeDerivative;
   pulseShapeDerivative.push_back(0.0);
@@ -76,22 +82,25 @@ int main() {
   pulseShapeDerivative.push_back(-0.25);
   pulseShapeDerivative.push_back(0.0);
 
-  int nSamples = 10; 
+  int max = 1; // max number of rows to read
 
-  int max = 0; // max number of rows to read
-
-  cout << "Enter number of pulses to read per file: ";
-  cin >> max;
-  cout << "max pulses = "<< max << endl;
-
-  // time of peak
-  double tMax = 4;
+  //cout << "Enter number of pulses to read per file: ";
+  //cin >> max;
+  //cout << "max pulses = "<< max << endl;
 
   // Create instance of object ComputeWeights
 
   // (int verbosity, bool doFitBaseline, bool doFitTime, int nPulseSamples, int nPrePulseSamples)
   // ComputeWeights A(verbosity, true, false, nSamples,3);
-  ComputeWeights A(verbosity, false, false, nSamples,3);
+
+  // Want to try 1 prepulse and 4 nSamples 
+
+  double tMax = 5; // time of peak
+  bool fitbaseline = false, fittime = false;
+  int nSamples = 6;
+  int prepulsesamples = 0;
+
+  ComputeWeights A(verbosity, fitbaseline, fittime, nSamples,prepulsesamples);
 
   cout << "Reading from the file" << endl; 
 
@@ -116,12 +125,11 @@ int main() {
     std::stringstream s(line);
     double d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14;
 
-
-    // Too add custom pedestal for closure tests
+    // To add custom pedestal for closure tests
 
     double a = 0, b = 0, c = 0;
 
-// /*
+ /*
 
   cout << "First pedestal value: ";
   cin >> a;
@@ -135,7 +143,7 @@ int main() {
   cin >> c;
   cout << "Third pedestal = "<< c << endl;
 
-// */
+ */
 
 
     // There are 14 numbers on each line, should check this with all data files 
@@ -170,17 +178,20 @@ int main() {
         cout << "nPulseSamples_ = " << A.GetnPulseSamples() << endl;
         cout << "nPrePulseSamples_ = " << A.GetnPrePulseSamples() << endl;
 
-        cout << "A.getAmpWeight(5) returns: " << A.getAmpWeight(5) << endl;
-        cout << "A.getChi2Matrix(5,5) returns: " << A.getChi2Matrix(5,5) << endl;
+        //cout << "A.getAmpWeight(5) returns: " << A.getAmpWeight(5) << endl;
+        //cout << "A.getChi2Matrix(5,5) returns: " << A.getChi2Matrix(5,5) << endl;
       }
 
       // Calculating ampltiude
 
-      double amplitude = 0;
-      for ( int i = 0; i < 10; i++) {
-	cout << "A.getAmpWeight(" << i << ") = " << A.getAmpWeight(i) << endl; 
+      int firstsample = tMax - 1;
+
+      double amplitude = 0.0;
+      for ( int i = firstsample; i < firstsample + nSamples; i++) {
+	//cout << "A.getPedWeight(" << i << ") = " << A.getPedWeight(i) << endl;
+	cout << "A.getAmpWeight(" << i - firstsample << ") = " << A.getAmpWeight(i - firstsample) << endl; 
 	cout << "pulseShape[" << i << "] = " << pulseShape[i] << endl; 
-	amplitude += A.getAmpWeight(i)*pulseShape[i];
+	amplitude += A.getAmpWeight(i - firstsample)*pulseShape[i];
 	}
       cout << "Ampltiude = " << amplitude << endl; 
 
@@ -192,19 +203,19 @@ int main() {
 
       amplitude = 0;
 
-      for ( int i = 0; i < 10; i++) {
+      for ( int i = firstsample; i < firstsample + nSamples; i++) {
 	cout << "pulseShape[" << i << "] = " << pulseShape[i] << endl; 
 	pulseShape[i] *= factor;
 	cout << "pulseShape[" << i << "] = " << pulseShape[i] << endl; 
 	}
 
-      for ( int i = 0; i < 10; i++) {
-	cout << "A.getAmpWeight(" << i << ") = " << A.getAmpWeight(i) << endl; 
+      for ( int i = firstsample; i < firstsample + nSamples; i++) {
+	cout << "A.getAmpWeight(" << i - firstsample << ") = " << A.getAmpWeight(i - firstsample) << endl; 
 	cout << "pulseShape[" << i << "] = " << pulseShape[i] << endl; 
-	amplitude += A.getAmpWeight(i)*pulseShape[i];
+	amplitude += A.getAmpWeight(i - firstsample)*pulseShape[i];
 	}
 
-      cout << "Ampltiude after scaling by " << factor << " = " << amplitude << endl; 
+      cout << "Ampltiude after scaling by " << factor << " = " << amplitude << endl;
 
       // Saving data 
 
