@@ -5,7 +5,7 @@
 
 #include "ComputeWeights.cpp" // Used to create instance of computeweights class 
 
-double recon_amp(double A, double t_0, double ts, double alpha, double beta, double weights[], bool ideal_weights)
+double recon_amp(double A, double t_0, double ts, double alpha, double beta, double weights[], bool ideal_weights, ofstream& weights_file)
 {
 
 	TString *name = new TString("function_alphabeta");
@@ -51,8 +51,13 @@ double recon_amp(double A, double t_0, double ts, double alpha, double beta, dou
 	if (ideal_weights){ // using ideal weights for each XTAL
 
 	int verbosity = 0; // 1 for lots of comments 
-	int nSamples = 10;
-	double tMax = 4; // time of peak in samples (is this correct? Does it matter? The function later might adjust this value)
+	//int nSamples = 10;
+	//double tMax = 4; // time of peak in samples (is this correct? Does it matter? The function later might adjust this value)
+
+ 	double tMax = 3; // time of peak, I think relative to first sample
+  	bool fitbaseline = false, fittime = false;
+  	static int nSamples = 5;
+  	int prepulsesamples = 0;
 
 	// dummy pulse shape derivative
 	// calculate derivative with some method here precisely. 
@@ -72,17 +77,18 @@ double recon_amp(double A, double t_0, double ts, double alpha, double beta, dou
 	// Create instance of object ComputeWeights
 
 	// (int verbosity, bool doFitBaseline, bool doFitTime, int nPulseSamples, int nPrePulseSamples)
-	ComputeWeights A_(verbosity, false, false, nSamples, 3);
+	ComputeWeights A_(verbosity, fitbaseline, fittime, nSamples, prepulsesamples);
 
 	// Compute ideal weights for this pulseShape
 	vector<double> pulseShape;
 	// pulse is moved to right by time_shift, so move sampling to right by time_shift.
 	int count_ = 0;
 
+	// Want samples from non-timeshifted wave to see how time shift affects recon amp 
 	// time_shift moves pulse to right by N, so move sampling beginning to right by N 
 	for(double i = xmin + ts; i < xmax + ts; i += dt){
 
-	  if ( i <= (t_0 + ts - alpha*beta) ) pulseShape.push_back(0);
+	  if ( i <= (t_0 + ts - alpha*beta) ) pulseShape.push_back(0); // if waveform undefined, set value to zero. 
 	  else pulseShape.push_back( ( function_alphabeta->Eval(i) ) / A); // divide by A to get weights for S*W = A 
 
 	  count_ += 1;
@@ -101,9 +107,28 @@ double recon_amp(double A, double t_0, double ts, double alpha, double beta, dou
           cout << "A_.getChi2Matrix(5,5) returns: " << A_.getChi2Matrix(5,5) << endl;
           }
 
+        int firstsample = tMax - 1;
+        double test_amplitude = 0.0;
+        for ( int i = firstsample; i < firstsample + nSamples; i++) {
+	  //cout << "A.getPedWeight(" << i << ") = " << A.getPedWeight(i) << endl;
+	  //cout << "A_.getAmpWeight(" << i - firstsample << ") = " << A_.getAmpWeight(i - firstsample) << endl; 
+	  //cout << "pulseShape[" << i << "] = " << pulseShape[i] << endl; 
+	  //test_amplitude += A*A_.getAmpWeight(i - firstsample)*pulseShape[i]; // mult by A to get A 
+	  //cout << "samples[" << i << "] = " << samples[i];
+	  stringstream cw;
+	  cw << A_.getAmpWeight(i-firstsample);
+	  weights_file << cw.str() << "\t";
+	  test_amplitude += A_.getAmpWeight(i - firstsample)*samples[i]; 
+	  }
+        //cout << "test_amplitude = " << test_amplitude << endl; 
+	//cout << "A = " << A << endl;
+	return test_amplitude;
+
+
+
 	// Calulate Amp with ideal weights
 
-	double ideal_recon_amp = 0.0; // Should always get A 
+	/*double ideal_recon_amp = 0.0; // Should always get A 
 
 	for (int k = 0; k < 10; k++ ){
 
@@ -112,9 +137,11 @@ double recon_amp(double A, double t_0, double ts, double alpha, double beta, dou
 	  }
 
 	//cout << "A = " << A << "\n";	
-	//cout << "ideal_recon_amp = " << ideal_recon_amp << "\n";
+	cout << "ideal_recon_amp = " << ideal_recon_amp << "\n";
 	//cout << "recon_amp = " << recon_amp << "\n";
 	return recon_amp;
+
+	*/
 
 	} // end ideal_weights if statement
 

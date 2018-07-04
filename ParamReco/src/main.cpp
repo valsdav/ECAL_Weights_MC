@@ -27,9 +27,8 @@ using namespace std;
 #include <chrono>
 #include <cmath>
 
-// files you're going to need to run main function
+// files needed to run main function
 #include "fill_histograms.cpp" 
-//#include "plot.cpp"
 
 int main()
 {
@@ -38,7 +37,7 @@ int main()
 	// Set Study Parameters
 	double ts = 0; // Move waveform +/- ns to right/left
  	int max_rows = -1; // < 0 to read all rows of XTAL_Params.txt
-
+	
 	// Define single set weights for EB, EE
 	//double w[10] = {-0.3812788, -0.3812788, -0.3812788, 0, 0.235699, 0.4228363, 0.3298652, 0.1575187, -0.002082776, 0};
 	double EB_w[10] = {0, 0, -0.56, -0.55, 0.25, 0.48, 0.38, 0, 0, 0}; // Barrel
@@ -71,7 +70,7 @@ int main()
 	double total = 0.0;
 
 	//for (ts = -1; ts <= 1; ts += 0.5){
-	for (ts = -0.5; ts <= 0.5; ts += 0.5){
+	for (ts = 0; ts <= 0; ts += 0.5){
 		total = fill_histograms(max_rows, ts, EB_w, EE_w, Fill_EB, Fill_EE, normalized_A, normalized_t0, ideal_weights);
 		Ets->Fill(ts,total);
 	  }

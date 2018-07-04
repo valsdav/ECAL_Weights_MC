@@ -7,6 +7,11 @@
 double fill_histograms(int max_rows, double ts, double EB_w[], double EE_w[], bool Fill_EB, bool Fill_EE, bool normalized_A, bool normalized_t0, bool ideal_weights)
 {
 	
+	// Output text file for weights 
+	ofstream weights_file;
+	weights_file.open("weights.txt");
+	weights_file << "cmsswid\tw0\tw1\tw2\tw3\tw4\tw5\n";
+
 	cout << "Time Shift = " << ts << "ns\n";
 	bool test_skip = false; // If want to skip lines to test things 
 	
@@ -247,11 +252,21 @@ double fill_histograms(int max_rows, double ts, double EB_w[], double EE_w[], bo
 	  // Reconstruct Amplitude 
 	  //recon_amp(A, t_0, ts, alpha, beta, weights);
 
+	  stringstream ID_string;
+	  ID_string.precision(17);
+	  ID_string << d1;
+	  weights_file << ID_string.str() << "\t";  
+
 	  //cout << "Recon_amp = " << recon_amp(A, t_0, ts, alpha, beta, weights,ideal_weights) << "\n";
 	  double ratio = 0.0;
 
-	  if (!ideal_weights){ratio = recon_amp(A, t_0, ts, alpha, beta, weights, ideal_weights);} // Normalized A
-	  if (ideal_weights){ratio = (recon_amp(A, t_0, ts, alpha, beta, weights, ideal_weights) / A ) ;} // Non-normalized A
+	  if (!ideal_weights){ratio = recon_amp(A, t_0, ts, alpha, beta, weights, ideal_weights, weights_file);} // Normalized A
+	  if (ideal_weights){ratio = (recon_amp(A, t_0, ts, alpha, beta, weights, ideal_weights, weights_file) / A ) ;} // Non-normalized A
+
+	  weights_file << "\n";
+
+	  // Write XTAL ID and weights 
+	  //stringstream.precision(17);
 
 	  double amp_error = (ratio - 1);
 	  //cout << "amp_error = " << amp_error << "\n";
@@ -292,6 +307,8 @@ double fill_histograms(int max_rows, double ts, double EB_w[], double EE_w[], bo
 
 	  //inparamFile.close();
 	  inFile.close();
+
+	  weights_file.close();
 
 	// take total error for ts and fill 1D histogram with total of abs error for each ts 
 
