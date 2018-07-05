@@ -126,7 +126,7 @@ double fill_histograms(int max_rows, double ts, double EB_w[], double EE_w[], bo
 	   if(s >> d1 >> d2 >> d3 >> d4 >> d5){ // if s extracts variables of this type and order
 	   
 
-		if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) ) { continue; } // These cmsswid's yield nan weights. Currently removing them from list, but should investigate why nan weights are obtained from waveform. This could be insightful.   
+		if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486)) { continue; } // These cmsswid's yield nan weights. Currently removing them from list, but should investigate why nan weights are obtained from waveform. This could be insightful.   
 		
 double weights[10] = {0.}; // reset weights 
 		string Parameters;

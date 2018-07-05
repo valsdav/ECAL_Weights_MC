@@ -72,14 +72,14 @@ double total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool p
 	string line, weights_line; 	  
 
 	if ((plot_EB == false) && (plot_EE == true)){ // if EE only
-
+	  cout << "Skipping to EE\n";
 	  int EE_Skip = 60494;
 	  // skip to first row of EE params, aka skip 60494 rows.
 	  // Might need to also do this with weights file 
 	 
 	    while(EE_Skip !=0){ // Skip 1000 characters or until new line 
 	      inFile.ignore(1000,'\n'); // count is number of rows read before this one
-	      //inweightsFile.ignore(1000,'\n');
+	      inweightsFile.ignore(1000,'\n');
 	      EE_Skip -= 1;
 	    }
 
@@ -100,6 +100,11 @@ double total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool p
 
 	// Variables that reset before going through XTAL_Params.txt
 	int EB_count = 0, EE_count = 0, extra_lines = 0, row = 0;
+	
+	//cout << "Right before checking XTAL_Params and Weights lines.\n";
+	//cout << "bool(getline(inFile, line)) = " << bool(getline(inFile, line)) << endl;
+	//cout << "bool(getline(inweightsFile, weights_line)) = " << bool(getline(inweightsFile, weights_line)) << endl;
+
 
 	//while((getline(inFile, line))) { // XTAL_Params.txt loop
 	while((getline(inFile, line)) && (getline(inweightsFile, weights_line))) { // get line of XTAL_Params.txt and weights, loop
@@ -123,7 +128,7 @@ double total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool p
 
 	   if(s >> d1 >> d2 >> d3 >> d4 >> d5){ // Do if on XTAL_params line with desired 's' stream extraction parameters	   
 
-		if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) ) continue; // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful.   
+		if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ) continue; // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful.   
 		
 		double weights[10] = {0.}; // reset weights for current line  
 		string Parameters;
@@ -184,6 +189,9 @@ double total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool p
 		bool leave = false;
 		//extra_lines = 0;
 
+		//cout << "Right before reading EB/EE_DOF line\n";
+		//cout << "bool(getline(inparamFile, param_line)) = " << bool(getline(inparamFile, param_line)) << endl;
+
 		// Match ID's between Params and Info files, then
 		// get EB, EE DOF for given ID.
 		while( (getline(inparamFile, param_line)) && (leave == false)) { // read EB/EE_DOF line
@@ -201,15 +209,16 @@ double total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool p
 
 			//if (row == 4625){
 
-			  //cout << "inside read EB/EE info line\n";
+                        stringstream ss(param_line);
+                        stringstream ww(weights_line);
+
+			  //cout << "row = " << row << endl;
 			  //cout << "(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) = " << bool(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) << endl;
 			  //cout << "(ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5) = " << bool(ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5) << endl;	
 			  //debug_val += 1;
 			//}
 
 
-			stringstream ss(param_line);
-			stringstream ww(weights_line);
 
 			if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
 

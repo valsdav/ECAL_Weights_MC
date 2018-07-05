@@ -40,13 +40,13 @@ int main()
 	// Let's try to make any one plot at a time
 	// What to Plot
 
-	bool plot_te = true; // Plot total error vs. time shift
-	bool plot_e = false; // Plot error as a function of Degrees of Freedom
+	bool plot_te = false; // Plot total error vs. time shift
+	bool plot_e = true; // Plot error as a function of Degrees of Freedom
 	bool plot_EB = true; // Make desired plots for Barrel
 	bool plot_EE = false; // Make desired plots for Endcap
 
 	// How to Plot it 
-	bool ideal_weights = true; // Either Compute ideal weights during runtime or read from text file 
+	bool ideal_weights = true; // True: Compute ideal weights during runtime or read from text file. False: Use single sets defined below 
 	bool normalized_A = false;
   	bool normalized_t0 = false; 
 
@@ -55,7 +55,7 @@ int main()
 
 	// Study Parameters
 	double ts_min = -1.0, ts_max = 1.0, dts = 0.5; // Only used if plot_te == true
-	double ts = 0; // Only used if plot_e = true
+	double ts = -1.0; // Only used if plot_e = true
 	// Move waveform +/- ns to right/left <-- double check that 
  	int max_rows = -1; // < 0 to read all rows of XTAL_Params.txt
 
@@ -68,17 +68,28 @@ int main()
 
 	// Titles
 	ostringstream ts_range_title, single_ts_title;
-  	ts_range_title << "Total Error vs. Time Shift";
-	single_ts_title << "Percent Error";
+        
+	if (plot_EB){
+          ts_range_title << "EB, ";
+          single_ts_title << "EB, ";
+          }
+
+        if (plot_EE){
+          ts_range_title << "EE, ";
+          single_ts_title << "EE, ";
+          }
+
+  	ts_range_title << "Total Error vs. Time Shift, ";
+	single_ts_title << "Recon Amp Percent Error, ";
 
 	if (ideal_weights) {
-		ts_range_title << ", Ideal Weights, ";
-		single_ts_title << ", Ideal Weights, ";
+		ts_range_title << "Ideal Weights, ";
+		single_ts_title << "Ideal Weights, ";
 		}
 
 	if (!ideal_weights) {
-		ts_range_title << ", Single Set of Weights, ";
-		single_ts_title << ", Single Set of Weights, ";
+		ts_range_title << "Single Set of Weights, ";
+		single_ts_title << "Single Set of Weights, ";
 		}
 
 	if (max_rows == -1) {
@@ -91,10 +102,10 @@ int main()
 		single_ts_title << max_rows << " XTALS per ts";	
 		}	
 
-  	TString ts_range_title_ = ts_range_title.str(); 
-  	TString single_ts_title_ = single_ts_title.str(); 
-	TH1F *tsr = new TH1F("tsr",ts_range_title_,((ts_max - ts_min) / (dts)) + 1,ts_min,ts_max + dts); // ts range
-	//TH1F *sts = new TH2F("sts",single_ts_title_,(ts_max - ts_min) / (dts),ts_min,ts_max + dts, , ,); // single ts
+  	TString ts_range_title_string= ts_range_title.str(); 
+  	TString single_ts_title_string = single_ts_title.str(); 
+	TH1F *tsr = new TH1F("tsr",ts_range_title_string,((ts_max - ts_min) / (dts)) + 1,ts_min,ts_max + dts); // ts range
+	TH2F *sts = new TH2F("sts",single_ts_title_string,,,,,,); // single ts
 
 	// Function variables
 	double total = 0.0;
@@ -114,15 +125,19 @@ int main()
 
 	if (plot_e){
 
-	// DOF_plot() .. ?
+	  if (plot_EB){
+	    sts->Fill(ieta, iphi, error);
+	  }
+	
+	  if (plot_EE){
+	    sts->Fill(ix, iy, error);     //DOF_plot() .. ?
+	  }
 
 	}
 
 	time_t current_time = time(0);
 
 	//gStyle->SetOptStat(0); // no stats box
-
-	//TLatex Tl;
 
 	TCanvas *c1 = new TCanvas("c1","c1",800,600);
 	c1->cd();
