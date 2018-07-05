@@ -1,3 +1,6 @@
+#ifndef RECON_AMP
+#define RECON_AMP
+
 // Abe Tishelman-Charny
 // 24 May, 2018
 // 
@@ -54,3 +57,5 @@ double recon_amp_noclhep(double A, double t_0, double ts, double alpha, double b
 
 	return recon_amp;
 }
+
+#endif
