@@ -1,24 +1,23 @@
 // Abe Tishleman-Charny
 // 24 May 2018
-// The purpose of this function is to plot EB and EE metrics as functions of DOF
+// The purpose of this function is to return the sum of the absolute values of the errors for each XTAL, where error is defined as (recon_amp / amp ) - 1
 
 #include "recon_amp_noclhep.cpp"
 
-double fill_histograms(int max_rows, double ts, double EB_w[], double EE_w[], bool plot_EB, bool plot_EE, bool normalized_A, bool normalized_t0, bool ideal_weights) 
+double total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool plot_EB, bool plot_EE, bool normalized_A, bool normalized_t0, bool ideal_weights) 
 {
-	
+	//bool test_skip = false; // If want to skip lines to test things 
+	//int debug_val = 0;
+	cout << "Computing Total Error for\n";
 	cout << "Time Shift = " << ts << "ns\n";
-	bool test_skip = false; // If want to skip lines to test things 
-
-	int debug_val = 0;
 	
-	double total_error = 0.0; // reset total error for given ts
+	double total_error = 0.0;
 
 	// Parameters
 	bool side_filled = false; // First EE side unfilled at start.
 	
 	// Initialize Histograms
- 	ostringstream sss1, sss2, sss3;
+ 	/*ostringstream sss1, sss2, sss3;
 	ostringstream sss4, sss5, sss6;
 
 	sss4 << "EB Error, ts = " << ts << " ns";
@@ -27,7 +26,9 @@ double fill_histograms(int max_rows, double ts, double EB_w[], double EE_w[], bo
 
 	TString EBerror = sss4.str();
 	TString EEerror1 = sss5.str();
-	TString EEerror2 = sss6.str();
+	TString EEerror2 = sss6.str();*/
+
+	/*
 
 	// EB
   	sss1 << "EB, " << "ts = " << ts << " ns";
@@ -46,43 +47,45 @@ double fill_histograms(int max_rows, double ts, double EB_w[], double EE_w[], bo
 	//TH2F *EE1E = new TH2F("EE - Error",EEerror1,170,-85,85,360,0,360); // error
 	//TH2F *EE2E = new TH2F("EE + Error",EEerror2,170,-85,85,360,0,360); // error 
 
-  	// Open File
-  	TString File("data/XTAL_Params.txt"); // Contains (rawid, A, t0, alpha, beta) values
+
+	*/
+
+  	// Open Files
+  	//TString File("data/XTAL_Params.txt"); // (rawid, A, t0, alpha, beta) values
   	ifstream inFile; // Input File stream class object  
-  	inFile.open(File); // apply XTAL_Params to in file stream
+  	inFile.open("data/XTAL_Params.txt"); // apply XTAL_Params to in file stream
 
         ifstream inweightsFile;
-        inweightsFile.open("weights.txt");
+        inweightsFile.open("data/weights.txt"); // precomputed weights 
 
-	string weights_line;
 
   	if (!inFile) {
   	  cout << "Unable to open Param file\n";
   	  exit(1); // terminate with error
  	 }
 
-	string line; 
-	double samples[10] = {0.};
-	//double samples[10];
+  	if (!inweightsFile) {
+  	  cout << "Unable to open weights file\n";
+  	  exit(1); // terminate with error
+ 	 }
 
-	int row = 0;	  
-	//double min = 100., max = 0.0;
+	string line, weights_line; 	  
 
 	if ((plot_EB == false) && (plot_EE == true)){ // if EE only
 
 	  int EE_Skip = 60494;
-	  // skip to first row of EE params, aka skip 60494 rows 
+	  // skip to first row of EE params, aka skip 60494 rows.
+	  // Might need to also do this with weights file 
 	 
 	    while(EE_Skip !=0){ // Skip 1000 characters or until new line 
 	      inFile.ignore(1000,'\n'); // count is number of rows read before this one
+	      //inweightsFile.ignore(1000,'\n');
 	      EE_Skip -= 1;
 	    }
 
 	  }
 
-	//cout << "Before skip\n";
-
-	if (test_skip == true){ // skip lines to test algo
+	/*if (test_skip == true){ // skip lines to test algo
 
 	  int testing = 60490; // 494 left in EB 
 	 
@@ -91,21 +94,19 @@ double fill_histograms(int max_rows, double ts, double EB_w[], double EE_w[], bo
 	      testing -= 1;
 	    }
 
-	  }
+	  }*/
 
-	//cout << "After skip\n";
+	// Read line of (rawid, A, t0, alpha, beta) values
 
-	// Read line
-
-	// Number rows of each type read so far
-	int EB_count = 0, EE_count = 0, extra_lines = 0;
+	// Variables that reset before going through XTAL_Params.txt
+	int EB_count = 0, EE_count = 0, extra_lines = 0, row = 0;
 
 	//while((getline(inFile, line))) { // XTAL_Params.txt loop
-	while((getline(inFile, line)) && (getline(inweightsFile, weights_line))) { // XTAL_Params.txt and weights loop
+	while((getline(inFile, line)) && (getline(inweightsFile, weights_line))) { // get line of XTAL_Params.txt and weights, loop
 
-
-	   int ieta = 0, iphi = 0; // EB DOF
-	   int ix = 0, iy = 0; // EE DOF
+	   // Variables that reset each line 
+	   //int ieta = 0, iphi = 0; // EB DOF
+	   //int ix = 0, iy = 0; // EE DOF
 
 	   // Check row
 	   if (row == max_rows){
@@ -114,59 +115,51 @@ double fill_histograms(int max_rows, double ts, double EB_w[], double EE_w[], bo
 		}
 
 	   if ((row%5000) == 0){
-
 	      cout << "Reading line " << row << endl;
 	      }
 
 	   stringstream s(line); // stringstream 's' operates on string 'line'
-	   double d1, d2, d3, d4, d5;
+	   double d1, d2, d3, d4, d5; // d1 = ID, d2 = A, d3 = t_0, d4 = alpha, d5 = beta   
 
-	   // d1 = ID, d2 = A, d3 = t_0, d4 = alpha, d5 = beta   
+	   if(s >> d1 >> d2 >> d3 >> d4 >> d5){ // Do if on XTAL_params line with desired 's' stream extraction parameters	   
 
-	   if(s >> d1 >> d2 >> d3 >> d4 >> d5){ // if s extracts variables of this type and order
-	   
-
-		if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) ) { continue; } // These cmsswid's yield nan weights. Currently removing them from list, but should investigate why nan weights are obtained from waveform. This could be insightful.   
+		if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) ) continue; // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful.   
 		
-double weights[10] = {0.}; // reset weights 
+		double weights[10] = {0.}; // reset weights for current line  
 		string Parameters;
 		int skip_count = 0;
 
 		// EB Line
 		if ((d1 >= 838861313) && (d1 <= 838970216) && (plot_EB)){
 			EB_count += 1;
-			//TString Parameters("data/EB_Info.txt");
-			Parameters = "data/EB_Info.txt";
+			Parameters = "data/EB_DOF.txt";
 			int skip_count = EB_count;
 			//cout << "skip_count = " << skip_count << "\n";
-			//for (int i = 0; i < 10; i++)
-			//{
-			//	weights[i] = EB_w[i];
-			//}
-
-		}
+			if (!ideal_weights){ 
+				for (int i = 0; i < 10; i++) weights[i] = EB_w[i];
+				}
+			}
 
 		// EE Line
 		if ((d1 >= 872415401) && (plot_EE)){
 			//cout << "On EE\n";
 			//if (EB_Only) break;
 			EE_count += 1;
-			//TString Parameters("data/EE_Info.txt");
-			Parameters = "data/EE_Info.txt";
+			Parameters = "data/EE_DOF.txt";
 			int skip_count = EE_count;
-			//for (int i = 0; i < 10; i++)
-			//{
-			//	weights[i] = EE_w[i];
-			//}
-
-		}  
+			if (!ideal_weights){
+				for (int i = 0; i < 10; i++) weights[i] = EE_w[i];
+				}
+			}
+		//}  
 	
 		//cout << "Parameters = " << Parameters << "\n";
 		//cout << "plot_EE = " << plot_EE << "\n";
 		ifstream inparamFile; // Input File stream class object  
-		inparamFile.open(Parameters); // reopen each time to start over and skipped desired number of lines 
+		inparamFile.open(Parameters); // open from beginning each time and skip desired number of lines 
+		// There may be a way to just open once and not need to skip lines every time. This may be much more efficient.
 		
-		if ((!inparamFile) && (!Fill_EE)) break; // if up to EE lines but don't want EE, leave loop.
+		if ((!inparamFile) && (!plot_EE)) break; // if up to EE lines but don't want EE, leave loop.
 
 		if (!inparamFile) {
 		  cout << "Unable to open Info file\n";
@@ -180,12 +173,7 @@ double weights[10] = {0.}; // reset weights
 		// skip_count should be EB_count or EE_count.
 		//int skip_count = ; // skip count * number of characters in a line
 
-		skip_count += extra_lines;
-		
-		//if (row%10 == 0){ 
-		//  cout << "Row " << row << endl;
-		//  cout << "extra_lines = " << extra_lines << endl;
-		//}
+		skip_count += extra_lines; // extra_lines updated every line 
 
 		while(skip_count !=0){
 		  inparamFile.ignore(1000,'\n'); // count is number of rows read before this one
@@ -198,22 +186,19 @@ double weights[10] = {0.}; // reset weights
 
 		// Match ID's between Params and Info files, then
 		// get EB, EE DOF for given ID.
-		while( (getline(inparamFile, param_line)) && (leave == false)) { // read EB/EE_Info line
+		while( (getline(inparamFile, param_line)) && (leave == false)) { // read EB/EE_DOF line
 	
-		//while( (getline(inparamFile, param_line)) && (getline(inweightsFile, weights_line)) &&  (leave == false)) { // read EB/EE_Info line
+		//while( (getline(inparamFile, param_line)) && (getline(inweightsFile, weights_line)) &&  (leave == false)) { // read EB/EE_DOF line
 			//cout << "Extra_lines = " << extra_lines << "\n";
 
-
-			//if ( (d1 == 838868019) || (d1 == 838868019) || (d1 == 838868019) || (d1 == 838868019) || (d1 == 838868019) || (d1 == 838868019) || (d1 == 838868019) ) { break; } // These cmsswid's yield nan weights. Currently removing them from list  
-
-			//double param_value;
 	      		double d1_, d2_, d3_, d4_, d5_, d6_;
 			double w0, w1, w2, w3, w4, w5, w6;
 
-			stringstream ss(param_line);
-			stringstream ww(weights_line);
 			// EB: d1_ = ID, d4_ = iphi, d5_ = ieta
 			// EE: d1_ = ID, d5_ = ix, d6_ = iy
+
+			// w0 = CMSSWID, w1 = first weight, w2 = ... (not necessarily starting at 0ns)
+
 			//if (row == 4625){
 
 			  //cout << "inside read EB/EE info line\n";
@@ -222,7 +207,11 @@ double weights[10] = {0.}; // reset weights
 			  //debug_val += 1;
 			//}
 
-			if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5)){ // if line has numbers, see if ID's match. 
+
+			stringstream ss(param_line);
+			stringstream ww(weights_line);
+
+			if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
 
 
 			//if(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_){ // if line has numbers, see if ID's match. 
@@ -232,7 +221,7 @@ double weights[10] = {0.}; // reset weights
 				//cout << "w1 = " << w1 << endl;
 
 				//cout << "Right after checking stringstream extraction\n";
-				cout.precision(17);
+				//cout.precision(17);
 				//cout << "d1 = " << d1 << endl;
 				//cout << "d1_ = " << d1_ << endl;
 				//cout << "w0 = " << w0 << endl;
@@ -248,7 +237,6 @@ double weights[10] = {0.}; // reset weights
 				//if (d1 == d1_){ // can pair DOF with XTAL, and extract correct weights 
 				if ((d1 == d1_) && (d1 == w0)){ // can pair DOF with XTAL, and extract correct weights 
 
-
 				  //cout << "All IDs match\n";
 				  //cout << "In matching ID loop\n";				  
 
@@ -256,21 +244,21 @@ double weights[10] = {0.}; // reset weights
 					// if here, extract weights	
 				    //cout << "ID matches weights' ID\n";
 					
-				    weights[0] = 0.0;
-				    weights[1] = 0.0;
-				    weights[2] = w1;				
-				    weights[3] = w2;				
-				    weights[4] = w3;				
-				    weights[5] = w4;				
-				    weights[6] = w5;				
-				    weights[7] = 0.0;
-				    weights[8] = 0.0;
-				    weights[9] = 0.0;
+				    if (ideal_weights){
+					    weights[0] = 0.0;
+					    weights[1] = 0.0;
+					    weights[2] = w1;				
+					    weights[3] = w2;				
+					    weights[4] = w3;				
+					    weights[5] = w4;				
+					    weights[6] = w5;				
+					    weights[7] = 0.0;
+					    weights[8] = 0.0;
+					    weights[9] = 0.0;
+				    }
 
-				  //}
 
-
-				  // EB Line
+				  /*// EB Line
 				  if ((d1 >= 838861313) && (d1 <= 838970216))
 				  {
 				    	
@@ -287,78 +275,69 @@ double weights[10] = {0.}; // reset weights
 				    ix = d5_;
 				    iy = d6_;
 				
-				  }
+				  }*/
 
 				  leave = true;
 
 				}
 			
 				else {
-				  if(row == 4625) cout << "IDs don't match\n";
+				  //if(row == 4625) cout << "IDs don't match\n";
 				  extra_lines += 1;
 				} // keep track of number of extra lines to skip next time 
 
-			}
+			} // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan)
 
-		} 
+		} // read EB/EE_DOF line
 
-	  Double_t A = d2, t_0 = d3, alpha = d4, beta = d5; 
+	  double A = d2, t_0 = d3, alpha = d4, beta = d5; // Double_t ?  
 
-	  if (normalized_A == true){
-
-	      A = 1.0; // Expected recon. amplitude
-	      }  
-
-	  if (normalized_t0 == true){
-
-	      t_0 = 125.0; // 125 ns
-	      }
-
+	  if (normalized_A == true) A = 1.0; // amp of 1
+	  if (normalized_t0 == true) t_0 = 125.0; // 125 ns
+	      
 	  // Reconstruct Amplitude 
 	  //recon_amp(A, t_0, ts, alpha, beta, weights);
 
 	  //cout << "Recon_amp = " << recon_amp(A, t_0, ts, alpha, beta, weights,ideal_weights) << "\n";
 	  double ratio = 0.0;
 
-	  // Want to already have weights read from text file here.
-	  // Then call recon_amp with read weights passed 
-
-	  //bool zero_weights = true; // assume true so one non zero value triggers false
-	  //for (int ii = 0; ii < 10; ii++) { 
+	  // Check for nan weights 
+	  bool zero_weights = true; // assume true so one non zero value triggers false
+	  for (int ii = 0; ii < 10; ii++) { 
 	    //cout << "weights[" << ii << "] = " << weights[ii] << endl;
-	    //if (weights[ii] != 0)zero_weights = false;
-	  //}
+	    if (weights[ii] != 0)zero_weights = false;
+	  }
 
-	  //if (zero_weights){
-
-	    //cout << "row " << row << endl;
+	  if (zero_weights){
+	    cout << "row " << row << endl;
 	    //cout << "debug_val = " << debug_val << endl;
-	    //cout << "set of weights is all zeros.\n";
-	    //cout << "exiting program.\n";
-	    //exit(1);
+	    cout << "check weights array.\n";
+	    cout << "exiting program.\n";
+	    exit(1);
+	  }
 
-	  //}
-
-	  if (!ideal_weights){ratio = recon_amp(A, t_0, ts, alpha, beta, weights, ideal_weights);} // Normalized A
-	  if (ideal_weights){ratio = (recon_amp(A, t_0, ts, alpha, beta, weights, ideal_weights) / A ) ;} // Non-normalized A
+	  if (ideal_weights){ratio = (recon_amp_noclhep(A, t_0, ts, alpha, beta, weights) / A ) ;} // Non-normalized A
+	  if (!ideal_weights){ratio = recon_amp_noclhep(A, t_0, ts, alpha, beta, weights);} // Normalized A
 
 	  //cout << "ratio = " << ratio << endl;
 
 	  double amp_error = (ratio - 1);
 	  //cout << "amp_error = " << amp_error << "\n";
-	
 	  // add to total error 
 
 	  total_error += abs(amp_error);
 
+	  // See if things are going well 
     	  if ((row%10000) == 0){
 	      cout << "row " << row << endl;
 	      for (int ii = 0; ii < 10; ii++) { cout << "weights[" << ii << "] = " << weights[ii] << endl;}
 	      cout << "ratio = " << ratio << endl;
+	      cout << "amp_error = " << amp_error << endl;
+	      cout << "abs(amp_error) = " << abs(amp_error) << endl;
 	      cout << "total_error =  " << total_error << endl;
               }
  
-
+/*
 	  // Fill Histograms	  
 
 	  // EB 
@@ -382,12 +361,12 @@ double weights[10] = {0.}; // reset weights
 			
 		
  	        }
-
-	   } // Do if on line with desired 's' stream extraction parameters
+*/
+	   } // Do if on XTAL_params line with desired 's' stream extraction parameters
 
 	  row += 1;
 
-	  } // Loop while still lines left and desired maximum hasn't been reached
+	  } // Loop while still lines left in XTAL_params and weights, and desired maximum hasn't been reached
 
 	  //inparamFile.close();
 	  inFile.close();
