@@ -4,8 +4,10 @@
 
 #include "recon_amp_noclhep.cpp"
 
-tuple<int, int, int, int, int, int, double, int, bool> DOF_error(bool plot_EE_minus, bool plot_EE_plus, int sts_row, int EB_count, int EE_count, int extra_lines, int skip_count,int max_rows, double ts, double EB_w[], double EE_w[], bool plot_EB, bool plot_EE, bool normalized_A, bool normalized_t0, bool ideal_weights) // tuple<returned variables' types> name(input variables)
+tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot_EE_minus, bool plot_EE_plus, int sts_row, int EB_count, int EE_count, int extra_lines, int skip_count,int max_rows, double ts, double EB_w[], double EE_w[], bool plot_EB, bool plot_EE, bool normalized_A, bool normalized_t0, bool ideal_weights) // tuple<returned variables' types> name(input variables)
 {
+
+	bool skip_this_line = false;
 
 	// Want to scan one row at at time. 
 
@@ -49,7 +51,7 @@ tuple<int, int, int, int, int, int, double, int, bool> DOF_error(bool plot_EE_mi
 		}
 
 	if ((plot_EB == false) && (plot_EE == true)){ // if EE only
-	  cout << "Skipping to EE\n";
+	  //cout << "Skipping to EE\n";
 	  int EE_Skip = 60494;
 	  // skip to first row of EE params and weights, aka skip 60494 rows.
 	 
@@ -58,6 +60,13 @@ tuple<int, int, int, int, int, int, double, int, bool> DOF_error(bool plot_EE_mi
 	      inweightsFile.ignore(1000,'\n');
 	      EE_Skip -= 1;
 	    }
+
+	    // If only want EE+, skip EE- lines
+	    if (plot_EE_plus){
+
+	      
+
+	      }
 
 	  }
 
@@ -83,7 +92,7 @@ tuple<int, int, int, int, int, int, double, int, bool> DOF_error(bool plot_EE_mi
 
 		cout << "No lines to read in XTAL_Params.txt or weights.txt.\n";
 		full = true;
-		return make_tuple(EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
+		return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
 
 	    }
 
@@ -98,7 +107,7 @@ tuple<int, int, int, int, int, int, double, int, bool> DOF_error(bool plot_EE_mi
 	   if (row == max_rows){
 		cout << "Maximum desired lines reached." << endl;
 		full = true;
-		return make_tuple(EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
+		return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
 		}
 
 	   //if ((row%5000) == 0){
@@ -112,9 +121,9 @@ tuple<int, int, int, int, int, int, double, int, bool> DOF_error(bool plot_EE_mi
 	   if(s >> d1 >> d2 >> d3 >> d4 >> d5){ // XTAL_params row has numbers    
 
 		if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ){
-			//full = true;
+			skip_this_line = true;
 			row += 1;
-			return make_tuple(EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
+			return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
 
 		  } // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful.   
 		
@@ -154,7 +163,7 @@ tuple<int, int, int, int, int, int, double, int, bool> DOF_error(bool plot_EE_mi
 		if ((!inparamFile) && (!plot_EE)){ 
 			
 			full = true;
-			return make_tuple(EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
+			return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
 
 		}// if up to EE lines but don't want EE, leave loop.
 
@@ -264,15 +273,27 @@ tuple<int, int, int, int, int, int, double, int, bool> DOF_error(bool plot_EE_mi
 				    // if side = 1 (read all -1 rows)
 				    if ( (!side_filled) && (d4_ == 1) ) side_filled = true;
 
-				    // If want EB+ and it's full, exit
+				    // If want EB- and it's full, exit
 				    if ((side_filled) && (plot_EE_minus)){ 
 					full = true;
-					return make_tuple(EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full);
+					return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full);
 
-				    } 
-				    DOF1 = d5_; // ix
-				    DOF2 = d6_; // iy
-				
+				    }
+				    // Two cases in which you want to save values
+ 				    if( ( (plot_EE_minus) && (!side_filled)) || ( (plot_EE_plus) && (side_filled) )){ 
+				      DOF1 = d5_; // ix
+				      DOF2 = d6_; // iy
+				      }
+
+				    // If want to plot EE+ but not there yet, skip line
+				    if ( (plot_EE_plus) && (!side_filled) ){
+
+					skip_this_line = true;
+					row += 1;
+					return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full);
+
+					}
+
 				  }
 
 				  leave = true;
@@ -369,6 +390,6 @@ tuple<int, int, int, int, int, int, double, int, bool> DOF_error(bool plot_EE_mi
 
 	if((row == max_rows)) full = true; //|| (finished reading XTAL_Params)) full = true;
 
-	return make_tuple(EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full);
+	return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full);
 
 }
