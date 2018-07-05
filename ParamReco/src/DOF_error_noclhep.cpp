@@ -4,7 +4,7 @@
 
 #include "recon_amp_noclhep.cpp"
 
-tuple<int, int, int, int, int, int, double, int, bool> DOF_error(int sts_row, int EB_count, int EE_count, int extra_lines, int skip_count,int max_rows, double ts, double EB_w[], double EE_w[], bool plot_EB, bool plot_EE, bool normalized_A, bool normalized_t0, bool ideal_weights) // tuple<returned variables' types> name(input variables)
+tuple<int, int, int, int, int, int, double, int, bool> DOF_error(bool plot_EE_minus, bool plot_EE_plus, int sts_row, int EB_count, int EE_count, int extra_lines, int skip_count,int max_rows, double ts, double EB_w[], double EE_w[], bool plot_EB, bool plot_EE, bool normalized_A, bool normalized_t0, bool ideal_weights) // tuple<returned variables' types> name(input variables)
 {
 
 	// Want to scan one row at at time. 
@@ -263,6 +263,13 @@ tuple<int, int, int, int, int, int, double, int, bool> DOF_error(int sts_row, in
 				  {
 				    // if side = 1 (read all -1 rows)
 				    if ( (!side_filled) && (d4_ == 1) ) side_filled = true;
+
+				    // If want EB+ and it's full, exit
+				    if ((side_filled) && (plot_EE_minus)){ 
+					full = true;
+					return make_tuple(EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full);
+
+				    } 
 				    DOF1 = d5_; // ix
 				    DOF2 = d6_; // iy
 				

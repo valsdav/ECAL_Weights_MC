@@ -43,10 +43,10 @@ int main()
 	// What to Plot
 	bool plot_te = false; // Plot total error vs. time shift
 	bool plot_e = true; // Plot error as a function of Degrees of Freedom
-	bool plot_EB = true; // Make desired plots for Barrel
-	bool plot_EE = false; // Make desired plots for Endcap
+	bool plot_EB = false; // Make desired plots for Barrel
+	bool plot_EE = true; // Make desired plots for Endcap
 
-	bool plot_EE_minus = false; // Set one of these to true only if plot_EE is set to true
+	bool plot_EE_minus = true; // Set one of these to true only if plot_EE is set to true
 	bool plot_EE_plus = false;
 
 	// How to Plot it 
@@ -58,7 +58,7 @@ int main()
 	if (!ideal_weights) normalized_A = true;
 
 	// Study Parameters
- 	int max_rows = -1; // < 0 to read all rows of XTAL_Params.txt
+ 	int max_rows = 100; // < 0 to read all rows of XTAL_Params.txt
 	double ts_min = -1.0, ts_max = 1.0, dts = 0.5; // Only used if plot_te == true
 	double ts = -1.0; // Only used if plot_e = true
 	// Move waveform +/- ns to right/left <-- double check that 
@@ -133,7 +133,9 @@ int main()
   	TString ts_range_title_string= ts_range_title.str(); 
   	TString single_ts_title_string = single_ts_title.str(); 
 	TH1F *tsr = new TH1F("tsr",ts_range_title_string,((ts_max - ts_min) / (dts)) + 1,ts_min,ts_max + dts); // ts range
-	TH2F *sts = new TH2F("sts",single_ts_title_string,(DOF1max - DOF1min),DOF1min,DOF1max,(DOF2max - DOF2min),DOF2min,DOF2max); // single ts
+	//TH2F *sts = new TH2F("sts",single_ts_title_string,(DOF1max - DOF1min),DOF1min,DOF1max,(DOF2max - DOF2min),DOF2min,DOF2max); // single ts
+
+	TH2F *sts = new TH2F("sts",single_ts_title_string); //,,,,,);
 
 	// Function variables
 	double total = 0.0;
@@ -161,7 +163,7 @@ int main()
 	    bool full = false; // Start not full
 
 	    while(!full){ // run while files left to read. Check DOF_error for bool
-	    	tie(EB_count, EE_count, extra_lines, skip_count, ieta, iphi, error, sts_row ,full) = DOF_error(sts_row, EB_count, EE_count, extra_lines, skip_count, max_rows, ts, EB_w, EE_w, plot_EB, plot_EE, normalized_A, normalized_t0, ideal_weights);
+	    	tie(EB_count, EE_count, extra_lines, skip_count, ieta, iphi, error, sts_row ,full) = DOF_error(plot_EE_minus, plot_EE_plus, sts_row, EB_count, EE_count, extra_lines, skip_count, max_rows, ts, EB_w, EE_w, plot_EB, plot_EE, normalized_A, normalized_t0, ideal_weights);
 
 	        //cout << "ieta = " << ieta << endl;
 	        //cout << "iphi = " << iphi << endl;
@@ -179,9 +181,32 @@ int main()
 
 	  }
 	
-	  //if (plot_EE){
+	  if (plot_EE){
+
+	    int EB_count = 0, EE_count = 0, extra_lines = 0, skip_count = 0;
+	    int ix, iy;
+	    double error; 
+	    int sts_row = 0; // single time shift loop row 
+	    bool full = false; // Start not full
+
+	    while(!full){ // run while files left to read. Check DOF_error for bool
+	    	tie(EB_count, EE_count, extra_lines, skip_count, ix, iy, error, sts_row ,full) = DOF_error(plot_EE_minus, plot_EE_plus, sts_row, EB_count, EE_count, extra_lines, skip_count, max_rows, ts, EB_w, EE_w, plot_EB, plot_EE, normalized_A, normalized_t0, ideal_weights);
+
+	        cout << "ix = " << ix << endl;
+	        cout << "iy = " << iy << endl;
+	        cout << "error = " << error << endl;
+	        cout << "sts_row = " << sts_row << endl;
+		cout << "int(full) = " << int(full) << endl;
+
+		if (full) break;
+		
+	        sts->Fill(ix, iy, error);
+
+		//full = true;
+
+	    }
 	    //sts->Fill(ix, iy, error);     
-	  //}
+	  }
 
 	}
 
