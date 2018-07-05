@@ -101,7 +101,8 @@ tuple<int, int, int, int, int, int, double, int, bool> DOF_error(int sts_row, in
 		return make_tuple(EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
 		}
 
-	   if ((row%5000) == 0){
+	   //if ((row%5000) == 0){
+	   if ((row%1000) == 0){
 	      cout << "Reading line " << row << endl;
 	      }
 
@@ -112,6 +113,7 @@ tuple<int, int, int, int, int, int, double, int, bool> DOF_error(int sts_row, in
 
 		if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ){
 			//full = true;
+			row += 1;
 			return make_tuple(EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
 
 		  } // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful.   
