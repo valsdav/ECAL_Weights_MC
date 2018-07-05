@@ -57,7 +57,7 @@ int main()
 	double ts_min = -1.0, ts_max = 1.0, dts = 0.5; // Only used if plot_te == true
 	double ts = 0; // Only used if plot_e = true
 	// Move waveform +/- ns to right/left <-- double check that 
- 	int max_rows = 10; // < 0 to read all rows of XTAL_Params.txt
+ 	int max_rows = -1; // < 0 to read all rows of XTAL_Params.txt
 
 	// For Single Set of Weights 
 	//double w[10] = {-0.3812788, -0.3812788, -0.3812788, 0, 0.235699, 0.4228363, 0.3298652, 0.1575187, -0.002082776, 0};
