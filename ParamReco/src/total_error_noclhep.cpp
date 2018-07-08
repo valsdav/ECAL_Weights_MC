@@ -4,7 +4,7 @@
 
 #include "recon_amp_noclhep.cpp"
 
-double total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool plot_EB, bool plot_EE, bool normalized_A, bool normalized_t0, bool ideal_weights) 
+tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool plot_EB, bool plot_EE, bool plot_EE_minus, bool plot_EE_plus, bool normalized_A, bool normalized_t0, bool ideal_weights) 
 {
 	//bool test_skip = false; // If want to skip lines to test things 
 	//int debug_val = 0;
@@ -82,6 +82,19 @@ double total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool p
 	      inweightsFile.ignore(1000,'\n');
 	      EE_Skip -= 1;
 	    }
+	
+	}
+
+	if (plot_EE_plus){
+	  cout << "Skipping to EE+\n";
+	  int EE_plus_Skip = 7324;
+	  
+	  while(EE_plus_Skip !=0){
+		
+		inFile.ignore(1000,'\n');
+	        inweightsFile.ignore(1000,'\n');
+		EE_plus_Skip -= 1;
+		}		
 
 	  }
 
@@ -105,6 +118,8 @@ double total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool p
 	//cout << "bool(getline(inFile, line)) = " << bool(getline(inFile, line)) << endl;
 	//cout << "bool(getline(inweightsFile, weights_line)) = " << bool(getline(inweightsFile, weights_line)) << endl;
 
+
+	double XTAL_count = 0;
 
 	//while((getline(inFile, line))) { // XTAL_Params.txt loop
 	while((getline(inFile, line)) && (getline(inweightsFile, weights_line))) { // get line of XTAL_Params.txt and weights, loop
@@ -218,11 +233,10 @@ double total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool p
 			  //debug_val += 1;
 			//}
 
-
+			
 
 			if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
-
-
+	
 			//if(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_){ // if line has numbers, see if ID's match. 
 			  // d5_ = ix, d6_ = iy
 
@@ -242,6 +256,13 @@ double total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool p
 				//cout << "w0 = " << w0 << endl;
 
 				//}		
+				//cout.precision(17);
+				//cout << "d1 = " << d1 << endl;
+				//cout << "d1_ = " << d1_ << endl;
+				//cout << "w0 = " << w0 << endl;
+				//break;
+	
+
 
 				//if (d1 == d1_){ // can pair DOF with XTAL, and extract correct weights 
 				if ((d1 == d1_) && (d1 == w0)){ // can pair DOF with XTAL, and extract correct weights 
@@ -285,6 +306,46 @@ double total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool p
 				    iy = d6_;
 				
 				  }*/
+
+                                  // EE Line
+                                  if (d1 >= 872415401)
+                                  {
+                                    // if side = 1, read all EE- rows, up to EE+.
+                                    if ( (!side_filled) && (d4_ == 1) ) side_filled = true;
+
+                                    // If only want EE- and read all EE- rows
+                                    if ((side_filled) && (plot_EE_minus)){
+                                        //full = true; 
+                                        cout << "Finished EE-. Exiting.\n";
+					return make_tuple(total_error, XTAL_count);			
+
+                                    }
+                                    // Two cases in which you want to save values
+                                    // if( ( (plot_EE_minus) && (!side_filled)) || ( (plot_EE_plus) && (side_filled) )){
+                                      //DOF1 = d5_; // ix
+                                      //DOF2 = d6_; // iy
+                                     // }
+
+				  //if (side_filled){
+		
+					 //cout << "EE+ line\n";
+					 //value += 1;
+					 //cout << "value = " << value << endl;
+					//}			
+	
+                                    // If want EE+ but not there yet, skip line
+                                    //if ( (plot_EE_plus) && (!side_filled) ){
+
+					//cout << "Skipping EE- Line.\n";
+					//inFile.ignore(1000,'\n');				
+					//inweightsFile.ignore(1000,'\n');
+
+					//continue;
+					//return make_tuple(total_error, XTAL_count);
+
+                                        //}
+
+                                  }
 
 				  leave = true;
 
@@ -334,7 +395,9 @@ double total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool p
 	  //cout << "amp_error = " << amp_error << "\n";
 	  // add to total error 
 
-	  total_error += abs(amp_error);
+	  //total_error += abs(amp_error);
+	  total_error += amp_error;
+	  XTAL_count += 1;
 
 	  // See if things are going well 
     	  if ((row%10000) == 0){
@@ -382,7 +445,7 @@ double total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool p
 
 	// take total error for ts and fill 1D histogram with total of abs error for each ts 
 
-	return total_error;
+	return make_tuple(total_error, XTAL_count);
 	
 ////////////////////
 

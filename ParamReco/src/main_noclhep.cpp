@@ -38,11 +38,15 @@ int main()
 {
 	time_t initial_time = time(0); // initial time 
 
+
+	//TH1F *errors = new TH1F("errors","A/A - 1", 100, -1, 1);
+	
+
 	// Currently can only make one plot at at time
 
 	// What to Plot
-	bool plot_te = false; // Plot total error vs. time shift
-	bool plot_e = true; // Plot error as a function of Degrees of Freedom
+	bool plot_te = true; // Plot total error vs. time shift
+	bool plot_e = false; // Plot error as a function of Degrees of Freedom
 	bool plot_EB = false; // Make desired plots for Barrel
 	bool plot_EE = true; // Make desired plots for Endcap
 
@@ -59,8 +63,8 @@ int main()
 
 	// Study Parameters
  	int max_rows = -1; // < 0 to read all rows of XTAL_Params.txt
-	double ts_min = -1.0, ts_max = 1.0, dts = 0.5; // Only used if plot_te == true
-	double ts = -1.0; // Only used if plot_e = true
+	double ts_min = -6, ts_max = 6, dts = 1; // Only used if plot_te == true
+	double ts = 0.0; // Only used if plot_e = true
 	// Move waveform +/- ns to right/left <-- double check that 
 
 	int DOF1min, DOF1max, DOF2min, DOF2max;
@@ -107,7 +111,7 @@ int main()
 	    }
           }
 
-  	ts_range_title << "Total Error vs. Time Shift, ";
+  	ts_range_title << "Bias vs. Time Shift, ";
 	single_ts_title << "Recon Amp Percent Error, ts = " << ts << "ns, ";
 
 	if (ideal_weights) {
@@ -143,12 +147,12 @@ int main()
 	// Call Functions
 
 	if (plot_te){
-
-		for (ts = ts_min; ts <= ts_max; ts += dts){
+		double XTAL_count = 0;
+		for (ts = ts_min; ts < ts_max + dts; ts += dts){
 			// total = total_error()
-			total = total_error(max_rows, ts, EB_w, EE_w, plot_EB, plot_EE, normalized_A, normalized_t0, ideal_weights);
-			tsr->Fill(ts,total);
-			cout << "ts = " << ts << ", total = " << total << "\n";
+			tie(total, XTAL_count) = total_error(max_rows, ts, EB_w, EE_w, plot_EB, plot_EE, plot_EE_minus, plot_EE_plus, normalized_A, normalized_t0, ideal_weights);
+			tsr->Fill(ts,total/XTAL_count); // want this to also return number of entries so average can be taken and plotted.
+			cout << "ts = " << ts << ", total = " << total << ", XTAL_count = " << XTAL_count << "\n";
 		  }
 
 	}
@@ -176,6 +180,8 @@ int main()
 		if (full) break;
 		
 	        if (!skip_this_line) sts->Fill(ieta, iphi, error);
+
+		//if (!skip_this_line) errors->Fill(error);
 
 		//full = true;
 
@@ -221,26 +227,26 @@ int main()
 	//sts->Draw();
 
 
-	TCanvas *c1 = new TCanvas("c1","c1",800,600);
-	c1->cd();	
-	sts->Draw();
-	c1->Update();
+	//TCanvas *c1 = new TCanvas("c1","c1",800,600);
+	//c1->cd();	
+	//sts->Draw();
+	//errors->Draw();
+	//c1->Update();
 	//EB->GetZaxis()->SetRangeUser(zmin,zmax);
-	sts->GetZaxis()->SetLabelSize(0.02);
-	sts->GetXaxis()->SetTitle("ix");
-	sts->GetXaxis()->SetTitleOffset(1.1);
-	sts->GetYaxis()->SetTitle("iy");
-	sts->GetYaxis()->SetTitleOffset(1.2);
+	//sts->GetZaxis()->SetLabelSize(0.02);
+	//sts->GetXaxis()->SetTitle("ix");
+	//sts->GetXaxis()->SetTitleOffset(1.1);
+	//sts->GetYaxis()->SetTitle("iy");
+	//sts->GetYaxis()->SetTitleOffset(1.2);
 	//sts->Draw("COLZ");
 	//ostringstream error_plot;
 	//error_plot << "Err
 	//c1->SaveAs("bin/Error_Plot.pdf");
 	//sts->Draw("COLZ");
-	sts->SaveAs("testhisto.root");
+	//sts->SaveAs("testhisto.root");
+	//c1->SaveAs("histopic.pdf");
 
 	//gStyle->SetOptStat(0); // no stats box
-
-/*
 
 	TCanvas *c1 = new TCanvas("c1","c1",800,600);
 	c1->cd();
@@ -248,11 +254,12 @@ int main()
 	c1->Update();
 	//EB->GetZaxis()->SetRangeUser(zmin,zmax); // for DOF plot
 	//tsr->GetZaxis()->SetLabelSize(0.02); // for DOF plot
-	tsr->GetXaxis()->SetTitle("ts (ns)");
-	tsr->GetXaxis()->SetTitleOffset(1.3);
+	tsr->GetXaxis()->SetTitle("Time Shift (ns)");
+	tsr->GetXaxis()->SetTitleOffset(1.2);
 	//tsr->GetYaxis()->SetTitle("Total Error"); // Write in latex? 
-	tsr->GetYaxis()->SetTitle("#sum_{XTALS}^{}Error");
-	tsr->GetYaxis()->SetTitleOffset(1.3);
+	//tsr->GetYaxis()->SetTitle("#sum_{XTALS}^{}Error");
+	tsr->GetYaxis()->SetTitle("bias");
+	tsr->GetYaxis()->SetTitleOffset(1.4);
 	tsr->Draw("HIST");
 	ostringstream error_plot_root, error_plot_pdf;
 	error_plot_root << "bin/te_Plot"; //_EB_"; 
@@ -293,10 +300,9 @@ int main()
 	TString pdferrortitle = error_plot_pdf.str();
 
 	//c1->SaveAs(rooterrortitle);
-	//c1->SaveAs(pdferrortitle); // Canvas screenshot
-	//tsr->SaveAs(rooterrortitle); // histogram, editable 
+	c1->SaveAs(pdferrortitle); // Canvas screenshot
+	tsr->SaveAs(rooterrortitle); // histogram, editable 
 	//tsr>SaveAs(pdferrortitle);
-*/
 
 	cout.precision(4);
 	time_t final_time = time(0);
