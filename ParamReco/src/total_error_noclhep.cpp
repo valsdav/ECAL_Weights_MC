@@ -15,40 +15,6 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 
 	// Parameters
 	bool side_filled = false; // First EE side unfilled at start.
-	
-	// Initialize Histograms
- 	/*ostringstream sss1, sss2, sss3;
-	ostringstream sss4, sss5, sss6;
-
-	sss4 << "EB Error, ts = " << ts << " ns";
-	sss5 << "EE- Error, ts = " << ts << " ns";
-	sss6 << "EE+ Error, ts = " << ts << " ns";
-
-	TString EBerror = sss4.str();
-	TString EEerror1 = sss5.str();
-	TString EEerror2 = sss6.str();*/
-
-	/*
-
-	// EB
-  	sss1 << "EB, " << "ts = " << ts << " ns";
-  	TString histo_title1 = sss1.str(); 
-	//TH2F *EB = new TH2F("EB",histo_title1,170,-85,85,360,0,360); // (ieta, iphi)
-	//TH2F *EBE = new TH2F("EB Error",EBerror,170,-85,85,360,0,360); // EB error (amount off from perfectly accurate reconstruction)
-
-	// EE
-  	sss2 << "EE, -z Side, " << "ts = " << ts << " ns"; 
-	sss3 << "EE, +z Side, " << "ts = " << ts << " ns";
-  	TString histo_title2 = sss2.str();
-	TString histo_title3 = sss3.str();
-
-	//TH2F *EE1 = new TH2F("EE -",histo_title2,100,0,100,100,0,100); // (ix, iy)
-  	//TH2F *EE2 = new TH2F("EE +",histo_title3,100,0,100,100,0,100);
-	//TH2F *EE1E = new TH2F("EE - Error",EEerror1,170,-85,85,360,0,360); // error
-	//TH2F *EE2E = new TH2F("EE + Error",EEerror2,170,-85,85,360,0,360); // error 
-
-
-	*/
 
   	// Open Files
   	//TString File("data/XTAL_Params.txt"); // (rawid, A, t0, alpha, beta) values
@@ -56,8 +22,8 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
   	inFile.open("data/XTAL_Params.txt"); // apply XTAL_Params to in file stream
 
         ifstream inweightsFile;
-        inweightsFile.open("data/weights.txt"); // precomputed weights 
-
+        //inweightsFile.open("data/NegWeights.txt"); // precomputed weights 
+	inweightsFile.open("data/PosWeights.txt"); // precomputed weights 
 
   	if (!inFile) {
   	  cout << "Unable to open Param file\n";
@@ -448,120 +414,4 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 	return make_tuple(total_error, XTAL_count);
 	
 ////////////////////
-
-	  // Currently, I need to draw EE1 and EE2 in this file. I don't understand why.
-
-	  // Try plotting with different mins and maxes? 
-	  //double zmin = 0.99, zmax = 1.01;
-
-/*
-
-	  time_t current_time = time(0);
-
-	  //double zmin = 0.995, zmax = 1.005; // 0.5%
-
-	  gStyle->SetOptStat(0); // no stats box
-
-	  TCanvas *c1 = new TCanvas("c1","c1",800,600);
-	  c1->cd();
-	  EBE->Draw();
-	  c1->Update();
-	  //EB->GetZaxis()->SetRangeUser(zmin,zmax);
-	  EBE->GetZaxis()->SetLabelSize(0.02);
-	  EBE->GetXaxis()->SetTitle("iEta");
-	  EBE->GetXaxis()->SetTitleOffset(1.1);
-	  EBE->GetYaxis()->SetTitle("iPhi");
-	  EBE->GetYaxis()->SetTitleOffset(1.2);
-	  EBE->Draw("COLZ");
-	  ostringstream error_plot;
-	  //error_plot << "Err
-	  c1->SaveAs("bin/Error_Plot.pdf");
-
-*/
-
-/*
-
-	  ostringstream oss1, oss2, oss3, oss4, oss5, oss6;
-
-	if (Fill_EB){
-
-	  TCanvas *c1 = new TCanvas("c1","c1",800,600);
-
-	  c1->cd();
-	  EB->Draw();
-	  c1->Update();
-	  EB->GetZaxis()->SetRangeUser(zmin,zmax);
-	  EB->GetZaxis()->SetLabelSize(0.02);
-	  EB->GetXaxis()->SetTitle("iEta");
-	  EB->GetXaxis()->SetTitleOffset(1.1);
-	  EB->GetYaxis()->SetTitle("iPhi");
-	  EB->GetYaxis()->SetTitleOffset(1.2);
-	  //c1->SetBatch(kFALSE);
-
-	  EB->Draw("COLZ");
-
-	  //oss1 << "bin/EB_ts_" << ts << "_" << ideal_weights << "_"  << current_time << ".pdf";
-	  //oss2 << "bin/EB_ts_" << ts << "_" << ideal_weights << "_"  << current_time << ".root"; 
-	  oss1 << "bin/EB_ts_" << ts << "_" << current_time << ".pdf";
-	  oss2 << "bin/EB_ts_" << ts << "_" << current_time << ".root"; 
-	  TString plot_title1 = oss1.str();
-	  TString plot_title2 = oss2.str();
-	  c1->SaveAs(plot_title1);
-	  //c1->SaveAs(plot_title2);
-
-	  }
-
-	if (Fill_EE){
-
-	  TCanvas *c2 = new TCanvas("c2","c2",800,600);
-
-	  c2->cd();
-	  EE1->Draw();
-	  c2->Update();
-	  EE1->GetZaxis()->SetRangeUser(zmin,zmax);
-	  EE1->GetZaxis()->SetLabelSize(0.02);
-	  EE1->GetXaxis()->SetTitle("ix");
-	  EE1->GetXaxis()->SetTitleOffset(1.1);
-	  EE1->GetYaxis()->SetTitle("iy");
-	  EE1->GetYaxis()->SetTitleOffset(1.2);
-	  //c1->SetBatch(kFALSE);
-
-	  EE1->Draw("COLZ");
-
-////////////////////
-
-	  TCanvas *c3 = new TCanvas("c3","c3",800,600);
-
-	  c3->cd();
-	  EE2->Draw();
-	  c3->Update();
-	  EE2->GetZaxis()->SetRangeUser(zmin,zmax);
-	  EE2->GetZaxis()->SetLabelSize(0.02);
-	  EE2->GetXaxis()->SetTitle("ix");
-	  EE2->GetXaxis()->SetTitleOffset(1.1);
-	  EE2->GetYaxis()->SetTitle("iy");
-	  EE2->GetYaxis()->SetTitleOffset(1.2);
-	  //c1->SetBatch(kFALSE);
-
-	  EE2->Draw("COLZ");
-
-	  oss3 << "bin/EE-_ts_" << ts << "_" << current_time << ".pdf";
-	  oss4 << "bin/EE-_ts_" << ts << "_" << current_time << ".root"; 
-	  oss5 << "bin/EE+_ts_" << ts << "_" << current_time << ".pdf";
-	  oss6 << "bin/EE+_ts_" << ts << "_" << current_time << ".root"; 
-
-	  TString plot_title3 = oss3.str();
-	  TString plot_title4 = oss4.str();
-	  TString plot_title5 = oss5.str();
-	  TString plot_title6 = oss6.str();
-
-	  c2->SaveAs(plot_title3);
-	  //c2->SaveAs(plot_title4);
-	  c3->SaveAs(plot_title5);
-	  //c3->SaveAs(plot_title6);
-
-	  }
-
-*/
-
 }

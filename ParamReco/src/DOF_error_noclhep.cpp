@@ -61,12 +61,20 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	      EE_Skip -= 1;
 	    }
 
+	}
+
 	    // If only want EE+, skip EE- lines
 	    if (plot_EE_plus){
 
-	      
-
-	      }
+	        cout << "Skipping to EE+\n";
+	        int EE_plus_Skip = 7324;
+	  
+	        while(EE_plus_Skip !=0){
+		
+		  inFile.ignore(1000,'\n');
+	          inweightsFile.ignore(1000,'\n');
+		  EE_plus_Skip -= 1;
+		}		
 
 	  }
 
@@ -91,6 +99,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	  if (!(getline(inFile, line)) || !(getline(inweightsFile, weights_line))){
 
 		cout << "No lines to read in XTAL_Params.txt or weights.txt.\n";
+		skip_this_line = true;
 		full = true;
 		return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
 
@@ -106,6 +115,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	   // Check row
 	   if (row == max_rows){
 		cout << "Maximum desired lines reached." << endl;
+		skip_this_line = true;
 		full = true;
 		return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
 		}
@@ -123,6 +133,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 		if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ){
 			skip_this_line = true;
 			row += 1;
+			cout << "Line skipped by hand.\n";
 			return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
 
 		  } // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful.   
@@ -162,7 +173,9 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 		
 		if ((!inparamFile) && (!plot_EE)){ 
 			
+			cout << "Not in Param file, not plotting EE.\n";
 			full = true;
+			skip_this_line = true;
 			return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
 
 		}// if up to EE lines but don't want EE, leave loop.
@@ -274,8 +287,10 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 				    if ( (!side_filled) && (d4_ == 1) ) side_filled = true;
 
 				    // If want EB- and it's full, exit
-				    if ((side_filled) && (plot_EE_minus)){ 
+				    if ((side_filled) && (plot_EE_minus)){
+					cout << "Finished reading EB- lines\n"; 
 					full = true;
+					skip_this_line = true;
 					return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full);
 
 				    }
@@ -287,7 +302,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 
 				    // If want to plot EE+ but not there yet, skip line
 				    if ( (plot_EE_plus) && (!side_filled) ){
-
+					cout << "Not up to EE+.\n";
 					skip_this_line = true;
 					row += 1;
 					return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full);
@@ -344,6 +359,8 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 
 	  //total_error += abs(amp_error);
 
+	  //if (error == 0) cout << "recon/true - 1 = 0\n";
+
 	  // See if things are going well 
     	  if ((row%10000) == 0){
 	      cout << "row " << row << endl;
@@ -389,6 +406,11 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	//inFile.close();
 
 	if((row == max_rows)) full = true; //|| (finished reading XTAL_Params)) full = true;
+
+	//cout << "Done Scanning Row.\n";
+	//cout << "DOF1 = " << DOF1 << endl;
+	//cout << "DOF2 = " << DOF2 << endl;
+	//cout << "error = " << error << endl;
 
 	return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full);
 

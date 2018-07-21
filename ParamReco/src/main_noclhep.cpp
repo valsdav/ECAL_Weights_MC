@@ -37,24 +37,31 @@ using namespace std;
 int main()
 {
 	time_t initial_time = time(0); // initial time 
-
-
-	//TH1F *errors = new TH1F("errors","A/A - 1", 100, -1, 1);
 	
+        string note = "Posweights";
 
-	// Currently can only make one plot at at time
+	// Customize One Plot
 
 	// What to Plot
 	bool plot_te = true; // Plot total error vs. time shift
 	bool plot_e = false; // Plot error as a function of Degrees of Freedom
-	bool plot_EB = false; // Make desired plots for Barrel
-	bool plot_EE = true; // Make desired plots for Endcap
+	bool plot_EB = true; // Make desired plots for Barrel
+	bool plot_EE = false; // Make desired plots for Endcap
 
 	bool plot_EE_minus = false; // Set one of these to true only if plot_EE is set to true
-	bool plot_EE_plus = true;
+	bool plot_EE_plus = false;
 
-	// How to Plot it 
+	// Weights
+	
+	// values
 	bool ideal_weights = true; // True: Compute ideal weights during runtime or read from text file. False: Use single sets defined below 
+	bool cmssw_weights = false;
+	bool presentation_weights = false;
+
+	// number filter
+	bool five_weights = true; // Set 1, 2, 8, 9, 10 to zero
+	//bool ten_weights = false;
+
 	bool normalized_A = false;
   	bool normalized_t0 = false; 
 
@@ -63,7 +70,7 @@ int main()
 
 	// Study Parameters
  	int max_rows = -1; // < 0 to read all rows of XTAL_Params.txt
-	double ts_min = -6, ts_max = 6, dts = 1; // Only used if plot_te == true
+	double ts_min = -30, ts_max = 30, dts = 2.5; // Only used if plot_te == true
 	double ts = 0.0; // Only used if plot_e = true
 	// Move waveform +/- ns to right/left <-- double check that 
 
@@ -77,16 +84,54 @@ int main()
 	}
 
 	if (plot_EE){
-		DOF1min = 0;
+		DOF1min = 0; // What happens when this is removed from the TH2F creation? Does it fix the color problem?
 		DOF1max = 100;
 		DOF2min = 0;
 		DOF2max = 100;
 	}
 
-	// For Single Set of Weights 
-	//double w[10] = {-0.3812788, -0.3812788, -0.3812788, 0, 0.235699, 0.4228363, 0.3298652, 0.1575187, -0.002082776, 0};
-	double EB_w[10] = {0, 0, -0.56, -0.55, 0.25, 0.48, 0.38, 0, 0, 0}; // Barrel
-	double EE_w[10] = {0, 0, -0.65, -0.52, 0.25, 0.52, 0.50, 0, 0, 0}; // Endcap
+	// Weights
+       
+	double cmssw[10] = {-0.3812788, -0.3812788, -0.3812788, 0, 0.235699, 0.4228363, 0.3298652, 0.1575187, -0.002082776, 0};
+	double presentationEB[10] = {0, 0, -0.56, -0.55, 0.25, 0.48, 0.38, 0, 0, 0};
+	double presentationEE[10] = {0, 0, -0.65, -0.52, 0.25, 0.52, 0.50, 0, 0, 0};
+ 
+	// Initialize
+	double EB_w[10] = {0.}, EE_w[10] = {0.};
+
+	//for (int i = 0; i < 10; i++){
+	//	EB_w[i] = 0.0;
+	//	EE_w[i] = 0.0;
+	//}
+
+	if (cmssw_weights){
+		for (int i = 0; i < 10; i++){
+			EB_w[i] = cmssw[i];
+			EE_w[i] = cmssw[i];
+
+		}
+
+        }        
+
+	if (presentation_weights){
+		for (int i = 0; i < 10; i++){
+			EB_w[i] = presentationEB[i];
+			EE_w[i] = presentationEE[i];
+			
+		}
+	}
+
+	if(five_weights){
+		for (int i = 0; i < 2; i++){
+			EB_w[i] = 0.0;
+			EE_w[i] = 0.0;
+		}
+
+		for(int i = 0; i < 3; i++){
+			EB_w[i+7] = 0.0;
+			EE_w[i+7] = 0.0;
+		}
+	}
 
 	// Make histogram(s)
 
@@ -138,6 +183,9 @@ int main()
   	TString single_ts_title_string = single_ts_title.str(); 
 	TH1F *tsr = new TH1F("tsr",ts_range_title_string,((ts_max - ts_min) / (dts)) + 1,ts_min,ts_max + dts); // ts range
 	TH2F *sts = new TH2F("sts",single_ts_title_string,(DOF1max - DOF1min),DOF1min,DOF1max,(DOF2max - DOF2min),DOF2min,DOF2max); // single ts
+
+	// For debugging
+	TH1F *values = new TH1F("values","values",40,-0.2,0.2);
 
 	//TH2F *sts = new TH2F("sts",single_ts_title_string); //,,,,,);
 
@@ -200,17 +248,26 @@ int main()
 	    while(!full){ // run while files left to read. Check DOF_error for bool
 	    	skip_this_line = false;
 		tie(skip_this_line, EB_count, EE_count, extra_lines, skip_count, ix, iy, error, sts_row ,full) = DOF_error(plot_EE_minus, plot_EE_plus, sts_row, EB_count, EE_count, extra_lines, skip_count, max_rows, ts, EB_w, EE_w, plot_EB, plot_EE, normalized_A, normalized_t0, ideal_weights);
-		if (sts_row%5000 == 0){
+		/*if (sts_row%1000 == 0){
 		  cout << "skip_this_line = " << skip_this_line << endl;
 	          cout << "ix = " << ix << endl;
 	          cout << "iy = " << iy << endl;
 	          cout << "error = " << error << endl;
 	          cout << "sts_row = " << sts_row << endl;
 		  cout << "int(full) = " << int(full) << endl;
-		}
+		}*/
 		if (full) break;
 		
-	        if(!skip_this_line) sts->Fill(ix, iy, error);
+	        if(!skip_this_line){ 
+			if ((sts_row > 420) && (sts_row < 425)) {
+				cout << "ix = " << ix << endl;
+				cout << "iy = " << iy << endl;
+				cout << "error = " << error << endl;
+				}
+			 
+			sts->Fill(ix, iy, error);
+			values->Fill(error);
+		}
 
 		//full = true;
 
@@ -224,85 +281,128 @@ int main()
 
 	// Should make plotting function eventually
 
-	//sts->Draw();
-
-
-	//TCanvas *c1 = new TCanvas("c1","c1",800,600);
-	//c1->cd();	
-	//sts->Draw();
-	//errors->Draw();
-	//c1->Update();
-	//EB->GetZaxis()->SetRangeUser(zmin,zmax);
-	//sts->GetZaxis()->SetLabelSize(0.02);
-	//sts->GetXaxis()->SetTitle("ix");
-	//sts->GetXaxis()->SetTitleOffset(1.1);
-	//sts->GetYaxis()->SetTitle("iy");
-	//sts->GetYaxis()->SetTitleOffset(1.2);
-	//sts->Draw("COLZ");
-	//ostringstream error_plot;
-	//error_plot << "Err
-	//c1->SaveAs("bin/Error_Plot.pdf");
-	//sts->Draw("COLZ");
-	//sts->SaveAs("testhisto.root");
-	//c1->SaveAs("histopic.pdf");
-
 	//gStyle->SetOptStat(0); // no stats box
 
 	TCanvas *c1 = new TCanvas("c1","c1",800,600);
-	c1->cd();
-	tsr->Draw("HIST");
-	c1->Update();
-	//EB->GetZaxis()->SetRangeUser(zmin,zmax); // for DOF plot
-	//tsr->GetZaxis()->SetLabelSize(0.02); // for DOF plot
-	tsr->GetXaxis()->SetTitle("Time Shift (ns)");
-	tsr->GetXaxis()->SetTitleOffset(1.2);
-	//tsr->GetYaxis()->SetTitle("Total Error"); // Write in latex? 
-	//tsr->GetYaxis()->SetTitle("#sum_{XTALS}^{}Error");
-	tsr->GetYaxis()->SetTitle("bias");
-	tsr->GetYaxis()->SetTitleOffset(1.4);
-	tsr->Draw("HIST");
-	ostringstream error_plot_root, error_plot_pdf;
-	error_plot_root << "bin/te_Plot"; //_EB_"; 
-	error_plot_pdf << "bin/te_Plot"; //_EB_"; 
+
+	if (plot_te){
+
+		c1->cd();
+		tsr->Draw("HIST");
+		c1->Update();
+		//EB->GetZaxis()->SetRangeUser(zmin,zmax); // for DOF plot
+		//tsr->GetZaxis()->SetLabelSize(0.02); // for DOF plot
+		tsr->GetXaxis()->SetTitle("Time Shift (ns)");
+		tsr->GetXaxis()->SetTitleOffset(1.2);
+		//tsr->GetYaxis()->SetTitle("Total Error"); // Write in latex? 
+		//tsr->GetYaxis()->SetTitle("#sum_{XTALS}^{}Error");
+		tsr->GetYaxis()->SetTitle("bias");
+		tsr->GetYaxis()->SetTitleOffset(1.4);
+		tsr->Draw("HIST");
+		ostringstream error_plot_root, error_plot_pdf;
+		error_plot_root << "bin/te_Plot";
+		error_plot_pdf << "bin/te_Plot"; 
 	
-	if (plot_EB){	
-	  error_plot_root << "_EB_";
-	  error_plot_pdf << "_EB_";
+		if (plot_EB){	
+		  error_plot_root << "_EB_";
+		  error_plot_pdf << "_EB_";
+		}
+
+		if (plot_EE){
+		  error_plot_root << "_EE";
+		  error_plot_pdf << "_EE";
+
+		  if (plot_EE_minus){
+			error_plot_root << "-_";	
+			error_plot_pdf << "-_";	
+		    }
+
+		  if (plot_EE_plus){
+			error_plot_root << "+_";	
+			error_plot_pdf << "+_";	
+		    }
+
+		}
+
+		if (ideal_weights){
+			error_plot_root << "idealweights"  << ts_min << ts_max << "_" << note << current_time << ".root";
+			error_plot_pdf << "idealweights" << ts_min << ts_max << "_"<< note << current_time << ".pdf";
+		  }
+
+		if (!ideal_weights){ 
+			error_plot_root << "singleweights" << ts_min << ts_max << "_" << note << current_time << ".root";
+			error_plot_pdf << "singleweights" << ts_min << ts_max << "_" << note << current_time << ".pdf";
+		  }
+
+		TString rooterrortitle = error_plot_root.str();
+		TString pdferrortitle = error_plot_pdf.str();
+
+		c1->SaveAs(pdferrortitle); // Canvas screenshot
+		tsr->SaveAs(rooterrortitle); // Editable histogram
+
 	}
 
-	if (plot_EE){
-	  error_plot_root << "_EE_";
-	  error_plot_pdf << "_EE_";
+	if (plot_e){
 
-	  if (plot_EE_minus){
-		error_plot_root << "-";	
-		error_plot_pdf << "-";	
-	    }
+		c1->cd();
+		//sts->Draw();
+		c1->Update();
+		//EB->GetZaxis()->SetRangeUser(zmin,zmax); // for DOF plot
+		//tsr->GetZaxis()->SetLabelSize(0.02); // for DOF plot
+		if (plot_EB){
+			sts->GetXaxis()->SetTitle("iEta");
+			sts->GetYaxis()->SetTitle("iPhi");	
+			}
+		if (plot_EE){
+			sts->GetXaxis()->SetTitle("ix");
+			sts->GetYaxis()->SetTitle("iy");		
+			}
+		sts->GetXaxis()->SetTitleOffset(1.1);
+		sts->GetYaxis()->SetTitleOffset(1.2);
+		sts->GetZaxis()->SetLabelSize(0.02);
+		//sts->Draw("COLZ");
+		ostringstream error_plot_root, error_plot_pdf;
+		error_plot_root << "bin/DOF_Plot";
+		error_plot_pdf << "bin/DOF_Plot"; 
+	
+		if (plot_EB){	
+		  error_plot_root << "_EB_";
+		  error_plot_pdf << "_EB_";
+		}
 
-	  if (plot_EE_plus){
-		error_plot_root << "+";	
-		error_plot_pdf << "+";	
-	    }
+		if (plot_EE){
+		  error_plot_root << "_EE";
+		  error_plot_pdf << "_EE";
 
+		  if (plot_EE_minus){
+			error_plot_root << "-_";	
+			error_plot_pdf << "-_";	
+		    }
+
+		  if (plot_EE_plus){
+			error_plot_root << "+_";	
+			error_plot_pdf << "+_";	
+		    }
+
+		}
+
+		if (ideal_weights){
+			error_plot_root << "idealweights" << note << current_time << ".root";
+			error_plot_pdf << "idealweights" << note << current_time << ".pdf";
+		  }
+
+		if (!ideal_weights){ 
+			error_plot_root << "singleweights" << note << current_time << ".root";
+			error_plot_pdf << "singleweights" << note << current_time << ".pdf";
+		  }
+
+		TString rooterrortitle = error_plot_root.str();
+		TString pdferrortitle = error_plot_pdf.str();
+
+		c1->SaveAs(pdferrortitle); // Canvas screenshot
+		sts->SaveAs(rooterrortitle); // Editable Histogram
+		//sts->SaveAs("EEPlot.root");
 	}
-
-	if (ideal_weights){
-		error_plot_root << "idealweights" << current_time << ".root";
-		error_plot_pdf << "idealweights" << current_time << ".pdf";
-	  }
-
-	if (!ideal_weights){ 
-		error_plot_root << "singleweights" << current_time << ".root";
-		error_plot_pdf << "singleweights" << current_time << ".pdf";
-	  }
-
-	TString rooterrortitle = error_plot_root.str();
-	TString pdferrortitle = error_plot_pdf.str();
-
-	//c1->SaveAs(rooterrortitle);
-	c1->SaveAs(pdferrortitle); // Canvas screenshot
-	tsr->SaveAs(rooterrortitle); // histogram, editable 
-	//tsr>SaveAs(pdferrortitle);
 
 	cout.precision(4);
 	time_t final_time = time(0);
