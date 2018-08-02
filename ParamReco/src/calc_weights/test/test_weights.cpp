@@ -28,8 +28,8 @@ int main()
 	weights_file.open("weights__.txt");
 	weights_file << "cmsswid\tw0\tw1\tw2\tw3\tw4\tw5\n";
 
-	double ts = 0.0;
-	double A = 0.240739, t_0 = 121.313, alpha = 1.18318, beta = 40.2921;
+	double ts = 0.0; // Simulated Time Shift
+	double A = 0.240739, t_0 = 121.313, alpha = 1.18318, beta = 40.2921; // Measured Parameters
 	double P = 0.0; // Simulated Pedestal
 	bool normalize_t0 = false;
 	if (normalize_t0) t_0 = 125;
@@ -75,10 +75,15 @@ int main()
 	// if nPulseSamples = 5, tMax = 3. For 10 nPulsesamples, tmax = 1. 
 
 	int verbosity = 1; // 1 for lots of comments 
- 	double tMax = 5; // 5 or 6 ? I think this is zero indexed. 
+ 	double tMax = 1; // 5 or 6 ? I think this is zero indexed. First sample can be zero, therefore tMax can be 1. 
   	bool dofitbaseline = true, dofittime = false;
-  	static int nPulseSamples = 3;
-  	int prepulsesamples = 2; 
+  	static int nPulseSamples = 9;
+  	int prepulsesamples = 1; 
+
+	// tMax, nPulseSamples, prepulsesamples = 1, 9, 1 gives top weight at peak sample.
+
+	// I think prepulsesamples not included in nPulseSamples b/c for 10 and 1 it says nsamples is too small.
+	// Pedweights add to 1?
 
   	//static int nPulseSamples = 5;
   	//int prepulsesamples = 1; // Is prepulsesamples contained within pulsesamples?
@@ -114,14 +119,14 @@ int main()
 	for(double i = xmin + ts; i < xmax + ts; i += dt){
 
 	  if ( i <= (t_0 + ts - alpha*beta) ) pulseShape.push_back(0 + P) ; // if waveform undefined, set value to zero. 
-	  else pulseShape.push_back( ( function_alphabeta->Eval(i) + P ) );/// (A + P) ); // divide by A to get weights for S*W = A 
+	  else pulseShape.push_back( ( function_alphabeta->Eval(i) + P ) / (A) );/// (A + P) ); // divide by A to get weights for S*W = A 
 	  //cout << "pulseShape(" << i << ") = " << pulseShape(i) << endl;
 	  count_ += 1;
 	}
 
         A_.compute(pulseShape,pulseShapeDerivative,tMax); // Run member function
 
-        int firstsample = tMax - 2; // first sample two before max. Already a tmax -1 in computeweights.cpp 
+        //int firstsample = tMax - 2; // first sample two before max. Already a tmax -1 in computeweights.cpp 
 	//int firstsample = 2;
         double A_hat = 0.0;
 	double weights_sum = 0.0;
@@ -131,27 +136,31 @@ int main()
 	//for ( int i = firstsample; i < firstsample + nPulseSamples + prepulsesamples; i++) {
 	//for ( int i = firstsample; i < firstsample + nPulseSamples; i++) {
 	//for ( int i = firstsample; i < firstsample + nPulseSamples; i++) {
-	for ( int i = 0; i < 10; i++) {
+	for ( int i = 1; i < 10; i++) {
 		//cout.precision(17);
 		//cout << "A_.getPedWeight(" << i - firstsample << ") = " << A_.getPedWeight(i - firstsample) << endl;
 		//cout << "A_.getAmpWeight(" << i - firstsample << ") = " << A_.getAmpWeight(i - firstsample) << endl;
+		cout << "A_.getAmpWeight(" << i  << ") = " << A_.getAmpWeight(i) << endl;
 		cout << "samples[" << i << "] = " << samples[i] << endl; 
-		cout << "pulseShape[" << i << "] = " << pulseShape[i] << endl;
+		//cout << "pulseShape[" << i << "] = " << pulseShape[i] << endl;
 		//A_hat += A*A_.getAmpWeight(i - firstsample)*pulseShape[i]; // mult by A to get A 
 		//Time_val += A_.getTimeWeight(i - firstsample)*samples[i];	
 		stringstream cw;
 		cw.precision(17);
 		//cw << A_.getAmpWeight(i-firstsample);
-		cw << A_.getAmpWeight(i - firstsample);
+		cw << A_.getAmpWeight(i);
 		weights_file << cw.str() << "\t";
-		weights_sum += A_.getAmpWeight(i - firstsample);
-		A_hat += A_.getAmpWeight(i - firstsample)*samples[i]; 
+		weights_sum += A_.getAmpWeight(i);
+		Ped_val += A_.getPedWeight(i)*samples[i]; 
+		A_hat += A_.getAmpWeight(i)*samples[i]; 
 	  }
 
-        for ( int i = firstsample; i < firstsample + prepulsesamples; i++) {
+	// Running 10 weights, 10 npulse, 0 nprepulse, gives 10 amp weights at end. 
+
+        //for ( int i = firstsample; i < firstsample + prepulsesamples; i++) {
 		//weights_sum += A_.getAmpWeight(i - firstsample);
-		Ped_val += A_.getPedWeight(i - firstsample)*samples[i];
-	  }
+		//Ped_val += A_.getPedWeight(i - firstsample)*samples[i];
+	  //}
 
         cout << "------------\n"; 
         cout << "A hat = " << A_hat << endl; 
@@ -161,5 +170,6 @@ int main()
 	cout << "Ped val = " << Ped_val << endl;
 	cout << "weights sum = " << weights_sum << endl;
 	cout << "bias = " << (A_hat/A) - 1 << endl;
+        cout << "------------\n"; 
 
 }

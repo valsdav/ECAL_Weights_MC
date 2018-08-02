@@ -116,7 +116,8 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 		<< firstSample << " because there are too few samples beyond." 
 		<< std::endl << "firstSample is set to "
 		<< nSamples - nPulseSamples_ << std::endl;
-    firstSample = nSamples - nPulseSamples_;
+    firstSample = nSamples - nPulseSamples_; // Custom first sample. 
+	// Change first sample to be independent of tMax? 
   }//check max samples considered
 
   // pulseshape[] -> coef
