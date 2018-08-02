@@ -27,7 +27,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
   	inFile.open("data/XTAL_Params.txt"); // apply XTAL_Params to in file stream
 
         ifstream inweightsFile;
-        inweightsFile.open("data/weights.txt"); // precomputed weights 
+        inweightsFile.open("data/NoPedSub.txt"); // precomputed weights 
 
   	if (!inFile) {
   	  cout << "Unable to open Param file\n";
@@ -67,7 +67,8 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	    if (plot_EE_plus){
 
 	        cout << "Skipping to EE+\n";
-	        int EE_plus_Skip = 7324;
+	        //int EE_plus_Skip = 7324;
+	        int EE_plus_Skip = 7200;
 	  
 	        while(EE_plus_Skip !=0){
 		
@@ -77,11 +78,6 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 		}		
 
 	  }
-
-
-
-
-
 
 	// Read line of (rawid, A, t0, alpha, beta) values
 
@@ -362,7 +358,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	  //if (error == 0) cout << "recon/true - 1 = 0\n";
 
 	  // See if things are going well 
-    	  if ((row%10000) == 0){
+    	  if ((row%100000) == 0){
 	      cout << "row " << row << endl;
 	      for (int ii = 0; ii < 10; ii++) { cout << "weights[" << ii << "] = " << weights[ii] << endl;}
 	      cout << "ratio = " << ratio << endl;

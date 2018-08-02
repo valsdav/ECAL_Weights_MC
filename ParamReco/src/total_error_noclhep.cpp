@@ -23,7 +23,7 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 
         ifstream inweightsFile;
         //inweightsFile.open("data/NegWeights.txt"); // precomputed weights 
-	inweightsFile.open("data/PosWeights.txt"); // precomputed weights 
+	inweightsFile.open("data/PedSub1+4.txt"); // precomputed weights 
 
   	if (!inFile) {
   	  cout << "Unable to open Param file\n";
@@ -54,6 +54,7 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 	if (plot_EE_plus){
 	  cout << "Skipping to EE+\n";
 	  int EE_plus_Skip = 7324;
+	  //int EE_plus_Skip = 7100;
 	  
 	  while(EE_plus_Skip !=0){
 		
@@ -181,7 +182,7 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 			//cout << "Extra_lines = " << extra_lines << "\n";
 
 	      		double d1_, d2_, d3_, d4_, d5_, d6_;
-			double w0, w1, w2, w3, w4, w5, w6;
+			double w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10;
 
 			// EB: d1_ = ID, d4_ = iphi, d5_ = ieta
 			// EE: d1_ = ID, d5_ = ix, d6_ = iy
@@ -199,9 +200,11 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 			  //debug_val += 1;
 			//}
 
-			
+			// Need to handle 5 or 10 weights. 
 
+			//if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5 >> w6 >> w7 >> w8 >> w9 >> w10)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
 			if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
+	
 	
 			//if(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_){ // if line has numbers, see if ID's match. 
 			  // d5_ = ix, d6_ = iy
@@ -235,22 +238,51 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 
 				  //cout << "All IDs match\n";
 				  //cout << "In matching ID loop\n";				  
-
+				/*cout << "w1 = " << w1 << endl;
+				cout << "w2 = " << w2 << endl;
+				cout << "w3 = " << w3 << endl;
+				cout << "w4 = " << w4 << endl;
+				cout << "w5 = " << w5 << endl;
+				cout << "w6 = " << w6 << endl;
+				cout << "w7 = " << w7 << endl;
+				cout << "w8 = " << w8 << endl;
+				cout << "w9 = " << w9 << endl;
+				cout << "w10 = " << w10 << endl;*/
 				  //if (d1_ == w0){
 					// if here, extract weights	
 				    //cout << "ID matches weights' ID\n";
 					
 				    if (ideal_weights){
-					    weights[0] = 0.0;
-					    weights[1] = 0.0;
-					    weights[2] = w1;				
-					    weights[3] = w2;				
-					    weights[4] = w3;				
-					    weights[5] = w4;				
-					    weights[6] = w5;				
-					    weights[7] = 0.0;
-					    weights[8] = 0.0;
-					    weights[9] = 0.0;
+
+					    // Check if there are ten weights
+					    //if (ww >> w1 >> w2 >> w3 >> w4 >> w5 >> w6 >> w7 >> w8 >> w9 >> w10){
+						//cout << "ten weights\n";
+						//weights[0] = w1;
+						//weights[1] = w2;
+						//weights[2] = w3;
+						//weights[3] = w4;
+						//weights[4] = w5;
+						//weights[5] = w6;
+						//weights[6] = w7;
+						//weights[7] = w8;
+						//weights[8] = w9;
+						//weights[9] = w10;
+					    //}					   
+					   
+					    // If not, assume five 
+					   // else{
+					      //cout << "five weights\n";
+					      weights[0] = 0.0;
+					      weights[1] = 0.0;
+					      weights[2] = w1;				
+					      weights[3] = w2;				
+					      weights[4] = w3;				
+					      weights[5] = w4;				
+					      weights[6] = w5;				
+					      weights[7] = 0.0;
+					      weights[8] = 0.0;
+					      weights[9] = 0.0;
+					    //}
 				    }
 
 
@@ -366,7 +398,7 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 	  XTAL_count += 1;
 
 	  // See if things are going well 
-    	  if ((row%10000) == 0){
+    	  if ((row%100000) == 0){
 	      cout << "row " << row << endl;
 	      for (int ii = 0; ii < 10; ii++) { cout << "weights[" << ii << "] = " << weights[ii] << endl;}
 	      cout << "ratio = " << ratio << endl;

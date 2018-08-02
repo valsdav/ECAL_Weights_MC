@@ -15,8 +15,13 @@
 #include <vector>
 
 // Include Class Libraries for High Energy Physics
-#include "CLHEP/Matrix/Matrix.h"
-#include "CLHEP/Matrix/SymMatrix.h"
+//#include "CLHEP/Matrix/Matrix.h"
+//#include "CLHEP/Matrix/SymMatrix.h"
+
+#include "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/Build_CLHEP/install_directory/include/CLHEP/Matrix/Matrix.h"
+#include "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/Build_CLHEP/install_directory/include/CLHEP/Matrix/SymMatrix.h"
+#include "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/Build_CLHEP/install_directory/include/CLHEP/Matrix/defs.h"
+
 
 class ComputeWeights
 {
