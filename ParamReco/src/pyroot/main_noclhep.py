@@ -2,9 +2,8 @@
 # 2 August 2018
 
 from ROOT import *
-#from Bias_Curve_noclhep.py import *
-#from DOF_error_noclhep.py import *
-from _BD import *
+from Create_h import *
+from Read_Line import *
 import argparse
 import sys
 import time
@@ -23,10 +22,11 @@ import os
 #include <tuple>
 
 # Rewriting in PyROOT
-initial_time = int(time.time()) # initial time 
 #print 'Initial time = ',initial_time
 
 note = ""
+
+# Add feature for multiple plots? 
 
 def input_arguments():
 	parser = argparse.ArgumentParser(description='Choose what bias plots to create')
@@ -52,35 +52,67 @@ def input_arguments():
 def main():
 	args = input_arguments()
 
-	#print'args.DOF = ',args.DOF
-	#print'args = ',args
-	#print'args. = ',args.(0)
+	#c1 = TCanvas('c1','c1',800,600)
+	#h = create_h(args)
+	#h.Fill(2,0.2) 
+	#h.Fill(1,0.1)
+	#h.Fill(0,-0.2)
+	#c1.cd()
+	#h.Draw()
+	#c1.SaveAs("test.pdf")
 
-	#for i in args[i]:
-		#print 'i = ',i
-	
-	if args.BD:
-		print'Creating BD Plot'
-		BD_Plot(args)	
+	h = Create_h(args) 
 
-	elif args.BC:
-		print'Creating BC Plot'
-		BC_Plot(args)
-	
-	else:
-		print 'Please Choose a Plot type'
+	if not args.rows:
+		print 'Please choose how many rows to read in XTAL Parameters.'
 		sys.exit('Exiting')
+	print 'Reading',args.rows,'rows...'
+
+	if args.BC:
+		shifts = []
+		tsmin = h.GetXaxis().GetBinLowEdge(1)
+		dts = h.GetXaxis().GetBinWidth(1)
+
+		for i in range(h.GetNbinsX() + 1):
+			print'h.GetBinLowEdge(',i + 1,') = ',h.GetBinLowEdge(i + 1)
+			shifts.append(tsmin + i*dts)
+			#test
+			#h.Fill(shifts[i],i+2) 
+
+		for ts in shifts:
+			total_bias = 0.
+			print 'ts = ',ts
+			for line in range(int(args.rows)):
+				Read_Line(args,line) # return params and weights 
+				# Create_Waveform(params,ts) <- return TF1
+				# Extract_Sample(TF1) <- return samples array/list
+				# Calc_Bias(samples,weights,A) <-return bias. Loop over N rows. <- If BC< loop over M time shifts 
+				# total_bias += Calc_Bias
+			# Fill(total_bias / number_xtals)
+
+	if args.BD:
+		for line in range(int(args.rows)):
+			Read_Line(args,line+1) #<- Return params and weights. Weights read or hardcoded. 
+			# Create_Waveform() <- return TF1
+			# Extract_Sample() <- return samples 
+			# Calc_Bias() <-return bias. Loop over N rows. <- If BC< loop over M time shifts 
+			# fill histogram
+				
+	# Can combine functions into python files later if you want to. For now giving each its own file.
+	# plot(h) <- return BC or BD plot 
 
 if __name__ == "__main__":
+	initial_time = int(time.time()) # initial time 
+
 	main()
 
+	final_time = int(time.time()) # initial time 
+	total_time = float(final_time - initial_time) / 60.
+	print'total_time = ',total_time,'minutes'
 
-# Import argparser into DOF and BC functions for this 
-#if (ideal_weights) normalized_A = false
-#if (!ideal_weights) normalized_A = true 
+#---------------------------------------------------------------------------------------------------------------------------
 
-# Preset weights. Save for functions?
-#//double cmssw[10] = {-0.3812788, -0.3812788, -0.3812788, 0, 0.235699, 0.4228363, 0.3298652, 0.1575187, -0.002082776, 0};
+# Preset weights
 #double cmssw_EB[10] = {0, 0, -0.56, -0.55, 0.25, 0.48, 0.38, 0, 0, 0}; // Add up to zero
 #double cmssw_EE[10] = {0, 0, -0.65, -0.52, 0.25, 0.52, 0.50, 0, 0, 0}; // Don't add up to zero
 
@@ -88,6 +120,26 @@ if __name__ == "__main__":
 
 """
 
+	# Use when acquiring weights 
+	if args.online:
+		print 'Online weights Chosen'
+
+		#//double cmssw[10] = {-0.3812788, -0.3812788, -0.3812788, 0, 0.235699, 0.4228363, 0.3298652, 0.1575187, -0.002082776, 0};
+		EB_w = array('d',[0, 0, -0.56, -0.55, 0.25, 0.48, 0.38, 0, 0, 0])	
+		EE_w = array('d',[0, 0, -0.65, -0.52, 0.25, 0.52, 0.50, 0, 0, 0])
+		BC_h_title += ' Online Weights' # might save this for legend rather than title. 
+
+	elif args.weights: # Use specified weights path
+		print '<weights>.txt path Chosen' # Don't save, just access during amplitude calculation
+		BC_h_title += ' Ideal Weights' # legend 
+
+		#EB_w = 
+		#EE_w = 
+	
+	else:
+		print 'Specify either Online or path to file weights'
+		#print 'Exiting'
+		sys.exit('Exiting')
 
 
 	// Function variables
@@ -199,6 +251,11 @@ if __name__ == "__main__":
 """
 
 # Move all of this to separate plotting function.
+
+	# Should be able to use this for plotting values on same plot in h->g conversion.
+	#for i in range(h.GetNbinsX() + 1):
+		#print'ts = ',h.GetXaxis().GetBinLowEdge(i + 1)
+		#print'avg bias = ',h.GetBinContent(i + 1)
 
 """
 	// Should make plotting function eventually
