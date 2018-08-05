@@ -53,7 +53,7 @@ def Create_h(args):
 
 		if args.EEplus:
 			PB = [0,100,0,100]
-		h_title += ', Time Shift ' + args.ts + 'ns'
+		h_title += ', Time Shift ' + str(args.ts) + 'ns'
 
 	print 'PB =',PB
 	print 'h_title = ',h_title

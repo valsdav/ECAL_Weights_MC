@@ -4,27 +4,12 @@
 from ROOT import *
 from Create_h import *
 from Read_Line import *
+from Waveform import *
+from Calc_Bias import *
 import argparse
 import sys
 import time
 import os
-
-# C++ header files 
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <sstream>
-#include <iterator>
-#include <string>
-#include <chrono>
-#include <cmath>
-#include <tuple>
-
-# Rewriting in PyROOT
-#print 'Initial time = ',initial_time
-
-note = ""
 
 # Add feature for multiple plots? 
 
@@ -52,15 +37,6 @@ def input_arguments():
 def main():
 	args = input_arguments()
 
-	#c1 = TCanvas('c1','c1',800,600)
-	#h = create_h(args)
-	#h.Fill(2,0.2) 
-	#h.Fill(1,0.1)
-	#h.Fill(0,-0.2)
-	#c1.cd()
-	#h.Draw()
-	#c1.SaveAs("test.pdf")
-
 	h = Create_h(args) 
 
 	if not args.rows:
@@ -68,55 +44,76 @@ def main():
 		sys.exit('Exiting')
 	print 'Reading',args.rows,'rows...'
 
+	#if not args.weights:
+		#print'Online 
+	Online_EB_w = array('d',[0, 0, -0.56, -0.55, 0.25, 0.48, 0.38, 0, 0, 0])	
+	Online_EE_w = array('d',[0, 0, -0.65, -0.52, 0.25, 0.52, 0.50, 0, 0, 0])
+	weights = [] # define for function passing when online weights used
+
 	if args.BC:
 		shifts = []
 		tsmin = h.GetXaxis().GetBinLowEdge(1)
 		dts = h.GetXaxis().GetBinWidth(1)
 
 		for i in range(h.GetNbinsX() + 1):
-			print'h.GetBinLowEdge(',i + 1,') = ',h.GetBinLowEdge(i + 1)
+			#print'h.GetBinLowEdge(',i + 1,') = ',h.GetBinLowEdge(i + 1)
 			shifts.append(tsmin + i*dts)
-			#test
 			#h.Fill(shifts[i],i+2) 
+
+		print'Time Shifts: ',shifts
 
 		for ts in shifts:
 			total_bias = 0.
+			XTALS = 0
 			print 'ts = ',ts
 			for line in range(int(args.rows)):
-				Read_Line(args,line) # return params and weights 
-				# Create_Waveform(params,ts) <- return TF1
-				# Extract_Sample(TF1) <- return samples array/list
-				# Calc_Bias(samples,weights,A) <-return bias. Loop over N rows. <- If BC< loop over M time shifts 
-				# total_bias += Calc_Bias
-			# Fill(total_bias / number_xtals)
+				if (args.weights): # return params and weights 
+					params, weights = Read_Line(args, line) # return params 
 
-	if args.BD:
+				if (not args.weights): # return params and weights 
+					params = Read_Line(args, line) # return params 
+				
+				wf,tstart = Create_Waveform(params, ts) # TF1
+				samples = Sample_Waveform(wf,tstart) 
+
+				# If not skipping line: (Work line skipping into read line? Don't exit until params acquired?)
+				XTALS += 1
+				total_bias += Calc_Bias(args,params,samples,weights,Online_EB_w,Online_EE_w) # Add to num. xtals # Pass Online weights too
+				
+			h.Fill(ts, total_bias / XTALS)
+
+	# Here, last two elements of params are DOFs
+	if args.BD: 
+		ts = float(args.ts)
 		for line in range(int(args.rows)):
-			Read_Line(args,line+1) #<- Return params and weights. Weights read or hardcoded. 
-			# Create_Waveform() <- return TF1
-			# Extract_Sample() <- return samples 
-			# Calc_Bias() <-return bias. Loop over N rows. <- If BC< loop over M time shifts 
-			# fill histogram
+
+			if (args.weights): # return params and weights 
+				params, weights = Read_Line(args,line) # DOF too. Add to params? 
+
+			if (not args.weights): # return params 
+				params = Read_Line(args,line) # return params 
+			wf,tstart = Create_Waveform(params, ts) 
+			samples = Sample_Waveform(wf,tstart)
+			bias = Calc_Bias(args,params,samples,weights,Online_EB_w,Online_EE_w) #<-return bias. Loop over N rows. <- If BC< loop over M time shifts	
+			print'iphi = ',params[5]
+			print'ieta = ',params[6]
+			print'bias = ',bias
+			h.Fill(params[5], params[6], bias)
 				
 	# Can combine functions into python files later if you want to. For now giving each its own file.
-	# plot(h) <- return BC or BD plot 
+
+	c1 = TCanvas('c1','c1',800,600)
+	h.Draw()
+	c1.SaveAs('test.pdf')
 
 if __name__ == "__main__":
-	initial_time = int(time.time()) # initial time 
-
+	initial_time = int(time.time()) 
 	main()
-
-	final_time = int(time.time()) # initial time 
+	final_time = int(time.time())
 	total_time = float(final_time - initial_time) / 60.
-	print'total_time = ',total_time,'minutes'
+	print'Run Time: ',total_time,'minutes'
 
 #---------------------------------------------------------------------------------------------------------------------------
-
-# Preset weights
-#double cmssw_EB[10] = {0, 0, -0.56, -0.55, 0.25, 0.48, 0.38, 0, 0, 0}; // Add up to zero
-#double cmssw_EE[10] = {0, 0, -0.65, -0.52, 0.25, 0.52, 0.50, 0, 0, 0}; // Don't add up to zero
-
-# Save this for functions?
 
 """
 
