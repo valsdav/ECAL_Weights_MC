@@ -3,8 +3,8 @@ def Calc_Bias(args,params,samples,weights,Online_EB_w,Online_EE_w):
 	bias = 0.0
 	amplitude = 0.0
 
-	print'samples = ',samples
-	print'weights = ',weights
+	#print'samples = ',samples
+	#print'weights = ',weights
 
 	for i in range(len(samples)):
 		if (args.online):

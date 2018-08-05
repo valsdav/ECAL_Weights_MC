@@ -49,6 +49,7 @@ def main():
 	Online_EB_w = array('d',[0, 0, -0.56, -0.55, 0.25, 0.48, 0.38, 0, 0, 0])	
 	Online_EE_w = array('d',[0, 0, -0.65, -0.52, 0.25, 0.52, 0.50, 0, 0, 0])
 	weights = [] # define for function passing when online weights used
+	params = []
 
 	if args.BC:
 		shifts = []
@@ -68,41 +69,56 @@ def main():
 			print 'ts = ',ts
 			for line in range(int(args.rows)):
 				last_line = False
-				while(not last_line):
-					if (args.weights): # return params and weights 
-						params, weights, last_line = Read_Line(args, line, last_line) # return params 
+				#while(not last_line):
+				if (args.weights): # return params and weights 
+					params, weights, last_line = Read_Line(args, line, last_line) # return params 
 
-					if (not args.weights): # return params and weights 
-						params, last_line = Read_Line(args, line) # return params 
-				
-					wf,tstart = Create_Waveform(params, ts) # TF1
-					samples = Sample_Waveform(wf,tstart) 
+				if (not args.weights): # return params and weights 
+					params, last_line = Read_Line(args, line) # return params 
+			
+				wf,tstart = Create_Waveform(params, ts) # TF1
+				samples = Sample_Waveform(wf,tstart) 
 
-					# If not skipping line: (Work line skipping into read line? Don't exit until params acquired?)
-					XTALS += 1
-					total_bias += Calc_Bias(args,params,samples,weights,Online_EB_w,Online_EE_w) # Add to num. xtals # Pass Online weights too
+				# If not skipping line: (Work line skipping into read line? Don't exit until params acquired?)
+				XTALS += 1
+				total_bias += Calc_Bias(args,params,samples,weights,Online_EB_w,Online_EE_w) # Add to num. xtals # Pass Online weights too
+				if (last_line):
+					print'Read_Line declared this the last line. Ceasing to read lines'
+					break
 				
 			h.Fill(ts, total_bias / XTALS)
 
 	# Here, last two elements of params are DOFs
+	count = 0
+	pre_extra = 0
+
 	if args.BD: 
 		ts = float(args.ts)
 		for line in range(int(args.rows)):
 			
+			skip_line = False
 			last_line = False
-			while(not last_line):
-				if (args.weights): # return params and weights 
-					params, weights, last_line = Read_Line(args,line, last_line) # DOF too. Add to params? 
+			#while(not last_line):
+			if (args.weights): # return params and weights 
+				params, weights, last_line, pre_extra, skip_line = Read_Line(args,line, last_line,pre_extra) # DOF too. Add to params? 
 
-				if (not args.weights): # return params 
-					params, last_line = Read_Line(args,line, last_line) # return params 
+			if (not args.weights): # return params 
+				params, last_line, pre_extra = Read_Line(args,line, last_line,pre_extra) # return params 
+			if (not skip_line):
 				wf,tstart = Create_Waveform(params, ts) 
 				samples = Sample_Waveform(wf,tstart)
 				bias = Calc_Bias(args,params,samples,weights,Online_EB_w,Online_EE_w) #<-return bias. Loop over N rows. <- If BC< loop over M time shifts	
-				print'iphi = ',params[5]
-				print'ieta = ',params[6]
-				print'bias = ',bias
+				#print'iphi = ',params[5]
+				#print'ieta = ',params[6]
+				#print'bias = ',bias
+				#print'params = ',params
 				h.Fill(params[5], params[6], bias)
+				count += 1
+			if (count%1000 == 0):
+				print'line = ',count
+			if (last_line):
+				print'Read_Line declared this the last line. Ceasing to read lines'
+				break
 				
 	# Can combine functions into python files later if you want to. For now giving each its own file.
 
