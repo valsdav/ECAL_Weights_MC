@@ -67,18 +67,20 @@ def main():
 			XTALS = 0
 			print 'ts = ',ts
 			for line in range(int(args.rows)):
-				if (args.weights): # return params and weights 
-					params, weights = Read_Line(args, line) # return params 
+				last_line = False
+				while(not last_line):
+					if (args.weights): # return params and weights 
+						params, weights, last_line = Read_Line(args, line, last_line) # return params 
 
-				if (not args.weights): # return params and weights 
-					params = Read_Line(args, line) # return params 
+					if (not args.weights): # return params and weights 
+						params, last_line = Read_Line(args, line) # return params 
 				
-				wf,tstart = Create_Waveform(params, ts) # TF1
-				samples = Sample_Waveform(wf,tstart) 
+					wf,tstart = Create_Waveform(params, ts) # TF1
+					samples = Sample_Waveform(wf,tstart) 
 
-				# If not skipping line: (Work line skipping into read line? Don't exit until params acquired?)
-				XTALS += 1
-				total_bias += Calc_Bias(args,params,samples,weights,Online_EB_w,Online_EE_w) # Add to num. xtals # Pass Online weights too
+					# If not skipping line: (Work line skipping into read line? Don't exit until params acquired?)
+					XTALS += 1
+					total_bias += Calc_Bias(args,params,samples,weights,Online_EB_w,Online_EE_w) # Add to num. xtals # Pass Online weights too
 				
 			h.Fill(ts, total_bias / XTALS)
 
@@ -86,24 +88,27 @@ def main():
 	if args.BD: 
 		ts = float(args.ts)
 		for line in range(int(args.rows)):
+			
+			last_line = False
+			while(not last_line):
+				if (args.weights): # return params and weights 
+					params, weights, last_line = Read_Line(args,line, last_line) # DOF too. Add to params? 
 
-			if (args.weights): # return params and weights 
-				params, weights = Read_Line(args,line) # DOF too. Add to params? 
-
-			if (not args.weights): # return params 
-				params = Read_Line(args,line) # return params 
-			wf,tstart = Create_Waveform(params, ts) 
-			samples = Sample_Waveform(wf,tstart)
-			bias = Calc_Bias(args,params,samples,weights,Online_EB_w,Online_EE_w) #<-return bias. Loop over N rows. <- If BC< loop over M time shifts	
-			print'iphi = ',params[5]
-			print'ieta = ',params[6]
-			print'bias = ',bias
-			h.Fill(params[5], params[6], bias)
+				if (not args.weights): # return params 
+					params, last_line = Read_Line(args,line, last_line) # return params 
+				wf,tstart = Create_Waveform(params, ts) 
+				samples = Sample_Waveform(wf,tstart)
+				bias = Calc_Bias(args,params,samples,weights,Online_EB_w,Online_EE_w) #<-return bias. Loop over N rows. <- If BC< loop over M time shifts	
+				print'iphi = ',params[5]
+				print'ieta = ',params[6]
+				print'bias = ',bias
+				h.Fill(params[5], params[6], bias)
 				
 	# Can combine functions into python files later if you want to. For now giving each its own file.
 
+	gROOT.SetBatch(1)
 	c1 = TCanvas('c1','c1',800,600)
-	h.Draw()
+	h.Draw("COLZ1")
 	c1.SaveAs('test.pdf')
 
 if __name__ == "__main__":
