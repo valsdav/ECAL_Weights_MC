@@ -5,7 +5,7 @@
 # https://www-zeuthen.desy.de/~middell/public/pyroot/pyroot.html
 
 from ROOT import *
-from array import *
+from array import array
 import os
 #import argparse
 
@@ -13,6 +13,8 @@ import os
 
 def Plot_BCs(args):
 
+
+	print'In Plot_BCs'
 	#parser = argparse.ArgumentParser(description='Process some files')
 	#parser.add_argument('-f', '--files', type = str, nargs='+' , help='files to plot from')
 	#parser.add_argument('-d', '--directory', type = str, nargs='+',  help='directory to root files')
@@ -25,11 +27,11 @@ def Plot_BCs(args):
 	# Find all files in current working directory ending in ".root"
 	# for data_folder path in current directory
 	#for file in os.listdir(str(os.getcwd()) + '/' + str(data_folder)):
-	for file in os.listdir(str(os.getcwd()) + '/plot_data/plot'):
+	for file in os.listdir(str(os.getcwd()) + '/' + 'plot_data/plot'):
 	    if file.endswith(".root"):
 		print(os.path.join(file))
-		#paths.append(str(data_folder) + '/' + os.path.join(file))
-		paths.append('plot_data/plot/' + os.path.join(file))
+		paths.append('plot_data/plot' + '/' + os.path.join(file))
+		#paths.append('plot_data/plot/' + os.path.join(file))
 
 	print "paths = ",paths
 
@@ -102,16 +104,22 @@ def Plot_BCs(args):
 
 		x = array('d')
 		y = array('d')
+		
+		
 
 		#print'x = ',x
 		#print'y = ',y
 
 		#while(hist.GetBinContent(counter) != 0):
-		"""while(counter < 40):
+		# While value doesn't equal previous value 
+		while(counter < 40):
 			#print ("hist.GetXaxis().GetBinContent(" + str(counter) + ") = " + str(hist.GetXaxis().GetBinLowEdge(counter)))
 			ts = hist.GetXaxis().GetBinLowEdge(counter)
 			#print ("hist.GetBinContent(" + str(counter) + ") = " + str(hist.GetBinContent(counter)))
 			value = hist.GetBinContent(counter)
+			if (value == hist.GetBinContent(counter-1)):
+				print'Breaking loop'
+				break
 
 			#cout << "abs(" << value << ") = " << abs(value) << endl;
 			#h2->Fill(ts,fabs(value));
@@ -121,19 +129,26 @@ def Plot_BCs(args):
 			print("ts = " + str(ts) )
 			print("value = " + str(value) )
 			print("counter = " + str(counter) )
+			
 			ts += dt
 			counter += 1
 
 		#graphs[h - 1] = TGraph(counter - 1, x, y)
-		graphs[h - 1] = TGraph(counter - 1,x,y)"""
+		#print'out of while'
+		graphs[h - 1] = TGraph(counter - 1,x,y)
+		#print'after graph line'
 
 	i = 0
+
+	print'before graph loop'	
 
 	for g in graphs:
 		g.SetMarkerStyle(8)
 		g.SetMarkerColor(2+i)
 		g.SetLineColor(2+i)
 		i += 1	
+
+	print'after graph loop'
 
 	#graphs[0].SetMarkerColor(kBlue)
 	#graphs[0].SetLineColor(kBlue)
@@ -164,6 +179,8 @@ def Plot_BCs(args):
 		g.SetName("g" + str(i))
 		i += 1
 
+	print'after loop'
+
 	#if (abs_val): l1 = TLegend(0.5, 0.5, 0.8, 0.8)
 	#else: l1 = TLegend(0.7, 0.1, 0.9, 0.3)
 	#else: l1 = TLegend(0.5, 0.1, 0.8, 0.4)
@@ -190,17 +207,17 @@ def Plot_BCs(args):
 	for g in graphs:
 		mg.Add(g, "LP")
 
-	mg.SetTitle(section + " Average Bias vs. Time Shift")
-
+	#mg.SetTitle(section + " Average Bias vs. Time Shift")
+	mg.SetTitle("Title")
 	c0 = TCanvas('c0', 'c0', 800, 600)
 	c0.SetBatch(kTRUE)
 
 	mg.Draw("A")
-	mg.GetXaxis().SetTitle("Time Shift (ns)")
+	#mg.GetXaxis().SetTitle("Time Shift (ns)")
 	#mg.GetXaxis().SetRangeUser(-3,3)
 	#mg.GetYaxis().SetRangeUser(-0.04,0.02)
-	mg.GetYaxis().SetTitle("Average Bias")
-	mg.GetYaxis().SetTitleOffset(1.3)
+	#mg.GetYaxis().SetTitle("Average Bias")
+	#mg.GetYaxis().SetTitleOffset(1.3)
 
 
 	xline = TLine(c0.GetUxmin(),0,c0.GetUxmax(),0)
@@ -213,10 +230,12 @@ def Plot_BCs(args):
 	yline.SetLineColor(kBlack)
 	yline.SetLineStyle(1)
 
-	l1.Draw("SAME")
-	xline.Draw("SAME")
-	yline.Draw("SAME")
+	#l1.Draw("SAME")
+	#xline.Draw("SAME")
+	#yline.Draw("SAME")
 
-	Save_Title = "plots/plot" + section + str(int(histos[0].GetXaxis().GetBinLowEdge(1))) + ".pdf"
+	#Save_Title = "plots/plot" + section + str(int(histos[0].GetXaxis().GetBinLowEdge(1))) + ".pdf"
 
-	c0.SaveAs(Save_Title)
+	#c0.SaveAs(Save_Title)
+
+

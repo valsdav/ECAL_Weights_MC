@@ -21,10 +21,10 @@ def Save_h(args,h):
 		add2name += 'EE+_'
 
 	if args.weights:
-		add2name += ( str(args.weights.split('.')[-2]) + '_' + str(int(time.time())) )
+		add2name += str(args.weights.split('.')[-2]) + '_' + str(int(time.time())) 
 
 	if args.online:
-		add2name += ( 'online_' + str(int(time.time())) )
+		add2name += 'online_' + str(int(time.time())) 
 
 	if args.BC:
 
@@ -43,13 +43,13 @@ def Save_h(args,h):
 		root_name = 'plot_data/plot/'
 		pdf_name = 'pdfs/BC_Plot_'
 
-		pdf_name += ( add2name + '.pdf' )
-		root_name += ( add2name + '.root' )
+		pdf_name += add2name + '.pdf' 
+		root_name += add2name + '.root' 
 		
 		c1.SaveAs(pdf_name) # Canvas screenshot
 		h.SaveAs(root_name) # Editable histogram
-		
-		return
+		print'in plot saving'		
+		#return
 
 
 	if args.BD:
@@ -77,17 +77,17 @@ def Save_h(args,h):
 		root_name = 'root/BD_Plot_'
 		pdf_name = 'pdfs/BD_Plot_'
 
-		pdf_name += ( add2name + '.pdf' )
-		root_name += ( add2name + '.root' )
+		pdf_name += add2name + '.pdf' 
+		root_name += add2name + '.root' 
 		
 		c1.SaveAs(pdf_name) # Canvas screenshot
 		h.SaveAs(root_name) # Editable histogram
 
-		f = TFile(root_name,"NEW");
-		h.Write();
+		#f = TFile(root_name,"NEW");
+		#h.Write();
 		#values->Write();
 	
-		f.Write()
-		f.Close()
+		#f.Write()
+		#f.Close()
 	
-		return 
+		#return 

@@ -7,7 +7,8 @@ from Read_Line import *
 from Waveform import *
 from Calc_Bias import *
 from Save_h import *
-from Plot import *
+from BCPlot import *
+from array import *
 import argparse
 import sys
 import time
@@ -42,11 +43,13 @@ def main():
 
 	if args.BC or args.BD:
 		h = Create_h(args) 
+	#h = Create_h(args)
 
 	if (args.BC or args.BD) and (not args.rows):
 		print 'Please choose how many rows to read in XTAL Parameters.'
 		sys.exit('Exiting')
-	print 'Reading',args.rows,'rows...'
+	if (args.rows):
+		print 'Reading',args.rows,'rows...'
 
 	#if not args.weights:
 		#print'Online 
@@ -143,7 +146,11 @@ def main():
 		Save_h(args,h) # Save histogram pdf and root 
 	
 	if args.BCPlot:
+		print'BCPlot chosen'
 		Plot_BCs(args) # plot all BC's
+
+	print'Finished'
+	
 
 if __name__ == "__main__":
 	initial_time = int(time.time()) 
