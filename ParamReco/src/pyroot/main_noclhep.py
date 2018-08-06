@@ -6,6 +6,8 @@ from Create_h import *
 from Read_Line import *
 from Waveform import *
 from Calc_Bias import *
+from Save_h import *
+from Plot import *
 import argparse
 import sys
 import time
@@ -15,6 +17,7 @@ import os
 
 def input_arguments():
 	parser = argparse.ArgumentParser(description='Choose what bias plots to create')
+	parser.add_argument('-BCPlot', action='store_true', help='Plot BC Root files in plot_data/plot')
 	parser.add_argument('-EB',  action='store_true', help='Create plot for Barrel')
 	parser.add_argument('-EEminus'  ,  action='store_true', help='Create plot for EE-')
 	parser.add_argument('-EEplus'  ,  action='store_true', help='Create plot for EE+')
@@ -37,9 +40,10 @@ def input_arguments():
 def main():
 	args = input_arguments()
 
-	h = Create_h(args) 
+	if args.BC or args.BD:
+		h = Create_h(args) 
 
-	if not args.rows:
+	if (args.BC or args.BD) and (not args.rows):
 		print 'Please choose how many rows to read in XTAL Parameters.'
 		sys.exit('Exiting')
 	print 'Reading',args.rows,'rows...'
@@ -50,6 +54,17 @@ def main():
 	Online_EE_w = array('d',[0, 0, -0.65, -0.52, 0.25, 0.52, 0.50, 0, 0, 0])
 	weights = [] # define for function passing when online weights used
 	params = []
+
+	count = 0 # number times through loop
+	DOF_Skip = 0
+	Param_Skip = 0
+
+	if args.EEminus or args.EEplus: 
+		Param_Skip += 60493 # Skip EB params
+
+	if args.EEplus:
+		Param_Skip += 7209 # Skip EE- params. Note this has less entries than number of EE- XTALS
+		DOF_Skip += 7324 # Skip EE- DOF's 
 
 	if args.BC:
 		shifts = []
@@ -68,29 +83,30 @@ def main():
 			XTALS = 0
 			print 'ts = ',ts
 			for line in range(int(args.rows)):
+				skip_line = False
 				last_line = False
+
 				#while(not last_line):
 				if (args.weights): # return params and weights 
-					params, weights, last_line = Read_Line(args, line, last_line) # return params 
+					params, weights, last_line, skip_line = Read_Line(args, line, last_line, DOF_Skip, Param_Skip) # return params 
 
 				if (not args.weights): # return params and weights 
-					params, last_line = Read_Line(args, line) # return params 
+					params, last_line, skip_line = Read_Line(args, line, last_line, DOF_Skip, Param_Skip) # return params 
 			
-				wf,tstart = Create_Waveform(params, ts) # TF1
-				samples = Sample_Waveform(wf,tstart) 
-
-				# If not skipping line: (Work line skipping into read line? Don't exit until params acquired?)
-				XTALS += 1
-				total_bias += Calc_Bias(args,params,samples,weights,Online_EB_w,Online_EE_w) # Add to num. xtals # Pass Online weights too
+				if (not skip_line):
+					wf,tstart = Create_Waveform(params, ts) # TF1
+					samples = Sample_Waveform(wf,tstart) 
+					total_bias += Calc_Bias(args,params,samples,weights,Online_EB_w,Online_EE_w) # Add to num. xtals # Pass Online weights too
+					XTALS += 1
+				if (XTALS%500 == 0):
+					print'Reading Line ',XTALS
 				if (last_line):
-					print'Read_Line declared this the last line. Ceasing to read lines'
+					print'Read_Line declared this the last line. Stopping file reading.'
 					break
 				
 			h.Fill(ts, total_bias / XTALS)
 
 	# Here, last two elements of params are DOFs
-	count = 0
-	pre_extra = 0
 
 	if args.BD: 
 		ts = float(args.ts)
@@ -98,12 +114,10 @@ def main():
 			
 			skip_line = False
 			last_line = False
-			#while(not last_line):
-			if (args.weights): # return params and weights 
-				params, weights, last_line, pre_extra, skip_line = Read_Line(args,line, last_line,pre_extra) # DOF too. Add to params? 
-
+			if (args.weights): # return params (+ DOF), weights 
+				params, weights, last_line, DOF_Skip, skip_line = Read_Line(args,line,last_line,DOF_Skip,Param_Skip) 
 			if (not args.weights): # return params 
-				params, last_line, pre_extra = Read_Line(args,line, last_line,pre_extra) # return params 
+				params, last_line, DOF_Skip, skip_line = Read_Line(args,line,last_line,DOF_Skip,Param_Skip) # return params 
 			if (not skip_line):
 				wf,tstart = Create_Waveform(params, ts) 
 				samples = Sample_Waveform(wf,tstart)
@@ -114,18 +128,22 @@ def main():
 				#print'params = ',params
 				h.Fill(params[5], params[6], bias)
 				count += 1
-			if (count%1000 == 0):
-				print'line = ',count
+				
+			if (skip_line):
+				print'Skipping Line ',line
+			if (count%500 == 0):
+				print'Reading line ',count
 			if (last_line):
-				print'Read_Line declared this the last line. Ceasing to read lines'
+				print'Last line reached. Stopping file reading.'
 				break
 				
 	# Can combine functions into python files later if you want to. For now giving each its own file.
 
-	gROOT.SetBatch(1)
-	c1 = TCanvas('c1','c1',800,600)
-	h.Draw("COLZ1")
-	c1.SaveAs('test.pdf')
+	if (args.BC or args.BD):
+		Save_h(args,h) # Save histogram pdf and root 
+	
+	if args.BCPlot:
+		Plot_BCs(args) # plot all BC's
 
 if __name__ == "__main__":
 	initial_time = int(time.time()) 
@@ -137,49 +155,6 @@ if __name__ == "__main__":
 #---------------------------------------------------------------------------------------------------------------------------
 
 """
-
-	# Use when acquiring weights 
-	if args.online:
-		print 'Online weights Chosen'
-
-		#//double cmssw[10] = {-0.3812788, -0.3812788, -0.3812788, 0, 0.235699, 0.4228363, 0.3298652, 0.1575187, -0.002082776, 0};
-		EB_w = array('d',[0, 0, -0.56, -0.55, 0.25, 0.48, 0.38, 0, 0, 0])	
-		EE_w = array('d',[0, 0, -0.65, -0.52, 0.25, 0.52, 0.50, 0, 0, 0])
-		BC_h_title += ' Online Weights' # might save this for legend rather than title. 
-
-	elif args.weights: # Use specified weights path
-		print '<weights>.txt path Chosen' # Don't save, just access during amplitude calculation
-		BC_h_title += ' Ideal Weights' # legend 
-
-		#EB_w = 
-		#EE_w = 
-	
-	else:
-		print 'Specify either Online or path to file weights'
-		#print 'Exiting'
-		sys.exit('Exiting')
-
-
-	// Function variables
-	double total = 0.0;
-	double total_error_ = 0.0;
-	int count = 0;
-	double avg_bias = 0.0;
-
-	# Shouldn't be necessary anymore 
-	// Call Functions
-
-	if (plot_te){
-		ts = 0.0;
-		double XTAL_count = 0;
-		for (ts = ts_min; ts < ts_max + dts; ts += dts){
-			// total = total_error()
-			tie(total, XTAL_count) = total_error(max_rows, ts, EB_w, EE_w, plot_EB, plot_EE, plot_EE_minus, plot_EE_plus, normalized_A, normalized_t0, ideal_weights);
-			tsr->Fill(ts,total/XTAL_count); // want this to also return number of entries so average can be taken and plotted.
-			cout << "ts = " << ts << ", total = " << total << ", XTAL_count = " << XTAL_count << "\n";
-		  }
-
-	}
 
 	double max_bias = 0.0;
 
@@ -278,161 +253,5 @@ if __name__ == "__main__":
 """
 	// Should make plotting function eventually
 
-	//gStyle->SetOptStat(0); // no stats box
 
-	TCanvas *c1 = new TCanvas("c1","c1",800,600);
-
-	if (plot_te){
-
-		c1->cd();
-		tsr->Draw("HIST");
-		c1->Update();
-		//EB->GetZaxis()->SetRangeUser(zmin,zmax); // for DOF plot
-		//tsr->GetZaxis()->SetLabelSize(0.02); // for DOF plot
-		tsr->GetXaxis()->SetTitle("Time Shift (ns)");
-		tsr->GetXaxis()->SetTitleOffset(1.2);
-		//tsr->GetYaxis()->SetTitle("Total Error"); // Write in latex? 
-		//tsr->GetYaxis()->SetTitle("#sum_{XTALS}^{}Error");
-		tsr->GetYaxis()->SetTitle("bias");
-		tsr->GetYaxis()->SetTitleOffset(1.4);
-		tsr->Draw("HIST");
-		ostringstream error_plot_root, error_plot_pdf;
-		error_plot_root << "bin/te_Plot";
-		error_plot_pdf << "bin/te_Plot"; 
-
-		if (plot_EB){	
-		  error_plot_root << "_EB_";
-		  error_plot_pdf << "_EB_";
-		}
-
-		if (plot_EE){
-		  error_plot_root << "_EE";
-		  error_plot_pdf << "_EE";
-
-		  if (plot_EE_minus){
-			error_plot_root << "-_";	
-			error_plot_pdf << "-_";	
-		    }
-
-		  if (plot_EE_plus){
-			error_plot_root << "+_";	
-			error_plot_pdf << "+_";	
-		    }
-
-		}
-
-		if (ideal_weights){
-			error_plot_root << "idealweights"  << ts_max << "_" << note << current_time << ".root";
-			error_plot_pdf << "idealweights"  << ts_max << "_"<< note << current_time << ".pdf";
-		  }
-
-		if (!ideal_weights){ 
-			error_plot_root << "singleweights" << "_" << note << current_time << ".root";
-			error_plot_pdf << "singleweights" << "_" << note << current_time << ".pdf";
-		  }
-
-		TString rooterrortitle = error_plot_root.str();
-		TString pdferrortitle = error_plot_pdf.str();
-
-		c1->SaveAs(pdferrortitle); // Canvas screenshot
-		tsr->SaveAs(rooterrortitle); // Editable histogram
-
-	}
-
-	avg_bias = total_error_ / count;
-
-	if (plot_e){
-
-		c1->cd();
-		//sts->Draw();
-		c1->Update();
-		//EB->GetZaxis()->SetRangeUser(zmin,zmax); // for DOF plot
-		//tsr->GetZaxis()->SetLabelSize(0.02); // for DOF plot
-		if (plot_EB){
-			sts->GetXaxis()->SetTitle("iEta");
-			sts->GetYaxis()->SetTitle("iPhi");	
-			}
-		if (plot_EE){
-			sts->GetXaxis()->SetTitle("ix");
-			sts->GetYaxis()->SetTitle("iy");
-			}
-		sts->GetXaxis()->SetTitleOffset(1.1);
-		sts->GetYaxis()->SetTitleOffset(1.2);
-		sts->GetZaxis()->SetLabelSize(0.02);
-		gStyle->SetOptStat(0);
-		sts->GetZaxis()->SetRangeUser(-0.08,0.12);
-		sts->Draw("COLZ1"); // COLZ1 to not color zeros
-	
-		ostringstream plot_title;
-		//plot_title << "";
-
-		ostringstream error_plot_root, error_plot_pdf;
-		error_plot_root << "bin/DOF_Plot";
-		error_plot_pdf << "bin/DOF_Plot"; 
-
-		if (plot_EB){	
-		  error_plot_root << "_EB_";
-		  error_plot_pdf << "_EB_";
-		  plot_title << "EB, ";
-		}
-
-		if (plot_EE){
-		  error_plot_root << "_EE";
-		  error_plot_pdf << "_EE";
-		  plot_title << "EE";
-
-		  if (plot_EE_minus){
-			error_plot_root << "-_";	
-			error_plot_pdf << "-_";	
-			plot_title << "-, ";
-		    }
-
-		  if (plot_EE_plus){
-			error_plot_root << "+_";	
-			error_plot_pdf << "+_";	
-			plot_title << "+, ";
-		    }
-
-		}
-
-		if (ideal_weights){
-			error_plot_root << "idealweights" << note << current_time << ".root";
-			error_plot_pdf << "idealweights" << note << current_time << ".pdf";
-			plot_title << "Ideal Weights, ";
-		  }
-
-		if (!ideal_weights){ 
-			error_plot_root << "onlineweights" << note << current_time << ".root";
-			error_plot_pdf << "onlineweights" << note << current_time << ".pdf";
-			plot_title << "Online Weights, ";
-		  }
-	
-		plot_title << "ts = " << ts; // ",  Avg Bias = " << avg_bias;
-
-		TString plottitle = plot_title.str();
-		sts->SetTitle(plottitle);
-		TString rooterrortitle = error_plot_root.str();
-		TString pdferrortitle = error_plot_pdf.str();
-
-		TFile *f = new TFile(rooterrortitle,"NEW");
-		sts->Write();
-		values->Write();
-
-		cout << "total error = " << total_error_ << endl;	
-		cout << "max bias = " << max_bias << endl;
-	
-		//f->Write();
-		//f->Close();
-		c1->SaveAs(pdferrortitle); // Canvas screenshot
-		//sts->SaveAs(rooterrortitle); // Editable Histogram
-		//sts->SaveAs("EEPlot.root");
-	}
-
-	cout.precision(4);
-	time_t final_time = time(0);
-	time_t total_time = (final_time - initial_time);
-	cout << "Total time: " << total_time / 60. << " minutes\n";
-
-	return 0;
-	}
 """

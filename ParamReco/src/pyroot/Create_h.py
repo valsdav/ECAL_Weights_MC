@@ -59,9 +59,9 @@ def Create_h(args):
 	print 'h_title = ',h_title
 
 	if args.BC: 
-		h = TH1F("BC_h", h_title, PB[0], PB[1], PB[2])
+		h = TH1F("h", h_title, PB[0], PB[1], PB[2])
 	if args.BD: 
-		h = TH2F("BD_h", h_title, ( PB[1] - PB[0] ) , PB[0], PB[1], ( PB[3]-PB[2] ) , PB[2], PB[3])
+		h = TH2F("h", h_title, ( PB[1] - PB[0] ) , PB[0], PB[1], ( PB[3]-PB[2] ) , PB[2], PB[3])
 
 	return h # can also return list of multiple histograms. 
 
