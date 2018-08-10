@@ -22,13 +22,9 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
   	inFile.open("data/XTAL_Params_2018.txt"); // apply XTAL_Params to in file stream
 
         ifstream inweightsFile;
-<<<<<<< HEAD
         //inweightsFile.open("data/NegWeights.txt"); // precomputed weights 
-	inweightsFile.open("data/PedSub1+4.txt"); // precomputed weights 
-=======
         inweightsFile.open("data/PedSub1+4_2018.txt"); // precomputed weights 
 
->>>>>>> Weights_Test
 
   	if (!inFile) {
   	  cout << "Unable to open Param file\n";
@@ -211,12 +207,9 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 
 			// Need to handle 5 or 10 weights. 
 
-<<<<<<< HEAD
 			//if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5 >> w6 >> w7 >> w8 >> w9 >> w10)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
-			if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
-=======
+			//if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
 			if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5 >> w6 >> w7 >> w8 >> w9 >> w10)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
->>>>>>> Weights_Test
 	
 	
 			//if(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_){ // if line has numbers, see if ID's match. 
@@ -266,7 +259,6 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 				    //cout << "ID matches weights' ID\n";
 					
 				    if (ideal_weights){
-<<<<<<< HEAD
 
 					    // Check if there are ten weights
 					    //if (ww >> w1 >> w2 >> w3 >> w4 >> w5 >> w6 >> w7 >> w8 >> w9 >> w10){
@@ -286,18 +278,6 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 					    // If not, assume five 
 					   // else{
 					      //cout << "five weights\n";
-					      weights[0] = 0.0;
-					      weights[1] = 0.0;
-					      weights[2] = w1;				
-					      weights[3] = w2;				
-					      weights[4] = w3;				
-					      weights[5] = w4;				
-					      weights[6] = w5;				
-					      weights[7] = 0.0;
-					      weights[8] = 0.0;
-					      weights[9] = 0.0;
-					    //}
-=======
 					    weights[0] = w1;
 					    weights[1] = w2;
 					    weights[2] = w3;				
@@ -308,7 +288,6 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 					    weights[7] = w8;
 					    weights[8] = w9;
 					    weights[9] = w10;
->>>>>>> Weights_Test
 				    }
 
 				  //for (int l = 0; l < 10; l++)

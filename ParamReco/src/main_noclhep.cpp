@@ -41,14 +41,11 @@ int main()
 
 	// Make tree to store info such as XTAL count and total error 
 
-<<<<<<< HEAD
 	string note = "PedSub1+4";
 	//string note = "Online";
-=======
 	//TH1F *errors = new TH1F("errors","A/A - 1", 100, -1, 1);
 
-	string note = "2018";	
->>>>>>> Weights_Test
+	//string note = "2018";	
 
 	// Customize One Plot
 
@@ -58,8 +55,8 @@ int main()
 	bool plot_EB = false; // Make desired plots for Barrel
 	bool plot_EE = true; // Make desired plots for Endcap
 
-	bool plot_EE_minus = true; // Set one of these to true only if plot_EE is set to true
-	bool plot_EE_plus = false;
+	bool plot_EE_minus = false; // Set one of these to true only if plot_EE is set to true
+	bool plot_EE_plus = true;
 
 	// Weights
 	
