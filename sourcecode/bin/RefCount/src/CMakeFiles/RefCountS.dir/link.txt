@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc ../../lib/libCLHEP-RefCount-2.3.4.5.a  CMakeFiles/RefCountS.dir/ZMuseCount.cc.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib ../../lib/libCLHEP-RefCount-2.3.4.5.a

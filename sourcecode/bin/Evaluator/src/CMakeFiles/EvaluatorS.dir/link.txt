@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc ../../lib/libCLHEP-Evaluator-2.3.4.5.a  CMakeFiles/EvaluatorS.dir/Evaluator.cc.o CMakeFiles/EvaluatorS.dir/setStdMath.cc.o CMakeFiles/EvaluatorS.dir/setSystemOfUnits.cc.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib ../../lib/libCLHEP-Evaluator-2.3.4.5.a

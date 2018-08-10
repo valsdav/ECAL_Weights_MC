@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc ../../lib/libCLHEP-RandomObjects-2.3.4.5.a  CMakeFiles/RandomObjectsS.dir/RandMultiGauss.cc.o CMakeFiles/RandomObjectsS.dir/RandomVector.cc.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib ../../lib/libCLHEP-RandomObjects-2.3.4.5.a

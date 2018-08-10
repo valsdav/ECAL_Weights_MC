@@ -1,1 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/c++  -O -pedantic -Wall  -std=c++11 -O2 -g   -Wl,-search_paths_first -Wl,-headerpad_max_install_names  CMakeFiles/testBasicVector3D.dir/testBasicVector3D.cc.o  -o testBasicVector3D ../../lib/libCLHEP-Geometry-2.3.4.5.a ../../lib/libCLHEP-Geometry-2.3.4.5.a ../../lib/libCLHEP-Vector-2.3.4.5.a 
