@@ -24,10 +24,10 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	// weights.txt: (rawid, desired number of weights)
 
   	ifstream inFile; // Input File stream class object  
-  	inFile.open("data/XTAL_Params.txt"); // apply XTAL_Params to in file stream
+  	inFile.open("data/XTAL_Params_2018.txt"); // apply XTAL_Params to in file stream
 
         ifstream inweightsFile;
-        inweightsFile.open("data/NoPedSub.txt"); // precomputed weights 
+        inweightsFile.open("data/PedSub1+4_2018.txt"); // precomputed weights 
 
   	if (!inFile) {
   	  cout << "Unable to open Param file\n";
@@ -126,13 +126,21 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 
 	   if(s >> d1 >> d2 >> d3 >> d4 >> d5){ // XTAL_params row has numbers    
 
-		if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ){
+		// 2018 Params
+		if ( (d1 == 838864037) || (d1 == 838869123) || (d1 == 838874865) || (d1 == 838891641) || (d1 == 838958295) || (d1 == 838966532) ){ 
+		skip_this_line = true;
+		row += 1;
+		cout << "Line skipped by hand.\n";
+		return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full);
+
+		// 2017 Params
+		/*if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ){
 			skip_this_line = true;
 			row += 1;
 			cout << "Line skipped by hand.\n";
 			return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
 
-		  } // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful.   
+		  }*/ // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful.   
 		
 		double weights[10] = {0.}; // reset weights for current line  
 		string Parameters;
@@ -210,7 +218,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 			//cout << "Extra_lines = " << extra_lines << "\n";
 
 	      		double d1_, d2_, d3_, d4_, d5_, d6_;
-			double w0, w1, w2, w3, w4, w5, w6;
+			double w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10;
 
 			// EB: d1_ = ID, d4_ = iphi, d5_ = ieta
 			// EE: d1_ = ID, d5_ = ix, d6_ = iy
@@ -228,7 +236,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 			//}
 
 
-			if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
+			if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5 >> w6 >> w7 >> w8 >> w9 >>w10)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
 
 				//cout.precision(17);
 				//cout << "d1 = " << d1 << endl;
@@ -254,16 +262,16 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 				    //cout << "ID matches weights' ID\n";
 					
 				    if (ideal_weights){
-					    weights[0] = 0.0;
-					    weights[1] = 0.0;
-					    weights[2] = w1;				
-					    weights[3] = w2;				
-					    weights[4] = w3;				
-					    weights[5] = w4;				
-					    weights[6] = w5;				
-					    weights[7] = 0.0;
-					    weights[8] = 0.0;
-					    weights[9] = 0.0;
+					    weights[0] = w1;
+					    weights[1] = w2;
+					    weights[2] = w3;				
+					    weights[3] = w4;				
+					    weights[4] = w5;				
+					    weights[5] = w6;				
+					    weights[6] = w7;				
+					    weights[7] = w8;
+					    weights[8] = w9;
+					    weights[9] = w10;
 				    }
 
 

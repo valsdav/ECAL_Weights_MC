@@ -40,7 +40,8 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 
 	if ((plot_EB == false) && (plot_EE == true)){ // if EE only
 	  cout << "Skipping to EE\n";
-	  int EE_Skip = 60494;
+	  //int EE_Skip = 60493;
+	  int EE_Skip = 60491; // For 2018 parameters. This includes the 0th row. 
 	  // skip to first row of EE params, aka skip 60494 rows.
 	  // Might need to also do this with weights file 
 	 
@@ -54,8 +55,8 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 
 	if (plot_EE_plus){
 	  cout << "Skipping to EE+\n";
-	  int EE_plus_Skip = 7324;
-	  //int EE_plus_Skip = 7100;
+	  //int EE_plus_Skip = 7324;
+	  int EE_plus_Skip = 7205; // 2018 Parameters. 
 	  
 	  while(EE_plus_Skip !=0){
 		

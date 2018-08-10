@@ -41,7 +41,8 @@ int main()
 
 	// Make tree to store info such as XTAL count and total error 
 
-	string note = "PedSub1+4";
+	//string note = "PedSub1+4_2018";
+	string note = "";
 	//string note = "Online";
 	//TH1F *errors = new TH1F("errors","A/A - 1", 100, -1, 1);
 
@@ -50,19 +51,19 @@ int main()
 	// Customize One Plot
 
 	// What to Plot
-	bool plot_te = true; // Plot total error vs. time shift
-	bool plot_e = false; // Plot error as a function of Degrees of Freedom
-	bool plot_EB = false; // Make desired plots for Barrel
-	bool plot_EE = true; // Make desired plots for Endcap
+	bool plot_te = false; // Plot total error vs. time shift
+	bool plot_e = true; // Plot error as a function of Degrees of Freedom
+	bool plot_EB = true; // Make desired plots for Barrel
+	bool plot_EE = false; // Make desired plots for Endcap
 
 	bool plot_EE_minus = false; // Set one of these to true only if plot_EE is set to true
-	bool plot_EE_plus = true;
+	bool plot_EE_plus = false;
 
 	// Weights
 	
 	// values
-	bool ideal_weights = true; // True: Compute ideal weights during runtime or read from text file. False: Use single sets defined below 
-	bool cmssw_weights = false;
+	bool ideal_weights = false; // True: Compute ideal weights during runtime or read from text file. False: Use single sets defined below 
+	bool cmssw_weights = true;
 	//bool presentation_weights = false;
 
 	// number filter
@@ -210,7 +211,7 @@ int main()
 
 	}
 
-	double max_bias = 0.0;
+	double max_bias = 0.0, min_bias = 0.0;
 
 	if (plot_e){
 	
@@ -238,6 +239,7 @@ int main()
 			sts->Fill(ieta, iphi, error);
 			values->Fill(error);
 			if (error > max_bias) max_bias = error;
+			if (error < min_bias) min_bias = error;
 			total_error_ += error;
 			count += 1;	
 		}
@@ -283,6 +285,7 @@ int main()
 			sts->Fill(ix, iy, error);
 			total_error_ += error;
 			if (error > max_bias) max_bias = error;
+			if (error < min_bias) min_bias = error;
 			count += 1;
 			values->Fill(error);
 		}
@@ -381,25 +384,26 @@ int main()
 		sts->GetYaxis()->SetTitleOffset(1.2);
 		sts->GetZaxis()->SetLabelSize(0.02);
 		gStyle->SetOptStat(0);
-		sts->GetZaxis()->SetRangeUser(-0.08,0.12);
+		sts->GetZaxis()->SetRangeUser(-0.002,0.015);
+		//sts->GetZaxis()->SetRangeUser(-0.08,0.12);
 		sts->Draw("COLZ1"); // COLZ1 to not color zeros
 		
 		ostringstream plot_title;
 		//plot_title << "";
 
 		ostringstream error_plot_root, error_plot_pdf;
-		error_plot_root << "bin/DOF_Plot";
-		error_plot_pdf << "bin/DOF_Plot"; 
+		error_plot_root << "bin/BD_";
+		error_plot_pdf << "bin/BD_"; 
 	
 		if (plot_EB){	
-		  error_plot_root << "_EB_";
-		  error_plot_pdf << "_EB_";
+		  error_plot_root << "EB_";
+		  error_plot_pdf << "EB_";
 		  plot_title << "EB, ";
 		}
 
 		if (plot_EE){
-		  error_plot_root << "_EE";
-		  error_plot_pdf << "_EE";
+		  error_plot_root << "EE";
+		  error_plot_pdf << "EE";
 		  plot_title << "EE";
 
 		  if (plot_EE_minus){
@@ -408,52 +412,28 @@ int main()
 			plot_title << "-, ";
 		    }
 
-	if (plot_EE){
-	  error_plot_root << "_EE";
-	  error_plot_pdf << "_EE";
 
-	  if (plot_EE_minus){
-		error_plot_root << "-_";	
-		error_plot_pdf << "-_";	
-	    }
-
-	  if (plot_EE_plus){
-		error_plot_root << "+_";	
-		error_plot_pdf << "+_";	
-	    }
-
-	}
-
-	if (ideal_weights){
-		error_plot_root << "idealweights" << current_time << '_' << note << ".root";
-		error_plot_pdf << "idealweights" << current_time <<'_' << note << ".pdf";
-	  }
-
-	if (!ideal_weights){ 
-		error_plot_root << "singleweights" << current_time << '_' << note << ".root";
-		error_plot_pdf << "singleweights" << current_time << '_' << note << ".pdf";
-	  }
-
-		  if (plot_EE_plus){
-			error_plot_root << "+_";	
+	  	   if (plot_EE_plus){
+		  	error_plot_root << "+_";	
 			error_plot_pdf << "+_";	
 			plot_title << "+, ";
-		    }
+	    		}
 
-		}
+		  }
 
 		if (ideal_weights){
-			error_plot_root << "idealweights" << note << current_time << ".root";
-			error_plot_pdf << "idealweights" << note << current_time << ".pdf";
+			error_plot_root << "ideal" << note << current_time << ".root";
+			error_plot_pdf << "ideal" << note << current_time << ".pdf";
 			plot_title << "Ideal Weights, ";
 		  }
 
 		if (!ideal_weights){ 
-			error_plot_root << "onlineweights" << note << current_time << ".root";
-			error_plot_pdf << "onlineweights" << note << current_time << ".pdf";
+			error_plot_root << "Online" << note << current_time << ".root";
+			error_plot_pdf << "Online" << note << current_time << ".pdf";
 			plot_title << "Online Weights, ";
 		  }
-		
+	
+		plot_title << " 2017 Parameters, ";	
 		plot_title << "ts = " << ts; // ",  Avg Bias = " << avg_bias;
 
 		TString plottitle = plot_title.str();
@@ -467,6 +447,8 @@ int main()
 
 		cout << "total error = " << total_error_ << endl;	
 		cout << "max bias = " << max_bias << endl;
+		cout << "min bias = " << min_bias << endl;
+		cout << "avg bias = " << avg_bias << endl;
 		
 		//f->Write();
 		//f->Close();
