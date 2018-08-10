@@ -7,6 +7,7 @@
 from ROOT import *
 from array import array
 import os
+#import sys
 #import argparse
 
 # dashed line across zero? 
@@ -36,6 +37,10 @@ def Plot_BCs(args):
 	print "paths = ",paths
 
 	print "len(paths) = ",len(paths)
+
+	if len(paths) == 0:
+		print'No Files Found. Exiting.'
+		os._exit(0) 
 
 	#elem0 = paths[0]
 	#elem1 = paths[1]
@@ -199,7 +204,8 @@ def Plot_BCs(args):
 
 	#paths[0].slice('_')[1] # section_weights_range.root
 	#section = str(paths[0])[10:-17] # EE+/-, EB
-	#section = paths[0].split('_')[-3].split('/')[-1]
+	print'paths[0] = ',paths[0]
+	section = paths[0].split('/')[-1].split('_')[0] # .split('/')[-1]
 	#print 'section = ',section
 
 	mg = TMultiGraph()
@@ -207,17 +213,19 @@ def Plot_BCs(args):
 	for g in graphs:
 		mg.Add(g, "LP")
 
-	#mg.SetTitle(section + " Average Bias vs. Time Shift")
-	mg.SetTitle("Title")
+	#section = ''
+
+	mg.SetTitle(section + " Average Bias vs. Time Shift")
+	#mg.SetTitle("Title")
 	c0 = TCanvas('c0', 'c0', 800, 600)
 	c0.SetBatch(kTRUE)
 
 	mg.Draw("A")
-	#mg.GetXaxis().SetTitle("Time Shift (ns)")
+	mg.GetXaxis().SetTitle("Time Shift (ns)")
 	#mg.GetXaxis().SetRangeUser(-3,3)
 	#mg.GetYaxis().SetRangeUser(-0.04,0.02)
-	#mg.GetYaxis().SetTitle("Average Bias")
-	#mg.GetYaxis().SetTitleOffset(1.3)
+	mg.GetYaxis().SetTitle("Average Bias")
+	mg.GetYaxis().SetTitleOffset(1.3)
 
 
 	xline = TLine(c0.GetUxmin(),0,c0.GetUxmax(),0)
@@ -230,12 +238,14 @@ def Plot_BCs(args):
 	yline.SetLineColor(kBlack)
 	yline.SetLineStyle(1)
 
-	#l1.Draw("SAME")
-	#xline.Draw("SAME")
-	#yline.Draw("SAME")
+	l1.Draw("SAME")
+	xline.Draw("SAME")
+	yline.Draw("SAME")
 
-	#Save_Title = "plots/plot" + section + str(int(histos[0].GetXaxis().GetBinLowEdge(1))) + ".pdf"
 
-	#c0.SaveAs(Save_Title)
+	#section = ''
+	Save_Title = "plots/plot" + section + str(int(histos[0].GetXaxis().GetBinLowEdge(1))) + ".pdf"
+
+	c0.SaveAs(Save_Title)
 
 

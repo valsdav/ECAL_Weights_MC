@@ -2,6 +2,7 @@
 # 2 August 2018
 
 from ROOT import *
+#from Tools import *
 from Create_h import *
 from Read_Line import *
 from Waveform import *
@@ -19,6 +20,7 @@ import os
 def input_arguments():
 	parser = argparse.ArgumentParser(description='Choose what bias plots to create')
 	parser.add_argument('-BCPlot', action='store_true', help='Plot BC Root files in plot_data/plot')
+	parser.add_argument('--PY', action='store', help='Year of Parameters to use')
 	parser.add_argument('-EB',  action='store_true', help='Create plot for Barrel')
 	parser.add_argument('-EEminus'  ,  action='store_true', help='Create plot for EE-')
 	parser.add_argument('-EEplus'  ,  action='store_true', help='Create plot for EE+')
@@ -45,11 +47,20 @@ def main():
 		h = Create_h(args) 
 	#h = Create_h(args)
 
+	#if (args.BC or args.BD) and (not args.rows):
+		#print 'Please choose how many rows to read in XTAL Parameters.'
+		#sys.exit('Exiting')
+
+	rows = 0
+
+	# If no lines specified, assume all.
 	if (args.BC or args.BD) and (not args.rows):
-		print 'Please choose how many rows to read in XTAL Parameters.'
-		sys.exit('Exiting')
-	if (args.rows):
+		print 'Reading all rows...'
+		rows = 100000
+
+	if (args.BC or args.BD) and (args.rows):
 		print 'Reading',args.rows,'rows...'
+		rows = int(args.rows)	
 
 	#if not args.weights:
 		#print'Online 
@@ -67,6 +78,7 @@ def main():
 
 	if args.EEplus:
 		Param_Skip += 7209 # Skip EE- params. Note this has less entries than number of EE- XTALS
+				# Param skip may depend on param file
 		DOF_Skip += 7324 # Skip EE- DOF's 
 
 	if args.BC:
@@ -85,22 +97,26 @@ def main():
 			total_bias = 0.
 			XTALS = 0
 			print 'ts = ',ts
-			for line in range(int(args.rows)):
+			for line in range(rows):
 				skip_line = False
 				last_line = False
-
+				#print'in loop'
 				#while(not last_line):
 				if (args.weights): # return params and weights 
-					params, weights, last_line, skip_line = Read_Line(args, line, last_line, DOF_Skip, Param_Skip) # return params 
+					params, weights, last_line, DOF_Skip, skip_line = Read_Line(args, line, last_line, DOF_Skip, Param_Skip) # return params 
 
 				if (not args.weights): # return params and weights 
-					params, last_line, skip_line = Read_Line(args, line, last_line, DOF_Skip, Param_Skip) # return params 
-			
+					params, last_line, DOF_Skip, skip_line = Read_Line(args, line, last_line, DOF_Skip, Param_Skip) # return params 
+		
+				#print'skip_line = ',skip_line
+	
 				if (not skip_line):
 					wf,tstart = Create_Waveform(params, ts) # TF1
 					samples = Sample_Waveform(wf,tstart) 
 					total_bias += Calc_Bias(args,params,samples,weights,Online_EB_w,Online_EE_w) # Add to num. xtals # Pass Online weights too
 					XTALS += 1
+				if (skip_line):
+					print'Skipping line',line
 				if (XTALS%500 == 0):
 					print'Reading Line ',XTALS
 				if (last_line):
@@ -113,14 +129,15 @@ def main():
 
 	if args.BD: 
 		ts = float(args.ts)
-		for line in range(int(args.rows)):
+		for line in range(rows):
 			
 			skip_line = False
 			last_line = False
 			if (args.weights): # return params (+ DOF), weights 
 				params, weights, last_line, DOF_Skip, skip_line = Read_Line(args,line,last_line,DOF_Skip,Param_Skip) 
 			if (not args.weights): # return params 
-				params, last_line, DOF_Skip, skip_line = Read_Line(args,line,last_line,DOF_Skip,Param_Skip) # return params 
+				params, last_line, DOF_Skip, skip_line = Read_Line(args,line,last_line,DOF_Skip,Param_Skip) # return params
+			#print'skip_line = ',skip_line 
 			if (not skip_line):
 				wf,tstart = Create_Waveform(params, ts) 
 				samples = Sample_Waveform(wf,tstart)
@@ -159,106 +176,3 @@ if __name__ == "__main__":
 	total_time = float(final_time - initial_time) / 60.
 	print'Run Time: ',total_time,'minutes'
 
-#---------------------------------------------------------------------------------------------------------------------------
-
-"""
-
-	double max_bias = 0.0;
-
-	if (plot_e){
-
-	  if (plot_EB){
-	    bool skip_this_line = false;
-	    int EB_count = 0, EE_count = 0, extra_lines = 0, skip_count = 0;
-	    int ieta, iphi;
-	    double error; 
-	    int sts_row = 0; // single time shift loop row 
-	    bool full = false; // Start not full
-
-	    while(!full){ // run while files left to read. Check DOF_error for bool
-		skip_this_line = false;
-	    	tie(skip_this_line, EB_count, EE_count, extra_lines, skip_count, ieta, iphi, error, sts_row ,full) = DOF_error(plot_EE_minus, plot_EE_plus, sts_row, EB_count, EE_count, extra_lines, skip_count, max_rows, ts, EB_w, EE_w, plot_EB, plot_EE, normalized_A, normalized_t0, ideal_weights);
-
-		//cout << "ieta = " << ieta << endl;
-		//cout << "iphi = " << iphi << endl;
-		//cout << "error = " << error << endl;
-		//cout << "sts_row = " << sts_row << endl;
-		//cout << "int(full) = " << int(full) << endl;
-
-		if (full) break;
-	
-		if (!skip_this_line){ 
-			sts->Fill(ieta, iphi, error);
-			values->Fill(error);
-			if (error > max_bias) max_bias = error;
-			total_error_ += error;
-			count += 1;	
-		}
-		//if (!skip_this_line) errors->Fill(error);
-
-		//full = true;
-
-	    }
-
-	  }
-
-	  if (plot_EE){
-	    bool skip_this_line = false;
-	    int EB_count = 0, EE_count = 0, extra_lines = 0, skip_count = 0;
-	    int ix, iy;
-	    double error; 
-	    int sts_row = 0; // single time shift loop row 
-	    bool full = false; // Start not full
-
-	    while(!full){ // run while files left to read. Check DOF_error for bool
-	    	skip_this_line = false;
-		tie(skip_this_line, EB_count, EE_count, extra_lines, skip_count, ix, iy, error, sts_row ,full) = DOF_error(plot_EE_minus, plot_EE_plus, sts_row, EB_count, EE_count, extra_lines, skip_count, max_rows, ts, EB_w, EE_w, plot_EB, plot_EE, normalized_A, normalized_t0, ideal_weights);
-		if (sts_row%10000 == 0){
-		  cout << "skip_this_line = " << skip_this_line << endl;
-		  cout << "ix = " << ix << endl;
-		  cout << "iy = " << iy << endl;
-		  cout << "error = " << error << endl;
-		  cout << "sts_row = " << sts_row << endl;
-		  cout << "int(full) = " << int(full) << endl;
-		}
-		if (full){ 
-			cout << "full, breaking.\n";
-			break;
-		}
-	
-		if(!skip_this_line){ 
-			//if ((sts_row > 420) && (sts_row < 425)) {
-				//cout << "ix = " << ix << endl;
-				//cout << "iy = " << iy << endl;
-				//cout << "error = " << error << endl;
-				//}
-			 
-			sts->Fill(ix, iy, error);
-			total_error_ += error;
-			if (error > max_bias) max_bias = error;
-			count += 1;
-			values->Fill(error);
-		}
-
-		//full = true;
-
-	    }
-	    //sts->Fill(ix, iy, error);     
-	  }
-
-	}
-
-"""
-
-# Move all of this to separate plotting function.
-
-	# Should be able to use this for plotting values on same plot in h->g conversion.
-	#for i in range(h.GetNbinsX() + 1):
-		#print'ts = ',h.GetXaxis().GetBinLowEdge(i + 1)
-		#print'avg bias = ',h.GetBinContent(i + 1)
-
-"""
-	// Should make plotting function eventually
-
-
-"""

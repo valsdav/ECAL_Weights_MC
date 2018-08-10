@@ -1,3 +1,4 @@
+import sys
 from array import *
 
 def Read_Line(args,line,last_line,DOF_Skip,Param_Skip):
@@ -39,28 +40,52 @@ def Read_Line(args,line,last_line,DOF_Skip,Param_Skip):
 	#if args.EEplus:
 	#	manual_skip += 7324 # EE- skip
 
-	with open('data/XTAL_Params.txt') as p_f:
+	if (not args.PY):
+		print'Please choose a parameter file year with --PY <year>'
+		sys.exit('Exiting')
+	param_path = 'data/XTAL_Params_' + str(args.PY) + '.txt'
+	if (args.weights):
+		weight_path = 'data/' + str(args.weights) + '_' + str(args.PY) + '.txt'
+
+	# May need both 2017 and 2018 last line conditions lists. Might have different first/final XTAL IDs
+
+	#with open('data/XTAL_Params.txt') as p_f:
+	with open(param_path) as p_f:
     		p_f = p_f.readlines()[line+1+Param_Skip+manual_skip:]
 		params_str = p_f[0].split() # current line
 		params_fl = [float(x) for x in params_str]
 		params = array('d',params_fl)
+		#print'params[0] = ',params[0]
 
 	# Should change to if all params are 0 since I think this is what causes nan weights.
-	if (params[0] == 838868019) or (params[0] == 838871589) or (params[0] == 838882900) or (params[0] == 838882985) or (params[0] == 838900809) or (params[0] == 838949036) or (params[0] == 838951621) or (params[0] == 872436486):
+	#print'params[0] == 838864037 = ',params[0] == 838864037
+	#print'int(args.PY) = ',int(args.PY)
+	#print'int(args.PY) == 2018 = ',int(args.PY) == 2018
+	if ( (int(args.PY) == 2017) and ( (params[0] == 838868019) or (params[0] == 838871589) or (params[0] == 838882900) or (params[0] == 838882985) or (params[0] == 838900809) or (params[0] == 838949036) or (params[0] == 838951621) or (params[0] == 872436486) ) ):
 		skip_line = True # Don't count previous statistics twice. 
 		if (args.weights): return params, weights, last_line, DOF_Skip, skip_line
 		if(args.online): return params, last_line, DOF_Skip, skip_line
 	
+	if ( (int(args.PY) == 2018) and ( (params[0] == 838864037) or (params[0] == 838869123) or (params[0] == 838874865) or (params[0] == 838891641) or (params[0] == 838958295) or (params[0] == 838966532) ) ):
+		skip_line = True
+		#print'skip_line = true for 
+		if (args.weights): return params, weights, last_line, DOF_Skip, skip_line
+		if (args.online): return params, last_line, DOF_Skip, skip_line
+
 	if (args.weights):
-		w_p = 'data/' + str(args.weights) # Weights Path
+		#w_p = 'data/' + str(args.weights) + '_' + str(args.PY) # Weights Path
 		IDs_Match= False
 
 		while(not IDs_Match):
-			with open(w_p) as w_f:
+			with open(weight_path) as w_f:
+				#Should be on same ID line as Params because weight lines derived from param lines
 		    		w_f = w_f.readlines()[line+1+Param_Skip+manual_skip:]  
 				weights_str = w_f[0].split() # current line
 				weights_fl = [float(x) for x in weights_str]
 				weights = array('d',weights_fl)
+				#print'w_f[0] = ',w_f[0]
+				#print'w_f[1] = ',w_f[1]
+				#print'weights = ',weights
 				#print'paramsID = ',params[0]
 				#print'weightsID = ',weights[0]
 				if (weights[0] == params[0]): 
@@ -77,6 +102,8 @@ def Read_Line(args,line,last_line,DOF_Skip,Param_Skip):
 						last_line = True
 					if (args.EEplus) and (params[0] == 872444475): # Last EE+ line in params
 						last_line = True
+				else:
+					weights_skip += 1
 	if (args.online):
 		if (args.rows == line):
 			last_line = True
@@ -90,9 +117,9 @@ def Read_Line(args,line,last_line,DOF_Skip,Param_Skip):
 
 	if args.BC:
 		if args.weights:
-			return params,weights,last_line,skip_line
+			return params,weights,last_line, DOF_Skip, skip_line
 		if args.online:
-			return params,last_line,skip_line 
+			return params,last_line, DOF_Skip, skip_line 
 
 	# Just define list of last-line conditions then loop through to see if they're true. implement in weights and online loop.
 

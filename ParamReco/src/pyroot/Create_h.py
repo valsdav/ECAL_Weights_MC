@@ -29,6 +29,13 @@ def Create_h(args):
 		print 'Plotting EE+'
 		h_title += ' EE+'
 
+	h_title += ', ' + str(args.PY) + ' Parameters'
+
+	if args.online:
+		h_title += ', Online Weights'
+	if args.weights:
+		htitle += ', ' + str(args.weights[:4])
+
 	# Get Plot Boundaries (PB)
 
 	# Bias Curve 

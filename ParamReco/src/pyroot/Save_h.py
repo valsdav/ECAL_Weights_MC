@@ -21,14 +21,16 @@ def Save_h(args,h):
 		add2name += 'EE+_'
 
 	if args.weights:
-		add2name += str(args.weights.split('.')[-2]) + '_' + str(int(time.time())) 
+		add2name += str(args.weights) + '_' + str(args.PY) + '_' + str(int(time.time())) 
 
 	if args.online:
-		add2name += 'online_' + str(int(time.time())) 
+		#add2name += 'online_' + str(int(time.time())) 
+		add2name += 'online' + str(args.PY) + '_' + str(int(time.time()))
 
 	if args.BC:
 
 		c1.cd()
+		gStyle.SetOptStat(0)
 		h.Draw("HIST")
 		c1.Update()
 		#EB->GetZaxis()->SetRangeUser(zmin,zmax) # for DOF plot
@@ -40,8 +42,8 @@ def Save_h(args,h):
 		h.GetXaxis().SetTitle("Time Shift (ns)")
 		h.Draw("HIST")
 
-		root_name = 'plot_data/plot/'
-		pdf_name = 'pdfs/BC_Plot_'
+		root_name = 'results/root/BC_Plot_'
+		pdf_name = 'results/pdfs/BC_Plot_'
 
 		pdf_name += add2name + '.pdf' 
 		root_name += add2name + '.root' 
@@ -55,12 +57,13 @@ def Save_h(args,h):
 	if args.BD:
 
 		c1.cd()
+		gStyle.SetOptStat(0)
 		h.Draw("COLZ1")
 		c1.Update()
 
 		if args.EB:
-			h.GetXaxis().SetTitle('iEta')
-			h.GetYaxis().SetTitle('iPhi')
+			h.GetXaxis().SetTitle('iPhi')
+			h.GetYaxis().SetTitle('iEta')
 			
 		if args.EEminus or args.EEplus:
 			h.GetXaxis().SetTitle('ix')
@@ -72,10 +75,11 @@ def Save_h(args,h):
 
 		#h.GetZaxis()->SetRangeUser(zmin,zmax) 
 		#h.GetZaxis().SetRangeUser(-0.08,0.12)
+		h.GetZaxis().SetRangeUser(0,0.014)
 		h.Draw("COLZ1")
 
-		root_name = 'root/BD_Plot_'
-		pdf_name = 'pdfs/BD_Plot_'
+		root_name = 'results/root/BD_Plot_'
+		pdf_name = 'results/pdfs/BD_Plot_'
 
 		pdf_name += add2name + '.pdf' 
 		root_name += add2name + '.root' 

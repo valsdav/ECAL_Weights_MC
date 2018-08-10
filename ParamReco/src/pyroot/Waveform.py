@@ -45,7 +45,3 @@ def Sample_Waveform(wf,tstart):
 		time += dt
 
 	return samples
-
-
-
-

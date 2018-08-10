@@ -40,7 +40,8 @@ int main()
 
 
 	//TH1F *errors = new TH1F("errors","A/A - 1", 100, -1, 1);
-	
+
+	string note = "2018";	
 
 	// Currently can only make one plot at at time
 
@@ -50,8 +51,8 @@ int main()
 	bool plot_EB = false; // Make desired plots for Barrel
 	bool plot_EE = true; // Make desired plots for Endcap
 
-	bool plot_EE_minus = false; // Set one of these to true only if plot_EE is set to true
-	bool plot_EE_plus = true;
+	bool plot_EE_minus = true; // Set one of these to true only if plot_EE is set to true
+	bool plot_EE_plus = false;
 
 	// How to Plot it 
 	bool ideal_weights = true; // True: Compute ideal weights during runtime or read from text file. False: Use single sets defined below 
@@ -63,7 +64,7 @@ int main()
 
 	// Study Parameters
  	int max_rows = -1; // < 0 to read all rows of XTAL_Params.txt
-	double ts_min = -6, ts_max = 6, dts = 1; // Only used if plot_te == true
+	double ts_min = -10, ts_max = 10, dts = 1; // Only used if plot_te == true
 	double ts = 0.0; // Only used if plot_e = true
 	// Move waveform +/- ns to right/left <-- double check that 
 
@@ -271,29 +272,29 @@ int main()
 	}
 
 	if (plot_EE){
-	  error_plot_root << "_EE_";
-	  error_plot_pdf << "_EE_";
+	  error_plot_root << "_EE";
+	  error_plot_pdf << "_EE";
 
 	  if (plot_EE_minus){
-		error_plot_root << "-";	
-		error_plot_pdf << "-";	
+		error_plot_root << "-_";	
+		error_plot_pdf << "-_";	
 	    }
 
 	  if (plot_EE_plus){
-		error_plot_root << "+";	
-		error_plot_pdf << "+";	
+		error_plot_root << "+_";	
+		error_plot_pdf << "+_";	
 	    }
 
 	}
 
 	if (ideal_weights){
-		error_plot_root << "idealweights" << current_time << ".root";
-		error_plot_pdf << "idealweights" << current_time << ".pdf";
+		error_plot_root << "idealweights" << current_time << '_' << note << ".root";
+		error_plot_pdf << "idealweights" << current_time <<'_' << note << ".pdf";
 	  }
 
 	if (!ideal_weights){ 
-		error_plot_root << "singleweights" << current_time << ".root";
-		error_plot_pdf << "singleweights" << current_time << ".pdf";
+		error_plot_root << "singleweights" << current_time << '_' << note << ".root";
+		error_plot_pdf << "singleweights" << current_time << '_' << note << ".pdf";
 	  }
 
 	TString rooterrortitle = error_plot_root.str();
