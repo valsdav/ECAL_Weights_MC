@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/meganstark/Computation*/opensource/CLHEP/RefCount/src/ZMuseCount.cc
+CLHEP/RefCount/ZMuseCount.h
+/Users/meganstark/Computation*/opensource/CLHEP/RefCount/src/CLHEP/RefCount/ZMuseCount.h
+CLHEP/RefCount/ZMuseCount.icc
+/Users/meganstark/Computation*/opensource/CLHEP/RefCount/src/CLHEP/RefCount/ZMuseCount.icc
+
+CLHEP/RefCount/ZMuseCount.h
+
+CLHEP/RefCount/ZMuseCount.icc
+

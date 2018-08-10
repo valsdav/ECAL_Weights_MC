@@ -1,0 +1,6 @@
+*.DS_store
+*.sublime-project
+*.sublime-workspace
+a.out
+output/*
+

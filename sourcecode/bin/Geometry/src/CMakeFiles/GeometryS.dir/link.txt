@@ -1,0 +1,2 @@
+/Library/Developer/CommandLineTools/usr/bin/ar qc ../../lib/libCLHEP-Geometry-2.3.4.5.a  CMakeFiles/GeometryS.dir/BasicVector3D.cc.o CMakeFiles/GeometryS.dir/Normal3D.cc.o CMakeFiles/GeometryS.dir/Plane3D.cc.o CMakeFiles/GeometryS.dir/Point3D.cc.o CMakeFiles/GeometryS.dir/Transform3D.cc.o CMakeFiles/GeometryS.dir/Vector3D.cc.o
+/Library/Developer/CommandLineTools/usr/bin/ranlib ../../lib/libCLHEP-Geometry-2.3.4.5.a

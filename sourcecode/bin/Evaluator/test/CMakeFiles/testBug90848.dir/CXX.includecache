@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/meganstark/Computation*/opensource/CLHEP/Evaluator/test/testBug90848.cc
+stdlib.h
+-
+stdio.h
+-
+cmath
+-
+limits
+-
+CLHEP/Evaluator/Evaluator.h
+/Users/meganstark/Computation*/opensource/CLHEP/Evaluator/test/CLHEP/Evaluator/Evaluator.h
+
+CLHEP/Evaluator/Evaluator.h
+string
+-
+
