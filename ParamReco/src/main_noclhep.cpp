@@ -41,8 +41,14 @@ int main()
 
 	// Make tree to store info such as XTAL count and total error 
 
+<<<<<<< HEAD
 	string note = "PedSub1+4";
 	//string note = "Online";
+=======
+	//TH1F *errors = new TH1F("errors","A/A - 1", 100, -1, 1);
+
+	string note = "2018";	
+>>>>>>> Weights_Test
 
 	// Customize One Plot
 
@@ -315,17 +321,17 @@ int main()
 		tsr->GetYaxis()->SetTitleOffset(1.4);
 		tsr->Draw("HIST");
 		ostringstream error_plot_root, error_plot_pdf;
-		error_plot_root << "bin/te_Plot";
-		error_plot_pdf << "bin/te_Plot"; 
+		error_plot_root << "bin/BC_";
+		error_plot_pdf << "bin/BC_"; 
 	
 		if (plot_EB){	
-		  error_plot_root << "_EB_";
-		  error_plot_pdf << "_EB_";
+		  error_plot_root << "EB_";
+		  error_plot_pdf << "EB_";
 		}
 
 		if (plot_EE){
-		  error_plot_root << "_EE";
-		  error_plot_pdf << "_EE";
+		  error_plot_root << "EE";
+		  error_plot_pdf << "EE";
 
 		  if (plot_EE_minus){
 			error_plot_root << "-_";	
@@ -340,13 +346,13 @@ int main()
 		}
 
 		if (ideal_weights){
-			error_plot_root << "idealweights"  << ts_max << "_" << note << current_time << ".root";
-			error_plot_pdf << "idealweights"  << ts_max << "_"<< note << current_time << ".pdf";
+			error_plot_root << "idealweights"  << ts_min << '_' << ts_max << "_" << note << current_time << ".root";
+			error_plot_pdf << "idealweights"  << ts_min << "_"<< ts_max << '_' <<  note << current_time << ".pdf";
 		  }
 
 		if (!ideal_weights){ 
-			error_plot_root << "singleweights" << "_" << note << current_time << ".root";
-			error_plot_pdf << "singleweights" << "_" << note << current_time << ".pdf";
+			error_plot_root << "online" << "_" << ts_min << '_' << ts_max << '_' << note << current_time << ".root";
+			error_plot_pdf << "online" << "_" << ts_min << '_' << ts_max << '_' << note << current_time << ".pdf";
 		  }
 
 		TString rooterrortitle = error_plot_root.str();
@@ -404,6 +410,32 @@ int main()
 			error_plot_pdf << "-_";	
 			plot_title << "-, ";
 		    }
+
+	if (plot_EE){
+	  error_plot_root << "_EE";
+	  error_plot_pdf << "_EE";
+
+	  if (plot_EE_minus){
+		error_plot_root << "-_";	
+		error_plot_pdf << "-_";	
+	    }
+
+	  if (plot_EE_plus){
+		error_plot_root << "+_";	
+		error_plot_pdf << "+_";	
+	    }
+
+	}
+
+	if (ideal_weights){
+		error_plot_root << "idealweights" << current_time << '_' << note << ".root";
+		error_plot_pdf << "idealweights" << current_time <<'_' << note << ".pdf";
+	  }
+
+	if (!ideal_weights){ 
+		error_plot_root << "singleweights" << current_time << '_' << note << ".root";
+		error_plot_pdf << "singleweights" << current_time << '_' << note << ".pdf";
+	  }
 
 		  if (plot_EE_plus){
 			error_plot_root << "+_";	
