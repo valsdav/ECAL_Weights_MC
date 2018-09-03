@@ -17,6 +17,8 @@ using namespace std;
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "TFile.h"
+#include "TTree.h"
+#include "TBranch.h"
 //#include "TLatex.h"
 
 // C++ header files 
@@ -35,40 +37,122 @@ using namespace std;
 #include "total_error_noclhep.cpp"
 #include "DOF_error_noclhep.cpp" 
 
-int main()
+int main(int argc, char** argv)
+//int main()
 {
 	time_t initial_time = time(0); // initial time 
 
-	// Make tree to store info such as XTAL count and total error 
+	// Parameters
+	cout << "argc = " << argc << endl;
+	for (int i = 0; i < argc; i++){
+		cout << "argv[" << i << "] = " << argv[i] << endl;
+		}
 
-	//string note = "PedSub1+4_2018";
+	// argv[0] = ./run.x
+	// argv[1] = (BC) or (BD)
+	// argv[2] = (ts_min,ts_max,dts) or (ts)
+	// argv[3] = (EB) or (EE+) or (EE-)
+	// argv[4] = (cmssw) or (weights.txt path)
+	// argv[5] = (2017) or (2018) // parameter year 
+	// argv[6] = max_rows
+	// argv[7] = note
+
 	string note = "";
-	//string note = "Online";
-	//TH1F *errors = new TH1F("errors","A/A - 1", 100, -1, 1);
 
-	//string note = "2018";	
+	if (argc == 8) note = string(argv[7]); // note is optional
+
+	string PY = string(argv[5]); // Parameter year
+	
 
 	// Customize One Plot
-
 	// What to Plot
-	bool plot_te = false; // Plot total error vs. time shift
-	bool plot_e = true; // Plot error as a function of Degrees of Freedom
-	bool plot_EB = true; // Make desired plots for Barrel
-	bool plot_EE = false; // Make desired plots for Endcap
 
-	bool plot_EE_minus = false; // Set one of these to true only if plot_EE is set to true
+	// Study Parameters
+ 	int max_rows; 
+	double ts_min, ts_max, dts; 
+	double ts; // +/- time shift moves waveform +/- ns to right/left
+
+	bool plot_BC = false; // Plot Bias Curve
+	bool plot_BD = false; // Plot Bias Distribution
+	// Plot EB, EE- or EE+
+	bool plot_EB = false; 
+	bool plot_EE_minus = false; 
 	bool plot_EE_plus = false;
+
+	max_rows = stoi(string(argv[6]));
+
+	// Read first command line argument
+
+	if(string(argv[1]) == "BC"){
+
+		plot_BC = true;
+
+		// extract ts_min, ts_max, dts
+		string BC_tsr = string(argv[2]);
+		vector<double> BC_tsr_vec;
+		stringstream tsr_ss(BC_tsr);
+		double tsr_i;
+
+		while (tsr_ss >> tsr_i){
+		
+		    BC_tsr_vec.push_back(tsr_i);
+		    if(tsr_ss.peek() == ',') 
+		    	tsr_ss.ignore();	
+
+		  }
+			
+		for (int i = 0; i < BC_tsr_vec.size(); i++)
+     			cout << BC_tsr_vec.at(i) << endl;
+
+		ts_min = BC_tsr_vec.at(0);
+		ts_max = BC_tsr_vec.at(1);
+		dts = BC_tsr_vec.at(2);
+
+		}
+
+	else if(string(argv[1]) == "BD"){
+
+		  plot_BD = true;
+		  ts = stod(string(argv[2]));
+
+		}
+	else {
+		cout << "Please set 1st argument to either 'BC' or 'BD'\n";
+		cout << "Terminating\n";
+
+		exit(0);
+		}
+
+	if(string(argv[3]) == "EB"){
+		plot_EB = true;
+		}
+	else if(string(argv[3]) == "EE-"){
+		plot_EE_minus = true;
+		}
+	else if(string(argv[3]) == "EE+"){
+		plot_EE_plus = true;
+		}
+	else {
+		cout << "Please set 3rd argument to either 'EB', 'EE-' or 'EE+'\n";
+		cout << "Terminating\n";
+
+		exit(0);
+		}
 
 	// Weights
 	
-	// values
 	bool ideal_weights = false; // True: Compute ideal weights during runtime or read from text file. False: Use single sets defined below 
-	bool cmssw_weights = true;
-	//bool presentation_weights = false;
+	bool cmssw_weights = false;
+	string weights_type = "PedSub1+4"; // Path to weights txt file
 
-	// number filter
-	//bool five_weights = false; // Set 1, 2, 8, 9, 10 to zero
-	//bool ten_weights = false;
+	if (string(argv[4]) == "cmssw"){
+	    cmssw_weights = true;	    
+	  }
+
+	else {
+		ideal_weights = true;
+	        weights_type = string(argv[4]);
+	      }
 
 	bool normalized_A = false;
   	bool normalized_t0 = false; 
@@ -76,14 +160,8 @@ int main()
 	if (ideal_weights) normalized_A = false;
 	if (!ideal_weights) normalized_A = true;
 
-	// Study Parameters
- 	int max_rows = -1; // < 0 to read all rows of XTAL_Params.txt
-	double ts_min = -10, ts_max = 10, dts = 1; // Only used if plot_te == true
-	double ts = 0.0; // Only used if plot_e = true
-	// Move waveform +/- ns to right/left <-- double check that 
-
 	int tsr_bins = ( (ts_max - ts_min) / (dts) ) + 1 ;
-
+	cout << "tsr_bins = " << tsr_bins << endl;
 	int DOF1min, DOF1max, DOF2min, DOF2max;
 
 	if (plot_EB){
@@ -93,7 +171,7 @@ int main()
 		DOF2max = 360;
 	}
 
-	if (plot_EE){
+	if (plot_EE_minus || plot_EE_plus){
 		DOF1min = 0; // What happens when this is removed from the TH2F creation? Does it fix the color problem?
 		DOF1max = 100;
 		DOF2min = 0;
@@ -141,18 +219,18 @@ int main()
           single_ts_title << "EB, ";
           }
 
-        if (plot_EE){
-          ts_range_title << "EE";
-          single_ts_title << "EE";
+        //if (plot_EE){
+          //ts_range_title << "EE";
+          //single_ts_title << "EE";
 	  if (plot_EE_minus){
-		ts_range_title << "-, ";	
-		single_ts_title << "-, ";	
+		ts_range_title << "EE-, ";	
+		single_ts_title << "EE-, ";	
 	    }
 	  if (plot_EE_plus){
-		ts_range_title << "+, ";	
-		single_ts_title << "+, ";	
+		ts_range_title << "EE+, ";	
+		single_ts_title << "EE+, ";	
 	    }
-          }
+          //}
 
   	ts_range_title << "Bias vs. Time Shift, ";
 	single_ts_title << "Bias, ts = " << ts << "ns, ";
@@ -177,6 +255,9 @@ int main()
 		single_ts_title << max_rows << " XTALS";	
 		}	
 
+	//TH1F *errors = new TH1F("errors","A/A - 1", 100, -1, 1);
+	// Make tree to store info such as XTAL count and total error 
+
   	TString ts_range_title_string= ts_range_title.str(); 
   	TString single_ts_title_string = single_ts_title.str(); 
 	//TH1F *tsr = new TH1F("tsr",ts_range_title_string,((ts_max - ts_min) / (dts)) + 1,ts_min,ts_max + dts); // ts range
@@ -199,12 +280,12 @@ int main()
 	
 	// Call Functions
 
-	if (plot_te){
+	if (plot_BC){
 		ts = 0.0;
 		double XTAL_count = 0;
 		for (ts = ts_min; ts < ts_max + dts; ts += dts){
 			// total = total_error()
-			tie(total, XTAL_count) = total_error(max_rows, ts, EB_w, EE_w, plot_EB, plot_EE, plot_EE_minus, plot_EE_plus, normalized_A, normalized_t0, ideal_weights);
+			tie(total, XTAL_count) = total_error(max_rows, ts, EB_w, EE_w, plot_EB, plot_EE_minus, plot_EE_plus, normalized_A, normalized_t0, ideal_weights, weights_type, PY);
 			tsr->Fill(ts,total/XTAL_count); // want this to also return number of entries so average can be taken and plotted.
 			cout << "ts = " << ts << ", total = " << total << ", XTAL_count = " << XTAL_count << "\n";
 		  }
@@ -213,7 +294,7 @@ int main()
 
 	double max_bias = 0.0, min_bias = 0.0;
 
-	if (plot_e){
+	if (plot_BD){
 	
 	  if (plot_EB){
 	    bool skip_this_line = false;
@@ -225,7 +306,7 @@ int main()
 
 	    while(!full){ // run while files left to read. Check DOF_error for bool
 		skip_this_line = false;
-	    	tie(skip_this_line, EB_count, EE_count, extra_lines, skip_count, ieta, iphi, error, sts_row ,full) = DOF_error(plot_EE_minus, plot_EE_plus, sts_row, EB_count, EE_count, extra_lines, skip_count, max_rows, ts, EB_w, EE_w, plot_EB, plot_EE, normalized_A, normalized_t0, ideal_weights);
+	    	tie(skip_this_line, EB_count, EE_count, extra_lines, skip_count, ieta, iphi, error, sts_row ,full) = DOF_error(plot_EE_minus, plot_EE_plus, sts_row, EB_count, EE_count, extra_lines, skip_count, max_rows, ts, EB_w, EE_w, plot_EB, normalized_A, normalized_t0, ideal_weights, weights_type, PY); //, argv[1]);
 
 	        //cout << "ieta = " << ieta << endl;
 	        //cout << "iphi = " << iphi << endl;
@@ -251,7 +332,7 @@ int main()
 
 	  }
 	
-	  if (plot_EE){
+	  if (plot_EE_minus || plot_EE_plus){
 	    bool skip_this_line = false;
 	    int EB_count = 0, EE_count = 0, extra_lines = 0, skip_count = 0;
 	    int ix, iy;
@@ -261,7 +342,7 @@ int main()
 
 	    while(!full){ // run while files left to read. Check DOF_error for bool
 	    	skip_this_line = false;
-		tie(skip_this_line, EB_count, EE_count, extra_lines, skip_count, ix, iy, error, sts_row ,full) = DOF_error(plot_EE_minus, plot_EE_plus, sts_row, EB_count, EE_count, extra_lines, skip_count, max_rows, ts, EB_w, EE_w, plot_EB, plot_EE, normalized_A, normalized_t0, ideal_weights);
+		tie(skip_this_line, EB_count, EE_count, extra_lines, skip_count, ix, iy, error, sts_row ,full) = DOF_error(plot_EE_minus, plot_EE_plus, sts_row, EB_count, EE_count, extra_lines, skip_count, max_rows, ts, EB_w, EE_w, plot_EB, normalized_A, normalized_t0, ideal_weights, weights_type, PY);
 		if (sts_row%10000 == 0){
 		  cout << "skip_this_line = " << skip_this_line << endl;
 	          cout << "ix = " << ix << endl;
@@ -306,7 +387,7 @@ int main()
 
 	TCanvas *c1 = new TCanvas("c1","c1",800,600);
 
-	if (plot_te){
+	if (plot_BC){
 
 		c1->cd();
 		tsr->Draw("HIST");
@@ -329,30 +410,30 @@ int main()
 		  error_plot_pdf << "EB_";
 		}
 
-		if (plot_EE){
-		  error_plot_root << "EE";
-		  error_plot_pdf << "EE";
+		//if (plot_EE){
+		  //error_plot_root << "EE";
+		  //error_plot_pdf << "EE";
 
 		  if (plot_EE_minus){
-			error_plot_root << "-_";	
-			error_plot_pdf << "-_";	
+			error_plot_root << "EE-_";	
+			error_plot_pdf << "EE-_";	
 		    }
 
 		  if (plot_EE_plus){
-			error_plot_root << "+_";	
-			error_plot_pdf << "+_";	
+			error_plot_root << "EE+_";	
+			error_plot_pdf << "EE+_";	
 		    }
 
-		}
+		//}
 
 		if (ideal_weights){
-			error_plot_root << "idealweights"  << ts_min << '_' << ts_max << "_" << note << current_time << ".root";
-			error_plot_pdf << "idealweights"  << ts_min << "_"<< ts_max << '_' <<  note << current_time << ".pdf";
+			error_plot_root << "idealweights"  << ts_min << "_" << ts_max << "_" << note << current_time << ".root";
+			error_plot_pdf << "idealweights"  << ts_min << "_" << ts_max << "_" <<  note << current_time << ".pdf";
 		  }
 
 		if (!ideal_weights){ 
-			error_plot_root << "online" << "_" << ts_min << '_' << ts_max << '_' << note << current_time << ".root";
-			error_plot_pdf << "online" << "_" << ts_min << '_' << ts_max << '_' << note << current_time << ".pdf";
+			error_plot_root << "online" << "_" << ts_min << "_" << ts_max << "_" << note << current_time << ".root";
+			error_plot_pdf << "online" << "_" << ts_min << "_" << ts_max << "_" << note << current_time << ".pdf";
 		  }
 
 		TString rooterrortitle = error_plot_root.str();
@@ -365,7 +446,7 @@ int main()
 
 	avg_bias = total_error_ / count;
 
-	if (plot_e){
+	if (plot_BD){
 
 		c1->cd();
 		//sts->Draw();
@@ -376,7 +457,7 @@ int main()
 			sts->GetXaxis()->SetTitle("iEta");
 			sts->GetYaxis()->SetTitle("iPhi");	
 			}
-		if (plot_EE){
+		if (plot_EE_minus || plot_EE_plus){
 			sts->GetXaxis()->SetTitle("ix");
 			sts->GetYaxis()->SetTitle("iy");
 			}
@@ -401,25 +482,25 @@ int main()
 		  plot_title << "EB, ";
 		}
 
-		if (plot_EE){
-		  error_plot_root << "EE";
-		  error_plot_pdf << "EE";
-		  plot_title << "EE";
+		//if (plot_EE){
+		  //error_plot_root << "EE";
+		  //error_plot_pdf << "EE";
+		  //plot_title << "EE";
 
 		  if (plot_EE_minus){
-			error_plot_root << "-_";	
-			error_plot_pdf << "-_";	
-			plot_title << "-, ";
+			error_plot_root << "EE-_";	
+			error_plot_pdf << "EE-_";	
+			plot_title << "EE-, ";
 		    }
 
 
 	  	   if (plot_EE_plus){
-		  	error_plot_root << "+_";	
-			error_plot_pdf << "+_";	
-			plot_title << "+, ";
+		  	error_plot_root << "EE+_";	
+			error_plot_pdf << "EE+_";	
+			plot_title << "EE+, ";
 	    		}
 
-		  }
+		  //}
 
 		if (ideal_weights){
 			error_plot_root << "ideal" << note << current_time << ".root";
@@ -433,7 +514,7 @@ int main()
 			plot_title << "Online Weights, ";
 		  }
 	
-		plot_title << " 2017 Parameters, ";	
+		plot_title << " " << string(PY) << " Parameters, ";	
 		plot_title << "ts = " << ts; // ",  Avg Bias = " << avg_bias;
 
 		TString plottitle = plot_title.str();
@@ -441,14 +522,40 @@ int main()
 		TString rooterrortitle = error_plot_root.str();
 		TString pdferrortitle = error_plot_pdf.str();
 
+		cout << "max bias = " << max_bias << endl;
+		cout << "total error = " << total_error_ << endl;
+		cout << "avg bias = " << avg_bias << endl;	
+		cout << "min bias = " << min_bias << endl;
+
 		TFile *f = new TFile(rooterrortitle,"NEW");
-		sts->Write();
+		//TTree *Tree = new TTree("Tmax","max");		
+
+                //TBranch *blah = new TBranch(*Tmax); 
+                //blah->Fill(max_bias);
+                //end fill
+
+		TH1F *maxb = new TH1F("max_bias","max_bias",10,-1,1);
+		maxb->Fill(max_bias);
+		maxb->SetStats(1);
+
+		TH1F *tot_e = new TH1F("total_error","total_error",10,-1,1);
+		tot_e->Fill(total_error_);
+		tot_e->SetStats(1);
+
+		TH1F *ab = new TH1F("average_bias","average_bias",10,-1,1);
+		ab->Fill(avg_bias);
+		ab->SetStats(1);
+
+		TH1F *minb = new TH1F("min_bias","min_bias",10,-1,1);
+		minb->Fill(min_bias);
+		minb->SetStats(1);
+		
 		values->Write();
 
-		cout << "total error = " << total_error_ << endl;	
-		cout << "max bias = " << max_bias << endl;
-		cout << "min bias = " << min_bias << endl;
-		cout << "avg bias = " << avg_bias << endl;
+		f->Write();
+
+		//sts->Write();
+		//values->Write();
 		
 		//f->Write();
 		//f->Close();

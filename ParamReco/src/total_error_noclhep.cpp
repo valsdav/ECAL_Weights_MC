@@ -4,7 +4,7 @@
 
 #include "recon_amp_noclhep.cpp"
 
-tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool plot_EB, bool plot_EE, bool plot_EE_minus, bool plot_EE_plus, bool normalized_A, bool normalized_t0, bool ideal_weights) 
+tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double EE_w[], bool plot_EB, bool plot_EE_minus, bool plot_EE_plus, bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY) 
 {
 	//bool test_skip = false; // If want to skip lines to test things 
 	//int debug_val = 0;
@@ -18,12 +18,21 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 
   	// Open Files
   	//TString File("data/XTAL_Params.txt"); // (rawid, A, t0, alpha, beta) values
+
+	stringstream params_ss;
+	params_ss << "data/XTAL_Params_" << PY << ".txt";	
+	string params_path = params_ss.str();
+
   	ifstream inFile; // Input File stream class object  
-  	inFile.open("data/XTAL_Params_2018.txt"); // apply XTAL_Params to in file stream
+  	inFile.open(params_path); // apply XTAL_Params to in file stream
+
+	stringstream weights_ss;
+	weights_ss << "data/" << weights_type << "_" << PY << ".txt";	
+	string weights_path = weights_ss.str();
 
         ifstream inweightsFile;
         //inweightsFile.open("data/NegWeights.txt"); // precomputed weights 
-        inweightsFile.open("data/PedSub1+4_2018.txt"); // precomputed weights 
+        inweightsFile.open(weights_path); // precomputed weights 
 
 
   	if (!inFile) {
@@ -38,7 +47,7 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 
 	string line, weights_line; 	  
 
-	if ((plot_EB == false) && (plot_EE == true)){ // if EE only
+	if ((plot_EB == false) && ( (plot_EE_minus) || (plot_EE_plus) ) ){ // if EE only
 	  cout << "Skipping to EE\n";
 	  //int EE_Skip = 60493;
 	  int EE_Skip = 60491; // For 2018 parameters. This includes the 0th row. 
@@ -113,10 +122,14 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 	   if(s >> d1 >> d2 >> d3 >> d4 >> d5){ // Do if on XTAL_params line with desired 's' stream extraction parameters	   
 
 		// 2017 params and weights
-		// if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ) continue; // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful.   
+		if (string(PY) == "2017"){
+			if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ) continue; // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful.   
+		}
 		
 		// 2018 params and weights 
-		if ( (d1 == 838864037) || (d1 == 838869123) || (d1 == 838874865) || (d1 == 838891641) || (d1 == 838958295) || (d1 == 838966532) ) continue;
+		if (string(PY) == "2018"){
+			if ( (d1 == 838864037) || (d1 == 838869123) || (d1 == 838874865) || (d1 == 838891641) || (d1 == 838958295) || (d1 == 838966532) ) continue;
+		}
 
 		double weights[10] = {0.}; // reset weights for current line  
 		string Parameters;
@@ -134,7 +147,7 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 			}
 
 		// EE Line
-		if ((d1 >= 872415401) && (plot_EE)){
+		if ((d1 >= 872415401) && ( (plot_EE_minus) || (plot_EE_plus) )){
 			//cout << "On EE\n";
 			//if (EB_Only) break;
 			EE_count += 1;
@@ -152,7 +165,7 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 		inparamFile.open(Parameters); // open from beginning each time and skip desired number of lines 
 		// There may be a way to just open once and not need to skip lines every time. This may be much more efficient.
 		
-		if ((!inparamFile) && (!plot_EE)) break; // if up to EE lines but don't want EE, leave loop.
+		if ((!inparamFile) && (!plot_EE_minus) && (!plot_EE_plus)) break; // if up to EE lines but don't want EE, leave loop.
 
 		if (!inparamFile) {
 		  cout << "Unable to open Info file\n";

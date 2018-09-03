@@ -4,7 +4,7 @@
 
 #include "recon_amp_noclhep.cpp"
 
-tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot_EE_minus, bool plot_EE_plus, int sts_row, int EB_count, int EE_count, int extra_lines, int skip_count,int max_rows, double ts, double EB_w[], double EE_w[], bool plot_EB, bool plot_EE, bool normalized_A, bool normalized_t0, bool ideal_weights) // tuple<returned variables' types> name(input variables)
+tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot_EE_minus, bool plot_EE_plus, int sts_row, int EB_count, int EE_count, int extra_lines, int skip_count,int max_rows, double ts, double EB_w[], double EE_w[], bool plot_EB, bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY) // tuple<returned variables' types> name(input variables)
 {
 
 	bool skip_this_line = false;
@@ -23,11 +23,19 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	// XTAL_Params: (rawid, A, t0, alpha, beta) values
 	// weights.txt: (rawid, desired number of weights)
 
+	stringstream params_ss;
+	params_ss << "data/XTAL_Params_" << PY << ".txt";	
+	string params_path = params_ss.str();
+
   	ifstream inFile; // Input File stream class object  
-  	inFile.open("data/XTAL_Params_2018.txt"); // apply XTAL_Params to in file stream
+  	inFile.open(params_ss.str()); // apply XTAL_Params to in file stream
+
+	stringstream weights_ss;
+	weights_ss << "data/" << weights_type << "_" << PY << ".txt";	
+	string weights_path = weights_ss.str();
 
         ifstream inweightsFile;
-        inweightsFile.open("data/PedSub1+4_2018.txt"); // precomputed weights 
+        inweightsFile.open(weights_path); // precomputed weights 
 
   	if (!inFile) {
   	  cout << "Unable to open Param file\n";
@@ -50,7 +58,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 		inweightsFile.ignore(1000,'\n');
 		}
 
-	if ((plot_EB == false) && (plot_EE == true)){ // if EE only
+	if ((plot_EB == false) && ( (plot_EE_minus) || (plot_EE_plus) )){ // if EE only
 	  //cout << "Skipping to EE\n";
 	  int EE_Skip = 60494;
 	  // skip to first row of EE params and weights, aka skip 60494 rows.
@@ -127,20 +135,24 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	   if(s >> d1 >> d2 >> d3 >> d4 >> d5){ // XTAL_params row has numbers    
 
 		// 2018 Params
-		if ( (d1 == 838864037) || (d1 == 838869123) || (d1 == 838874865) || (d1 == 838891641) || (d1 == 838958295) || (d1 == 838966532) ){ 
-		skip_this_line = true;
-		row += 1;
-		cout << "Line skipped by hand.\n";
-		return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full);
-
-		// 2017 Params
-		/*if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ){
+		if (string(PY) == "2018"){
+			if ( (d1 == 838864037) || (d1 == 838869123) || (d1 == 838874865) || (d1 == 838891641) || (d1 == 838958295) || (d1 == 838966532) ){ 
 			skip_this_line = true;
 			row += 1;
 			cout << "Line skipped by hand.\n";
-			return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
+			return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full);
+			}
+		}
+		// 2017 Params
+		if (string(PY) == "2017"){
+			if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ){
+				skip_this_line = true;
+				row += 1;
+				cout << "Line skipped by hand.\n";
+				return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
 
-		  }*/ // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful.   
+			  } // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful. 
+		}  
 		
 		double weights[10] = {0.}; // reset weights for current line  
 		string Parameters;
@@ -158,7 +170,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 			}
 
 		// EE Line
-		if ((d1 >= 872415401) && (plot_EE)){
+		if ((d1 >= 872415401) && ( (plot_EE_minus) || (plot_EE_plus) )){
 			//cout << "On EE\n";
 			//if (EB_Only) break;
 			EE_count += 1;
@@ -175,7 +187,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 		inparamFile.open(Parameters); // open from beginning each time and skip desired number of lines 
 		// There may be a way to just open once and not need to skip lines every time. This may be much more efficient.
 		
-		if ((!inparamFile) && (!plot_EE)){ 
+		if ((!inparamFile) && (!plot_EE_minus) && (!plot_EE_plus) ){ 
 			
 			cout << "Not in Param file, not plotting EE.\n";
 			full = true;
