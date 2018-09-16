@@ -74,7 +74,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	    // If only want EE+, skip EE- lines
 	    if (plot_EE_plus){
 
-	        cout << "Skipping to EE+\n";
+	        //cout << "Skipping to EE+\n";
 	        //int EE_plus_Skip = 7324;
 	        int EE_plus_Skip = 7200;
 	  

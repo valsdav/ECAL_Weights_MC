@@ -49,12 +49,13 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 
 	if ((plot_EB == false) && ( (plot_EE_minus) || (plot_EE_plus) ) ){ // if EE only
 	  cout << "Skipping to EE\n";
-	  //int EE_Skip = 60493;
-	  int EE_Skip = 60491; // For 2018 parameters. This includes the 0th row. 
+	  int EE_Skip;
+	  if (string(PY) == "2017") EE_Skip = 60494; // 2017 parameters 
+	  if (string(PY) == "2018") EE_Skip = 60491; // For 2018 parameters. This includes the 0th row. 
 	  // skip to first row of EE params, aka skip 60494 rows.
 	  // Might need to also do this with weights file 
 	 
-	    while(EE_Skip !=0){ // Skip 1000 characters or until new line 
+	    while(EE_Skip !=0){ // Skip 1000 characters or until innew line 
 	      inFile.ignore(1000,'\n'); // count is number of rows read before this one
 	      inweightsFile.ignore(1000,'\n');
 	      EE_Skip -= 1;
@@ -461,7 +462,7 @@ tuple<double, double> total_error(int max_rows, double ts, double EB_w[], double
 
 	  } // Loop while still lines left in XTAL_params and weights, and desired maximum hasn't been reached
 
-	  //inparamFile.close();
+	  inparamFile.close();
 	  inFile.close();
 
 	// take total error for ts and fill 1D histogram with total of abs error for each ts 

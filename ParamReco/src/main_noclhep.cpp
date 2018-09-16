@@ -52,7 +52,7 @@ int main(int argc, char** argv)
 	// argv[1] = (BC) or (BD)
 	// argv[2] = (ts_min,ts_max,dts) or (ts)
 	// argv[3] = (EB) or (EE+) or (EE-)
-	// argv[4] = (cmssw) or (weights.txt path)
+	// argv[4] = (online) or (weights.txt path)
 	// argv[5] = (2017) or (2018) // parameter year 
 	// argv[6] = max_rows
 	// argv[7] = note
@@ -142,11 +142,11 @@ int main(int argc, char** argv)
 	// Weights
 	
 	bool ideal_weights = false; // True: Compute ideal weights during runtime or read from text file. False: Use single sets defined below 
-	bool cmssw_weights = false;
-	string weights_type = "PedSub1+4"; // Path to weights txt file
+	bool online_weights = false;
+	string weights_type = "PedSub1+4"; // Type of Weights used 
 
-	if (string(argv[4]) == "cmssw"){
-	    cmssw_weights = true;	    
+	if (string(argv[4]) == "online"){
+	    online_weights = true;	    
 	  }
 
 	else {
@@ -180,9 +180,9 @@ int main(int argc, char** argv)
 
 	// Weights
        
-	//double cmssw[10] = {-0.3812788, -0.3812788, -0.3812788, 0, 0.235699, 0.4228363, 0.3298652, 0.1575187, -0.002082776, 0};
-	double cmssw_EB[10] = {0, 0, -0.56, -0.55, 0.25, 0.48, 0.38, 0, 0, 0};
-	double cmssw_EE[10] = {0, 0, -0.65, -0.52, 0.25, 0.52, 0.50, 0, 0, 0};
+	//double online[10] = {-0.3812788, -0.3812788, -0.3812788, 0, 0.235699, 0.4228363, 0.3298652, 0.1575187, -0.002082776, 0};
+	double online_EB[10] = {0, 0, -0.56, -0.55, 0.25, 0.48, 0.38, 0, 0, 0};
+	double online_EE[10] = {0, 0, -0.65, -0.52, 0.25, 0.52, 0.50, 0, 0, 0};
  
 	// Initialize
 	double EB_w[10] = {0.}, EE_w[10] = {0.};
@@ -192,10 +192,10 @@ int main(int argc, char** argv)
 	//	EE_w[i] = 0.0;
 	//}
 
-	if (cmssw_weights){
+	if (online_weights){
 		for (int i = 0; i < 10; i++){
-			EB_w[i] = cmssw_EB[i];
-			EE_w[i] = cmssw_EE[i];
+			EB_w[i] = online_EB[i];
+			EE_w[i] = online_EE[i];
 
 		}
 
@@ -383,7 +383,7 @@ int main(int argc, char** argv)
 
 	// Should make plotting function eventually
 
-	//gStyle->SetOptStat(0); // no stats box
+	gStyle->SetOptStat(0); // no stats box
 
 	TCanvas *c1 = new TCanvas("c1","c1",800,600);
 
@@ -403,37 +403,35 @@ int main(int argc, char** argv)
 		tsr->Draw("HIST");
 		ostringstream error_plot_root, error_plot_pdf;
 		error_plot_root << "bin/BC_";
-		error_plot_pdf << "bin/BC_"; 
+		error_plot_pdf <<  "bin/BC_"; 
 	
 		if (plot_EB){	
 		  error_plot_root << "EB_";
-		  error_plot_pdf << "EB_";
+		  error_plot_pdf  << "EB_";
 		}
 
-		//if (plot_EE){
-		  //error_plot_root << "EE";
-		  //error_plot_pdf << "EE";
-
-		  if (plot_EE_minus){
+		if (plot_EE_minus){
 			error_plot_root << "EE-_";	
-			error_plot_pdf << "EE-_";	
-		    }
+			error_plot_pdf  << "EE-_";	
+		  }
 
-		  if (plot_EE_plus){
+		if (plot_EE_plus){
 			error_plot_root << "EE+_";	
-			error_plot_pdf << "EE+_";	
-		    }
-
-		//}
+			error_plot_pdf  << "EE+_";	
+		  }
 
 		if (ideal_weights){
-			error_plot_root << "idealweights"  << ts_min << "_" << ts_max << "_" << note << current_time << ".root";
-			error_plot_pdf << "idealweights"  << ts_min << "_" << ts_max << "_" <<  note << current_time << ".pdf";
+			//error_plot_root << "idealweights"  << ts_min << "_" << ts_max << "_" << note << current_time << ".root";
+			//error_plot_pdf  << "idealweights"  << ts_min << "_" << ts_max << "_" <<  note << current_time << ".pdf";
+			error_plot_root << weights_type << "_" << PY << "_" << ts_min << "_" << ts_max << note << ".root";
+			error_plot_pdf  << weights_type << "_" << PY << "_" << ts_min << "_" << ts_max << note << ".pdf";
 		  }
 
 		if (!ideal_weights){ 
-			error_plot_root << "online" << "_" << ts_min << "_" << ts_max << "_" << note << current_time << ".root";
-			error_plot_pdf << "online" << "_" << ts_min << "_" << ts_max << "_" << note << current_time << ".pdf";
+			//error_plot_root << "online" << "_" << ts_min << "_" << ts_max << "_" << PY << "_" << note << current_time << ".root";
+			//error_plot_pdf  << "online" << "_" << ts_min << "_" << ts_max << "_" << PY << "_" << note << current_time << ".pdf";
+			error_plot_root << "online" << "_" << PY << "_" << ts_min << "_" << ts_max << note << ".root";
+			error_plot_pdf  << "online" << "_" << PY << "_" << ts_min << "_" << ts_max << note << ".pdf";
 		  }
 
 		TString rooterrortitle = error_plot_root.str();
@@ -465,8 +463,8 @@ int main(int argc, char** argv)
 		sts->GetYaxis()->SetTitleOffset(1.2);
 		sts->GetZaxis()->SetLabelSize(0.02);
 		gStyle->SetOptStat(0);
-		sts->GetZaxis()->SetRangeUser(-0.002,0.015);
-		//sts->GetZaxis()->SetRangeUser(-0.08,0.12);
+		if(plot_EB) sts->GetZaxis()->SetRangeUser(-0.002,0.015); // Arbitrary EB range 
+		if(plot_EE_minus || plot_EE_plus) sts->GetZaxis()->SetRangeUser(-0.08,0.16); // Arbitrary EE range 
 		sts->Draw("COLZ1"); // COLZ1 to not color zeros
 		
 		ostringstream plot_title;
@@ -503,14 +501,18 @@ int main(int argc, char** argv)
 		  //}
 
 		if (ideal_weights){
-			error_plot_root << "ideal" << note << current_time << ".root";
-			error_plot_pdf << "ideal" << note << current_time << ".pdf";
+			//error_plot_root << "ideal" << note << current_time << ".root";
+			//error_plot_pdf  << "ideal" << note << current_time << ".pdf";
+			error_plot_root << "ideal" << "_" << PY << "_" << "ts" << ts << note << ".root";
+			error_plot_pdf  << "ideal" << "_" << PY << "_" << "ts" << ts << note << ".pdf";
 			plot_title << "Ideal Weights, ";
 		  }
 
 		if (!ideal_weights){ 
-			error_plot_root << "Online" << note << current_time << ".root";
-			error_plot_pdf << "Online" << note << current_time << ".pdf";
+			//error_plot_root << "Online" << "_" << PY << "_" << "ts" << ts << "_" << note << current_time << ".root";
+			//error_plot_pdf  << "Online" << "_" << PY << "_" << "ts" << ts << "_" << note << current_time << ".pdf";
+			error_plot_root << "Online" << "_" << PY << "_" << "ts" << ts << note << ".root";
+			error_plot_pdf  << "Online" << "_" << PY << "_" << "ts" << ts << note << ".pdf";
 			plot_title << "Online Weights, ";
 		  }
 	
@@ -527,7 +529,17 @@ int main(int argc, char** argv)
 		cout << "avg bias = " << avg_bias << endl;	
 		cout << "min bias = " << min_bias << endl;
 
-		TFile *f = new TFile(rooterrortitle,"NEW");
+		// Want to figure out how to write color drawn histogram into TFile 
+		TFile *f = new TFile(rooterrortitle,"RECREATE");
+		//sts->Draw("COLZ1");
+		gDirectory->WriteObject(sts,"Distribution");
+		gDirectory->WriteObject(values,"Bias_Values");
+
+		//gDirectory->GetObject("Distribution",sts)->Draw("COLZ1");
+		//TH2F *dist = (TH2F*)f->Get("Distribution");
+		//dist->Draw("COLZ1");
+		//gDirectory->WriteObject(dist,"DistributionColor");
+		//gDirectory->Draw("COLZ1");
 		//TTree *Tree = new TTree("Tmax","max");		
 
                 //TBranch *blah = new TBranch(*Tmax); 
@@ -537,28 +549,35 @@ int main(int argc, char** argv)
 		TH1F *maxb = new TH1F("max_bias","max_bias",10,-1,1);
 		maxb->Fill(max_bias);
 		maxb->SetStats(1);
+		maxb->Write();
 
-		TH1F *tot_e = new TH1F("total_error","total_error",10,-1,1);
+		TH1F *tot_e = new TH1F("total_error","total_error",10,total_error_ - 1,total_error_ + 1);
 		tot_e->Fill(total_error_);
 		tot_e->SetStats(1);
+		tot_e->Write();
 
 		TH1F *ab = new TH1F("average_bias","average_bias",10,-1,1);
 		ab->Fill(avg_bias);
 		ab->SetStats(1);
+		ab->Write();
 
 		TH1F *minb = new TH1F("min_bias","min_bias",10,-1,1);
 		minb->Fill(min_bias);
 		minb->SetStats(1);
+		minb->Write();
 		
-		values->Write();
-
-		f->Write();
+		//values->Write();
+		//sts->Write();
+		//f->Write();
 
 		//sts->Write();
 		//values->Write();
 		
 		//f->Write();
-		//f->Close();
+		//f->Write();
+		//sts->Draw("COLZ1");
+				
+	
 		c1->SaveAs(pdferrortitle); // Canvas screenshot
 		//sts->SaveAs(rooterrortitle); // Editable Histogram
 		//sts->SaveAs("EEPlot.root");

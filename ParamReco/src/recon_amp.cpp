@@ -124,8 +124,6 @@ double recon_amp(double A, double t_0, double ts, double alpha, double beta, dou
 	//cout << "A = " << A << endl;
 	return test_amplitude;
 
-
-
 	// Calulate Amp with ideal weights
 
 	/*double ideal_recon_amp = 0.0; // Should always get A 

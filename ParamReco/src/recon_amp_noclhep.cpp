@@ -54,6 +54,11 @@ double recon_amp_noclhep(double A, double t_0, double ts, double alpha, double b
 	    recon_amp += samples[k]*weights[k]; 
 
 	  }
+	
+	// Need to delete objects or memory can overflow
+	name->~TString();
+	formula->~TString();
+	function_alphabeta->Delete();
 
 	return recon_amp;
 }
