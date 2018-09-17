@@ -170,7 +170,7 @@ int main(int argc, char** argv)
 
 	else {
 		ideal_weights = true;
-	        weights_type = string(argv[4 + (plot_EC)]);
+	        weights_type = string(argv[4 - (plot_EC)]);
 	      }
 
 	bool note_exists = false;
