@@ -317,24 +317,27 @@ int main(int argc, char** argv)
 	
 	// Call Functions
 
-	double abs_eta_min = 0.0, abs_eta_max = 0.0;
+	//double abs_eta_min = 0.0, abs_eta_max = 0.0;
 
 	if (plot_EC){
 	
 		cout << "Plotting Eta Curve\n";
 
 		// Define first abs_eta_max
-		abs_eta_max = 1.4; // Start here, increase by 0.4 first time, then 0.3 till 2.7
-		double ieta_max = 0.0; // eta being iterated over 
+		//abs_eta_max = 1.4; // Start here, increase by 0.4 first time, then 0.3 till 2.7
+		//abs_eta_max = 1.8; // Start here, increase by 0.4 first time, then 0.3 till 2.7
+		//double ieta_max = 0.0; // eta being iterated over 
+		double ieta_min = 0, ieta_max = 1.4; // initial values for eta being iterated over 
 
-		for (ieta_max = abs_eta_max; ieta_max < 3.1; ieta_max += 0.3){ // want last run to be at eta_max
+		//for (ieta_max = abs_eta_max; ieta_max < 3.1; ieta_max += 0.3){ // want last run to be at eta_max
+		for (ieta_max; ieta_max <= 3.0; ieta_max += 0.3){ // for debugging 
 			
 			TH1F *EC = new TH1F("EC",ts_range_title_string,tsr_bins,ts_min,ts_max + dts); // ts range
 			ts = 0.0 ;
 			double XTAL_count = 0;
 			for (ts = ts_min; ts < ts_max + dts; ts += dts){
 				// total = total_error()
-				tie(total, XTAL_count) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, abs_eta_min, ieta_max);
+				tie(total, XTAL_count) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, ieta_min, ieta_max);
 				EC->Fill(ts,total/XTAL_count); // want this to also return number of entries so average can be taken and plotted.
 				cout << "ts = " << ts << ", total = " << total << ", XTAL_count = " << XTAL_count << "\n";
 			  }
@@ -342,7 +345,7 @@ int main(int argc, char** argv)
 		// Save etamin and etamax in root file title, extract in plot.py.
 		// destroy histogram from memory 
 		ostringstream eta_title;
-		eta_title << "bin/EC_" << abs_eta_min << "_" << ieta_max << "_" << ts_min << "_" << ts_max << "_";
+		eta_title << "bin/EC_" << ieta_min << "_" << ieta_max << "_" << ts_min << "_" << ts_max << "_";
 		if (ideal_weights) eta_title << weights_type << "_" << PY;
 		if (!ideal_weights) eta_title << "online_" << PY;
 
@@ -354,7 +357,7 @@ int main(int argc, char** argv)
 		EC->SaveAs(eta_title_string);
 		EC->~TH1F();
 
-		abs_eta_min = ieta_max;	
+		ieta_min = ieta_max;	
 		if (ieta_max == 1.4) ieta_max += 0.1; // after loop, this will make next ietamax 1.8
 	
 		}
