@@ -46,7 +46,7 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 
 	// Variables that reset before going through XTAL_Params and weights from beginning 
 	int EB_count = 0, EE_count = 0, extra_lines = 0, row = 0;
-	double XTAL_count = 0.0, total_error = 0.0;; // double because want double divison later 	
+	double XTAL_count = 0.0, total_error = 0.0; // double because want double divison later 	
 
 	// Initial skip 
 	while(initial_skip !=0){
@@ -149,11 +149,20 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 		//cout << "d1 = " << d1 << endl;
 		//cout << "row = " << row << endl;
 
-		if (row%5000 == 0){
-		  cout << "Row = " << row << endl;
-		  cout << "d1 = " << d1 << endl;
+		//if (row%5000 == 0){
+		  //cout << "Row = " << row << endl;
+		  //cout << "d1 = " << d1 << endl;
 
+		//}
+
+		if (d1 == 838926858){
+
+		  cout << " d1 = 838926858, should have 0-1.4 eta entry\n";
+		  verbosity = true;
 		}
+
+		
+
 		/*if(d1 == 872418966){ // should have abs(eta) between 1.8 and 2.1 
 			
 			//cout << "debug\n";
@@ -170,15 +179,21 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 
 		// Match ID's between Params and Info files, then
 		// get EB, EE DOF for given ID.
+		//int i = 0;
 		while( (getline(inparamFile, param_line)) && (leave == false)) { // read EB/EE_DOF line
+
+		bool five_params = false;
+
+		verbosity = true;
+
+		double d1_, d2_, d3_, d4_, d5_; 
+                stringstream ss(param_line);
 	
+		//if(verbosity) cout << "reading DOF file\n";
+		//if(verbosity) cout << "(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_) = " << bool((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_)) << endl;
+                    
 		//while( (getline(inparamFile, param_line)) && (getline(inweightsFile, weights_line)) &&  (leave == false)) { // read EB/EE_DOF line
 			//cout << "Extra_lines = " << extra_lines << "\n";
-
-	      		//double d1_, d2_, d3_, d4_, d5_, d6_;
-			double d1_, d2_, d3_, d4_, d5_; 
-			//double w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10;
-
 			// d1_ = cmsswID, d2_ = ieta or ix, d3_ = iphi or iy, d4_ = 0 or iz (+/-1), d5_ = eta
 			// ^^ For Compact_DOF.txt
 
@@ -187,7 +202,6 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 			//if (row == 4625){
 
 			
-                        stringstream ss(param_line);
 
 			  //cout << "row = " << row << endl;
 			  //cout << "(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) = " << bool(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) << endl;
@@ -195,19 +209,28 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 			  //debug_val += 1;
 			//}
 
+
 			// Need to handle 5 or 10 weights. 
 
 			//if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5 >> w6 >> w7 >> w8 >> w9 >> w10)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
 			//if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
+
+			// If There are only two double parameters, you will skip DOF lines even if the ID's match
+			// If 
+
 			if(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_){ // If DOF line contains 5 doubles
 	
+				five_params = true;
 
 				if (verbosity){
 					cout.precision(17);
-					cout << "d1 = " << d1 << endl;
-					cout << "d1_ = " << d1_ << endl;
-					cout << "w0 = " << w0 << endl;
+					//cout << "d1 = " << d1 << endl;
+					//cout << "d1_ = " << d1_ << endl;
+					//cout << "w0 = " << w0 << endl;
+					//i += 1;
 				  }
+
+				//if (i == 20) exit(0);
 
 				//if (d1 == d1_){ // can pair DOF with XTAL, and extract correct weights 
 
@@ -215,14 +238,24 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 
 					double eta = d5_;
 
-					if(d1_ == 872418966){ // should have abs(eta) between 1.8 and 2.1 
+					if(d1_ == 838926858){ // should have abs(eta) between 0, 1.4
 
-						cout << "debugging\n";
-						cout << "All ID's match\n";
+						//cout << "debugging\n";
+						cout << "Past non 5 params lines.\n";
 						cout << "d1_ = " << d1_ << endl;
 						cout << "eta = " << eta << endl;
 						cout << "abs(eta) = " << abs(eta) << endl;
 
+					}
+
+					if(verbosity){ // should have abs(eta) between 1.8 and 2.1 
+
+						//cout << "debugging\n";
+						//cout << "All ID's match\n";
+						//cout << "d1_ = " << d1_ << endl;
+						//cout << "eta = " << eta << endl;
+						//cout << "abs(eta) = " << abs(eta) << endl;
+						verbosity = false;
 					}
 
 
@@ -292,6 +325,17 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 
 			} // if DOF line contains 5 doubles
 
+		if(!five_params){
+	
+		  //cout << "Five params not read on this line\n";
+		  cout.precision(17);
+		  //cout << "d1 = " << d1 << endl;
+		  //cout << "d1_ = " << d1_ << endl;
+		  //cout << "w0 = " << w0 << endl;
+		  leave = true;
+
+		  }
+
 		} // read EB/EE_DOF line
 
 	  // Only compute the bias, add to total bias, and add XTAL if eta is in range. 
@@ -338,14 +382,14 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 		  XTAL_count += 1;
 
 		  // See if things are going well 
-	    	  if ((row%100000) == 0){
+	    	  /*if ((row%100000) == 0){
 		      cout << "row " << row << endl;
 		      for (int ii = 0; ii < 10; ii++) { cout << "weights[" << ii << "] = " << weights[ii] << endl;}
 		      cout << "ratio = " << ratio << endl;
 		      cout << "amp_error = " << amp_error << endl;
 		      cout << "abs(amp_error) = " << abs(amp_error) << endl;
 		      cout << "total_error =  " << total_error << endl;
-		      }
+		      }*/
 
 	  } // if in_range
 

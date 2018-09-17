@@ -160,33 +160,35 @@ if plot_type == 'BC':
 
 elif plot_type == 'EC':
 	for g in graphs:
-		min_eta = paths[i].split('_')[-7] #when there's a note. With no note, one less '_'
+		min_eta = paths[i].split('_')[-7] #min is -7 when there's a note. With no note, one less '_'
 		max_eta = paths[i].split('_')[-6]
+		#print'min_eta = ',min_eta
+		#print'max_eta = ',max_eta
 		g.SetMarkerStyle(8)
 
-		if (min_eta == 0) and (max_eta == 1.4):
+		if (min_eta == '0') and (max_eta == '1.4'):
 				g.SetMarkerColor(kRed) 
 				g.SetLineColor(kRed)
 
-		if (min_eta == 1.4) and (max_eta == 1.8):
+		if (min_eta == '1.4') and (max_eta == '1.8'):
 				g.SetMarkerColor(kGreen) 
 				g.SetLineColor(kGreen)
 
-		if (min_eta == 1.8) and (max_eta == 2.1):
+		if (min_eta == '1.8') and (max_eta == '2.1'):
 				g.SetMarkerColor(kBlue) 
 				g.SetLineColor(kBlue)
 
-		if (min_eta == 2.1) and (max_eta == 2.4):
-				g.SetMarkerColor(kPink) 
-				g.SetLineColor(kPink)
+		if (min_eta == '2.1') and (max_eta == '2.4'):
+				g.SetMarkerColor(kMagenta) 
+				g.SetLineColor(kMagenta)
 
-		if (min_eta == 2.4) and (max_eta == 2.7):
+		if (min_eta == '2.4') and (max_eta == '2.7'):
 				g.SetMarkerColor(kCyan) 
 				g.SetLineColor(kCyan)
 
-		if (min_eta == 2.7) and (max_eta == 3):
-				g.SetMarkerColor(kOrange) 
-				g.SetLineColor(kOrange)
+		if (min_eta == '2.7') and (max_eta == '3'):
+				g.SetMarkerColor(kOrange + 6) 
+				g.SetLineColor(kOrange + 6)
 		i += 1
 	#g.SetMarkerColor(2+i)
 	#g.SetLineColor(2+i)
@@ -233,8 +235,14 @@ l1 = TLegend(0.7, 0.1, 0.9, 0.3) # Bottom right
 i = 0
 
 for g in graphs:
-	label = paths[i].split('_')[-4] + '_' + paths[i].split('_')[-3]
-	l1.AddEntry(g, label, "lp")
+	if plot_type == 'BC':
+		label = paths[i].split('_')[-4] + '_' + paths[i].split('_')[-3]
+		l1.AddEntry(g, label, "lp")
+
+	if plot_type == 'EC':
+		label = paths[i].split('_')[-7] + ' #leq #||{#eta} < ' + paths[i].split('_')[-6]
+		l1.AddEntry(g, label, "lp")	
+
 	i += 1
 
 #paths[0].slice('_')[1] # section_weights_range.root
