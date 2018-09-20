@@ -1,34 +1,33 @@
 // Abe Tishleman-Charny
 // 24 May 2018
-// The purpose of this function is to return the sum of the absolute values of the errors for each XTAL, where error is defined as (recon_amp / amp ) - 1
+// The purpose of this tuple is to return the total bias and number of crystals in a given eta range with online or ideal weights.
 
 #include "recon_amp_noclhep.cpp"
 
-tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_w[], bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY, double ieta_min, double ieta_max) 
+tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_w[], bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY, double eta_min, double eta_max) 
 {
 	int initial_skip = 0; // Used for testing
 	bool verbosity = false;
 
-	cout << "-------------------------------\n";
-	cout << "Computing Total Error for:\n";
-	cout << "Abs(Eta)_min = " << ieta_min << endl; // minimum absolute values of eta for this loop
-	cout << "Abs(Eta)_max = " << ieta_max << endl; // maximum abs value of eta to compute bias for this loop
-	cout << "Computing Total Error for\n";
+	cout << "*****************************************\n";
+	cout << "Computing Average Bias for:\n";
+	cout << "Eta: [" << eta_min << ", " << eta_max << "]" << endl;
 	cout << "Time Shift = " << ts << "ns\n";
+	cout << "*****************************************\n";
 
   	// Open XTAL_Params and Weights files
 
 	stringstream params_ss, weights_ss;
+
 	params_ss << "data/XTAL_Params_" << PY << ".txt"; // (ID, A, t0, alpha, beta) values	
 	weights_ss << "data/" << weights_type << "_" << PY << ".txt"; // (ID, weights)
 
-	string params_path = params_ss.str();
-	string weights_path = weights_ss.str();
+	string params_path = params_ss.str(), weights_path = weights_ss.str();
 
-  	ifstream inFile, inweightsFile; // Input File stream object  
+  	ifstream inFile, inweightsFile; // Input File stream objects 
 
-  	inFile.open(params_path); // apply XTAL_Params to inFile stream
-        inweightsFile.open(weights_path); // open precomputed weights text file 
+  	inFile.open(params_path); // XTAL_Params: inFile stream
+        inweightsFile.open(weights_path); // weights.txt: inweightsFile stream
 
   	if (!inFile) {
   	  cout << "Unable to open Param file\n";
@@ -40,27 +39,29 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
   	  exit(1); // terminate with error
  	 }
 
-	string line, weights_line; // for storing XTAL_Params and weights lines 	  
+	string line, weights_line; // XTAL_Params: line, weights.txt: weights_line	  
 
 	// Read XTAL_Params, weights lines 
+	// Change to first reading Eta line, then cycle through XTAL_Params and weights until the parameters are found? 
 
-	// Variables that reset before going through XTAL_Params and weights from beginning 
+	// Initialize variables
 	int EB_count = 0, EE_count = 0, extra_lines = 0, row = 0;
 	double XTAL_count = 0.0, total_error = 0.0; // double because want double divison later 	
 
-	// Initial skip 
+	// Initial skip, optional
 	while(initial_skip !=0){
 	  inFile.ignore(1000,'\n');
 	  inweightsFile.ignore(1000,'\n');
 	  initial_skip -= 1;
 	}
 
+	
 	while((getline(inFile, line)) && (getline(inweightsFile, weights_line))) { // get line of XTAL_Params.txt and weights, loop
 	   // I think while this is true it performs the action, obtaining the next line .. ?
 
 	   // Check row
 	   if (row == max_rows){
-		cout << "Maximum desired lines reached." << endl;
+		cout << "Maximum desired rows reached." << endl;
 		break;
 		}
 
@@ -68,12 +69,13 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 	      cout << "Reading line " << row << endl;
 	      }
 
-	   stringstream s(line); // stringstream 's' operates on string 'line'
-	   stringstream ww(weights_line);
-	   double d1, d2, d3, d4, d5; // d1 = ID, d2 = A, d3 = t_0, d4 = alpha, d5 = beta   
-	   double w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10; // ID, weights
+	   stringstream s(line); // convert 'line' to stream 's'
+	   stringstream ww(weights_line); // convert 'weights_line' to stream ww 
 
-	   if( (s >> d1 >> d2 >> d3 >> d4 >> d5) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5 >> w6 >> w7 >> w8 >> w9 >> w10)){ // Do if on XTAL_params line with desired 's' stream extraction DOF	  
+	   double d1, d2, d3, d4, d5; // d1 = ID, d2 = A, d3 = t_0, d4 = alpha, d5 = beta   
+	   double w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10; // w0 = ID, wi = weights_{i}
+
+	   if( (s >> d1 >> d2 >> d3 >> d4 >> d5) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5 >> w6 >> w7 >> w8 >> w9 >> w10)){ // Do if on XTAL_params line with 5 doubles, and weights line with 11 doubles 	  
 
 		// 2017 params and weights
 		if (string(PY) == "2017"){
@@ -155,11 +157,11 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 
 		//}
 
-		if (d1 == 838926858){
+		//if (d1 == 838926858){
 
-		  cout << " d1 = 838926858, should have 0-1.4 eta entry\n";
-		  verbosity = true;
-		}
+		//  cout << " d1 = 838926858, should have 0-1.4 eta entry\n";
+		//  verbosity = true;
+		//}
 
 		
 
@@ -238,15 +240,15 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 
 					double eta = d5_;
 
-					if(d1_ == 838926858){ // should have abs(eta) between 0, 1.4
+//					if(d1_ == 838926858){ // should have abs(eta) between 0, 1.4
 
-						//cout << "debugging\n";
-						cout << "Past non 5 params lines.\n";
-						cout << "d1_ = " << d1_ << endl;
-						cout << "eta = " << eta << endl;
-						cout << "abs(eta) = " << abs(eta) << endl;
+//						//cout << "debugging\n";
+//						cout << "Past non 5 params lines.\n";
+//						cout << "d1_ = " << d1_ << endl;
+//						cout << "eta = " << eta << endl;
+//						cout << "abs(eta) = " << abs(eta) << endl;
 
-					}
+//					}
 
 					if(verbosity){ // should have abs(eta) between 1.8 and 2.1 
 
@@ -259,13 +261,14 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 					}
 
 
-					//cout << "ieta_min = " << ieta_min << endl;
+					//cout << "eta_min = " << eta_min << endl;
 					//cout << "eta = " << eta << endl;
-					//cout << "ieta_max = " << ieta_max << endl;
+					//cout << "eta_max = " << eta_max << endl;
 
 					// if eta is out of range, don't extract weights 
 					// check if eta is in range
-					if ( ( ieta_min <= abs(eta) ) && ( ieta_max > abs(eta) )  ){
+					//if ( ( eta_min <= abs(eta) ) && ( eta_max > abs(eta) )  ){
+					if ( ( eta_min <= eta ) && ( eta_max > eta )  ){
 
 					  in_range = true;
 					  //cout << "All three ID's match and eta in range\n";
@@ -319,7 +322,7 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 				else { // DOF ID doesn't match Params and Weights. Read next DOF line. 
 
 				  extra_lines += 1;
-				  //if (ieta_max == 1.8){debug_val += 1;
+				  //if (eta_max == 1.8){debug_val += 1;
 				  //if (debug_val == 3) exit(0);}
 				} // keep track of number of extra lines to skip next time 
 

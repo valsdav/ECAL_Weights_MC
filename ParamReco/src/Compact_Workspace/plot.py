@@ -52,6 +52,12 @@ f3 = TFile()
 f4 = TFile() 
 f5 = TFile()
 f6 = TFile()
+f7 = TFile()
+f8 = TFile()
+f9 = TFile() 
+f10 = TFile()
+f11 = TFile()
+f12 = TFile()
 
 h1 = TH1F()
 h2 = TH1F()
@@ -59,6 +65,12 @@ h3 = TH1F()
 h4 = TH1F()
 h5 = TH1F()
 h6 = TH1F()
+h7 = TH1F()
+h8 = TH1F()
+h9 = TH1F()
+h10 = TH1F()
+h11 = TH1F()
+h12 = TH1F()
 
 g1 = TGraph()
 g2 = TGraph()
@@ -66,10 +78,16 @@ g3 = TGraph()
 g4 = TGraph()
 g5 = TGraph()
 g6 = TGraph()
+g7 = TGraph()
+g8 = TGraph()
+g9 = TGraph()
+g10 = TGraph()
+g11= TGraph()
+g12 = TGraph()
 
-files = [f1, f2, f3, f4, f5, f6]
-histos = [h1, h2, h3, h4, h5, h6]
-graphs = [g1, g2, g3, g4, g5, g6]
+files = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12]
+histos = [h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12]
+graphs = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g11, g12]
 
 i = 0
 
@@ -159,6 +177,9 @@ if plot_type == 'BC':
 		i += 1
 
 elif plot_type == 'EC':
+
+	double eta_boundaries = [-3.0,-2.6, -2.3, -2.0, -1.479, -1.133, -0.78477, -0.04362, 0.45396, 0.80182, 1.1479, 2.0, 2.3, 2.6, 3.0]
+
 	for g in graphs:
 		min_eta = paths[i].split('_')[-7] #min is -7 when there's a note. With no note, one less '_'
 		max_eta = paths[i].split('_')[-6]
@@ -227,7 +248,9 @@ for g in graphs:
 #else: l1 = TLegend(0.7, 0.1, 0.9, 0.3)
 #else: l1 = TLegend(0.5, 0.1, 0.8, 0.4)
 
-l1 = TLegend(0.7, 0.1, 0.9, 0.3) # Bottom right
+l1 = TLegend(0.7, 0.3, 0.9, 0.5) 
+
+#l1 = TLegend(0.7, 0.1, 0.9, 0.3) # Bottom right
 #l1 = TLegend(0.1, 0.7, 0.3, 0.9) # Upper left
 
 #l1.SetHeader("Legend") # I actually can't believe you can declare l1 in an if statement then access outside 
@@ -240,7 +263,8 @@ for g in graphs:
 		l1.AddEntry(g, label, "lp")
 
 	if plot_type == 'EC':
-		label = paths[i].split('_')[-7] + ' #leq #||{#eta} < ' + paths[i].split('_')[-6]
+		#label = paths[i].split('_')[-7] + ' #leq #||{#eta} < ' + paths[i].split('_')[-6]
+		label = paths[i].split('_')[-7] + ' #leq #eta < ' + paths[i].split('_')[-6]
 		l1.AddEntry(g, label, "lp")	
 
 	i += 1
@@ -248,18 +272,29 @@ for g in graphs:
 #paths[0].slice('_')[1] # section_weights_range.root
 #section = str(paths[0])[10:-17] # EE+/-, EB
 #section = paths[0].split('_')[-3].split('/')[-1]
-section = paths[0].split('_')[-5] #.split('/')[-1]
-minimum = paths[0].split('_')[-2] + 'ns'
-maximum = paths[0].split('.')[-2].split('_')[-1] + 'ns'
+if plot_type == 'BC':
+	section = paths[0].split('_')[-5] #.split('/')[-1]
+	minimum = paths[0].split('_')[-2] + 'ns'
+	maximum = paths[0].split('.')[-2].split('_')[-1] + 'ns'
+	#print 'section = ',section
 
-print 'section = ',section
+if plot_type == 'EC':
+	weights_type = paths[0].split('_')[-3]
+	print 'weights type:',weights_type
+	if weights_type == 'online': weights_type = 'Online'
+	print 'weights type = ',weights_type
+	PY = paths[0].split('_')[-2]
+
+	minimum = paths[0].split('_')[-5]   
+	maximum = paths[0].split('_')[-4] 
 
 mg = TMultiGraph()
 
 for g in graphs:
 	mg.Add(g, "LP")
 
-mg.SetTitle(section + " Average Bias vs. Time Shift")
+if plot_type == 'BC': mg.SetTitle(section + " Average Bias vs. Time Shift")
+if plot_type == 'EC': mg.SetTitle(weights_type + ' Weights, ' + PY + ' Parameters')
 
 c0 = TCanvas('c0', 'c0', 800, 600)
 c0.SetBatch(kTRUE)
@@ -288,6 +323,7 @@ yline.Draw("SAME")
 
 #Save_Title = "plots/plot" + section + str(int(histos[0].GetXaxis().GetBinLowEdge(1))) + ".pdf"
 #Save_Title = "bin/pyplot" + section + "_" + str(int(histos[0].GetXaxis().GetBinLowEdge(1))) + ".pdf"
-Save_Title = "bin/pyplot" + section + "_" + minimum + '_' + maximum + ".pdf"
+if plot_type == 'BC': Save_Title = "pyplot/pyplot" + section + "_" + minimum + '_' + maximum + ".pdf"
+if plot_type == 'EC': Save_Title = "pyplot/pyplot_EC_" + weights_type + "_" + PY + "_" + minimum + '_' + maximum + ".pdf"
 
 c0.SaveAs(Save_Title)

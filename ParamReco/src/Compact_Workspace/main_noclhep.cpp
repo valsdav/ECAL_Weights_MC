@@ -323,24 +323,43 @@ int main(int argc, char** argv)
 	
 		cout << "Plotting Eta Curve\n";
 
+		vector<double> eta_boundaries = {-3.0,-2.6, -2.3, -2.0, -1.479, -1.133, -0.78477, -0.04362, 0.45396, 0.80182, 1.1479, 2.0, 2.3, 2.6, 3.0};
+		//vector<double> eta_boundaries = {-3.0,-2.6};
+
 		// Define first abs_eta_max
 		//abs_eta_max = 1.4; // Start here, increase by 0.4 first time, then 0.3 till 2.7
 		//abs_eta_max = 1.8; // Start here, increase by 0.4 first time, then 0.3 till 2.7
 		//double ieta_max = 0.0; // eta being iterated over 
-		double ieta_min = 0, ieta_max = 1.4; // initial values for eta being iterated over 
-
+		double ieta_min = eta_boundaries[0], ieta_max = eta_boundaries[1]; // initial values for eta being iterated over 
+		int total_eta_skip = 0, single_eta_skip = 0; // number of rows to skip in eta file. Update every time an eta range is finished.
 		//for (ieta_max = abs_eta_max; ieta_max < 3.1; ieta_max += 0.3){ // want last run to be at eta_max
-		for (ieta_max; ieta_max <= 3.0; ieta_max += 0.3){ // for debugging 
-			
+		for (int i = 0; i < eta_boundaries.size() - 1; i += 1){ // for debugging 
+						
+			ieta_min = eta_boundaries[i];
+			ieta_max = eta_boundaries[i+1];
+
 			TH1F *EC = new TH1F("EC",ts_range_title_string,tsr_bins,ts_min,ts_max + dts); // ts range
-			ts = 0.0 ;
+			ts = 0.0;
 			double XTAL_count = 0;
+			// in EC_bias, max_rows is max number of eta rows to read. Does not include eta_skip.
 			for (ts = ts_min; ts < ts_max + dts; ts += dts){
-				// total = total_error()
+				//tie(total, XTAL_count, single_eta_skip) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, ieta_min, ieta_max, total_eta_skip); // if function has eta_skip feature 
 				tie(total, XTAL_count) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, ieta_min, ieta_max);
-				EC->Fill(ts,total/XTAL_count); // want this to also return number of entries so average can be taken and plotted.
-				cout << "ts = " << ts << ", total = " << total << ", XTAL_count = " << XTAL_count << "\n";
+				if (XTAL_count != 0){ 
+					EC->Fill(ts,total/XTAL_count); // Set histo point 
+					cout << "eta_min = " << ieta_min << ", eta_max = " << ieta_max << ", ts = " << ts << "\n";
+					cout << "Total Bias = " << total << ", XTAL_count = " << XTAL_count << "\n";
+					cout << "Average Bias = " << total/XTAL_count << "\n";
+				}
+
+				else{
+				
+					cout << "XTAL_count = " << XTAL_count << ", not filling histogram.\n"; // should equal zero
+
+				}
 			  }
+		//cout << "single_eta_skip = " << single_eta_skip << endl;
+		//total_eta_skip += single_eta_skip;
 		// Save histogram as root file, do again for next eta range.
 		// Save etamin and etamax in root file title, extract in plot.py.
 		// destroy histogram from memory 
