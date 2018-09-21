@@ -58,6 +58,8 @@ f9 = TFile()
 f10 = TFile()
 f11 = TFile()
 f12 = TFile()
+f13 = TFile()
+f14 = TFile()
 
 h1 = TH1F()
 h2 = TH1F()
@@ -71,6 +73,8 @@ h9 = TH1F()
 h10 = TH1F()
 h11 = TH1F()
 h12 = TH1F()
+h13 = TH1F()
+h14 = TH1F()
 
 g1 = TGraph()
 g2 = TGraph()
@@ -84,10 +88,13 @@ g9 = TGraph()
 g10 = TGraph()
 g11= TGraph()
 g12 = TGraph()
+g13= TGraph()
+g14 = TGraph()
 
-files = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12]
-histos = [h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12]
-graphs = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g11, g12]
+
+files = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14]
+histos = [h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14]
+graphs = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g11, g12, g13, g14]
 
 i = 0
 
@@ -137,9 +144,9 @@ for h, hist in enumerate(histos, 1):
 		x.append(ts)
 		if (abs_val): y.append(fabs(value))
 		else: y.append(value)
-		print("ts = " + str(ts) )
-		print("value = " + str(value) )
-		print("counter = " + str(counter) )
+		#print("ts = " + str(ts) )
+		#print("value = " + str(value) )
+		#print("counter = " + str(counter) )
 		ts += dt
 		counter += 1
 
@@ -178,39 +185,64 @@ if plot_type == 'BC':
 
 elif plot_type == 'EC':
 
-	double eta_boundaries = [-3.0,-2.6, -2.3, -2.0, -1.479, -1.133, -0.78477, -0.04362, 0.45396, 0.80182, 1.1479, 2.0, 2.3, 2.6, 3.0]
+	#gStyle.SetPalette(55) # kRainbow
+
+	eta_boundaries = [-3.0,-2.6, -2.3, -2.0, -1.479, -1.133, -0.78477, -0.04362, 0.45396, 0.80182, 1.1479, 1.479, 2.0, 2.3, 2.6, 3.0]
+	EB_ranges = 0
+	EE_ranges = 0
+	i = 0
 
 	for g in graphs:
-		min_eta = paths[i].split('_')[-7] #min is -7 when there's a note. With no note, one less '_'
-		max_eta = paths[i].split('_')[-6]
-		#print'min_eta = ',min_eta
-		#print'max_eta = ',max_eta
+		min_eta = float(paths[i].split('_')[-7]) #min is -7 when there's a note. With no note, one less '_'
+		max_eta = float(paths[i].split('_')[-6])
+		print'min_eta = ',min_eta
+		print'max_eta = ',max_eta
 		g.SetMarkerStyle(8)
 
-		if (min_eta == '0') and (max_eta == '1.4'):
-				g.SetMarkerColor(kRed) 
-				g.SetLineColor(kRed)
+		# Greater abs(eta), less transparent 
 
-		if (min_eta == '1.4') and (max_eta == '1.8'):
-				g.SetMarkerColor(kGreen) 
-				g.SetLineColor(kGreen)
+		# EE
+		if ( (min_eta < -1.479) or (min_eta >= 1.479) ): 
+			print'i = ',i
+			print'EE'
+			#g.SetMarkerColor(kRed - EE_ranges)
+			g.SetMarkerColorAlpha(kRed, 1 + 0.1*EE_ranges)
+			g.SetLineColorAlpha(kRed, 1 + 0.1*EE_ranges)
+			EE_ranges += 1
 
-		if (min_eta == '1.8') and (max_eta == '2.1'):
-				g.SetMarkerColor(kBlue) 
-				g.SetLineColor(kBlue)
-
-		if (min_eta == '2.1') and (max_eta == '2.4'):
-				g.SetMarkerColor(kMagenta) 
-				g.SetLineColor(kMagenta)
-
-		if (min_eta == '2.4') and (max_eta == '2.7'):
-				g.SetMarkerColor(kCyan) 
-				g.SetLineColor(kCyan)
-
-		if (min_eta == '2.7') and (max_eta == '3'):
-				g.SetMarkerColor(kOrange + 6) 
-				g.SetLineColor(kOrange + 6)
+		# EB
+		elif ( (min_eta >= -1.479) and (min_eta < 1.479) ): 
+			print'i = ',i
+			print'EB'
+			g.SetMarkerColorAlpha(kGreen, 0 + 0.1*EB_ranges)
+			g.SetLineColorAlpha(kGreen, 0 + 0.1*EB_ranges)
+			EB_ranges += 1
 		i += 1
+
+#		if (min_eta == '0') and (max_eta == '1.4'):
+#				g.SetMarkerColor(kRed) 
+#				g.SetLineColor(kRed)
+
+#		if (min_eta == '1.4') and (max_eta == '1.8'):
+#				g.SetMarkerColor(kGreen) 
+#				g.SetLineColor(kGreen)
+
+#		if (min_eta == '1.8') and (max_eta == '2.1'):
+#				g.SetMarkerColor(kBlue) 
+#				g.SetLineColor(kBlue)
+
+#		if (min_eta == '2.1') and (max_eta == '2.4'):
+#				g.SetMarkerColor(kMagenta) 
+#				g.SetLineColor(kMagenta)
+
+#		if (min_eta == '2.4') and (max_eta == '2.7'):
+#				g.SetMarkerColor(kCyan) 
+#				g.SetLineColor(kCyan)
+
+#		if (min_eta == '2.7') and (max_eta == '3'):
+#				g.SetMarkerColor(kOrange + 6) 
+#				g.SetLineColor(kOrange + 6)
+#		i += 1
 	#g.SetMarkerColor(2+i)
 	#g.SetLineColor(2+i)
 	#i += 1	
@@ -248,9 +280,9 @@ for g in graphs:
 #else: l1 = TLegend(0.7, 0.1, 0.9, 0.3)
 #else: l1 = TLegend(0.5, 0.1, 0.8, 0.4)
 
-l1 = TLegend(0.7, 0.3, 0.9, 0.5) 
+#l1 = TLegend(0.7, 0.3, 0.9, 0.5) 
 
-#l1 = TLegend(0.7, 0.1, 0.9, 0.3) # Bottom right
+l1 = TLegend(0.7, 0.1, 0.9, 0.3) # Bottom right
 #l1 = TLegend(0.1, 0.7, 0.3, 0.9) # Upper left
 
 #l1.SetHeader("Legend") # I actually can't believe you can declare l1 in an if statement then access outside 

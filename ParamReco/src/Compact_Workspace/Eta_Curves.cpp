@@ -4,10 +4,10 @@
 
 #include "recon_amp_noclhep.cpp"
 
-tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_w[], bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY, double eta_min, double eta_max) 
+tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_w[], bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY, double eta_min, double eta_max, int merged_skip) 
 {
-	int initial_skip = 0; // Used for testing
-	bool verbosity = false;
+
+	//cout.precision(17);
 
 	cout << "*****************************************\n";
 	cout << "Computing Average Bias for:\n";
@@ -15,399 +15,178 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 	cout << "Time Shift = " << ts << "ns\n";
 	cout << "*****************************************\n";
 
-  	// Open XTAL_Params and Weights files
+	// Open Merged Data file 
+	stringstream merged_ss;
+	merged_ss << "data/Merged_data_" << PY << "_" << weights_type << ".txt";
+	string merged_path = merged_ss.str();
+	ifstream inMergedFile;
+	inMergedFile.open(merged_path);
 
-	stringstream params_ss, weights_ss;
-
-	params_ss << "data/XTAL_Params_" << PY << ".txt"; // (ID, A, t0, alpha, beta) values	
-	weights_ss << "data/" << weights_type << "_" << PY << ".txt"; // (ID, weights)
-
-	string params_path = params_ss.str(), weights_path = weights_ss.str();
-
-  	ifstream inFile, inweightsFile; // Input File stream objects 
-
-  	inFile.open(params_path); // XTAL_Params: inFile stream
-        inweightsFile.open(weights_path); // weights.txt: inweightsFile stream
-
-  	if (!inFile) {
-  	  cout << "Unable to open Param file\n";
+  	if (!inMergedFile) {
+  	  cout << "Unable to open Merged Data file\n";
   	  exit(1); // terminate with error
  	 }
 
-  	if (!inweightsFile) {
-  	  cout << "Unable to open weights file\n";
-  	  exit(1); // terminate with error
- 	 }
+	string merged_line;
 
-	string line, weights_line; // XTAL_Params: line, weights.txt: weights_line	  
 
-	// Read XTAL_Params, weights lines 
-	// Change to first reading Eta line, then cycle through XTAL_Params and weights until the parameters are found? 
+	// Initial skip, number of eta lines already read. 
+	cout << "Skipping " << merged_skip << " merged data rows..." << endl;
 
-	// Initialize variables
-	int EB_count = 0, EE_count = 0, extra_lines = 0, row = 0;
-	double XTAL_count = 0.0, total_error = 0.0; // double because want double divison later 	
+	//int temp_eta_skip = merged_skip;
 
-	// Initial skip, optional
-	while(initial_skip !=0){
-	  inFile.ignore(1000,'\n');
-	  inweightsFile.ignore(1000,'\n');
-	  initial_skip -= 1;
+	while(merged_skip !=0){
+	  inMergedFile.ignore(1000,'\n');
+	  merged_skip -= 1;
 	}
 
+	double total_bias = 0.0, XTAL_count = 0.0; // Set double because want double division later 
+	int merged_row = 0;
+
+	while( getline(inMergedFile, merged_line) ){ // While there are merged data file rows to read 
+
+		//cout << "On Merged data row: " << merged_row << endl;
+
+		stringstream m_s(merged_line);
+		double d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19;
+
+		if (m_s >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7 >> d8 >> d9 >> d10 >> d11 >> d12 >> d13 >> d14 >> d15 >> d16 >> d17 >> d18 >> d19){ // if 19 double on line  
 	
-	while((getline(inFile, line)) && (getline(inweightsFile, weights_line))) { // get line of XTAL_Params.txt and weights, loop
-	   // I think while this is true it performs the action, obtaining the next line .. ?
-
-	   // Check row
-	   if (row == max_rows){
-		cout << "Maximum desired rows reached." << endl;
-		break;
-		}
-
-	   if ((row%5000) == 0){
-	      cout << "Reading line " << row << endl;
-	      }
-
-	   stringstream s(line); // convert 'line' to stream 's'
-	   stringstream ww(weights_line); // convert 'weights_line' to stream ww 
-
-	   double d1, d2, d3, d4, d5; // d1 = ID, d2 = A, d3 = t_0, d4 = alpha, d5 = beta   
-	   double w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10; // w0 = ID, wi = weights_{i}
-
-	   if( (s >> d1 >> d2 >> d3 >> d4 >> d5) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5 >> w6 >> w7 >> w8 >> w9 >> w10)){ // Do if on XTAL_params line with 5 doubles, and weights line with 11 doubles 	  
-
-		// 2017 params and weights
-		if (string(PY) == "2017"){
-			if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ) continue; // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful.   
-		}
+			vector <double> XTAL_Params = {d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19};
 		
-		// 2018 params and weights 
-		if (string(PY) == "2018"){
-			if ( (d1 == 838864037) || (d1 == 838869123) || (d1 == 838874865) || (d1 == 838891641) || (d1 == 838958295) || (d1 == 838966532) ) continue;
-		}
+			//double ID, DOF1, DOF2, DOF3, eta, A, t_0, alpha, beta, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10;
 
-		double weights[10] = {0.}; // reset weights for current line  
-		string DOF; // DOF file string
-		int DOF_skip_count = 0;
+			//vector <double> Param_Names = {ID, DOF1, DOF2, DOF3, eta, A, t_0, alpha, beta, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10};
 
-		// Always open same DOF file, but need to choose correct EB/EE weights for online. 
+			double ID = XTAL_Params[0], DOF1 = XTAL_Params[1], DOF2 = XTAL_Params[2], DOF3 = XTAL_Params[3], eta = XTAL_Params[4], A = XTAL_Params[5], t_0 = XTAL_Params[6], alpha = XTAL_Params[7], beta = XTAL_Params[8];
 
-		// EB Line
-		if ((d1 >= 838861313) && (d1 <= 838970216)){ //&& (plot_EB)){
-			EB_count += 1;
-			//DOF = "data/EB_DOF.txt";
-			DOF = "data/Compact_DOF.txt";
-			//int skip_count = EB_count;
-			//cout << "skip_count = " << skip_count << "\n";
-			if (!ideal_weights){ 
-				for (int i = 0; i < 10; i++) weights[i] = EB_w[i];
-				}
+			vector <double>i_weights;
+
+			// This assumes size of XTAL_Params and weights. 
+			for (int i = 0; i < XTAL_Params.size() - 9; i++){
+				i_weights.push_back(XTAL_Params[i+9]);
 			}
 
-		// EE Line
-		if ((d1 >= 872415401)){ //&& ( (plot_EE_minus) || (plot_EE_plus) )){
-			//cout << "On EE\n";
-			//if (EB_Only) break;
-			EE_count += 1;
-			DOF = "data/Compact_DOF.txt";
-			//int skip_count = EE_count;
-			if (!ideal_weights){
-				for (int i = 0; i < 10; i++) weights[i] = EE_w[i];
-				}
-			}
-		//}  
 
-		//cout << "DOF = " << DOF << "\n";
-		//cout << "plot_EE = " << plot_EE << "\n";
-		ifstream inparamFile; // Input File stream class object  
-		inparamFile.open(DOF); // open from beginning each time and skip desired number of lines 
-		// There may be a way to just open once and not need to skip lines every time. This may be much more efficient.
+			if ( (eta >= eta_min ) && ( eta < eta_max) ){ // eta in range 
 
-		if (!inparamFile) {
-		  cout << "Unable to open Info file\n";
-		  exit(1); // terminate with error
-		}
+				// Set Weights 
 
-		string param_line; 
-
-		// Skip desired number of lines 
-
-		// skip_count should be EB_count or EE_count.
-		//int skip_count = ; // skip count * number of characters in a line
-
-		DOF_skip_count += EB_count;
-		DOF_skip_count += EE_count;
-		DOF_skip_count += extra_lines; // extra_lines updated every line 
-
-		while(DOF_skip_count !=0){
-		  
-		  inparamFile.ignore(1000,'\n'); // count is number of rows read before this one
-		  DOF_skip_count -= 1;
-		}
-
-		cout.precision(17);
-
-		//cout << "d1 = " << d1 << endl;
-		//cout << "row = " << row << endl;
-
-		//if (row%5000 == 0){
-		  //cout << "Row = " << row << endl;
-		  //cout << "d1 = " << d1 << endl;
-
-		//}
-
-		//if (d1 == 838926858){
-
-		//  cout << " d1 = 838926858, should have 0-1.4 eta entry\n";
-		//  verbosity = true;
-		//}
-
+		     		double weights[10] = {0.}; // reset weights for current line  
 		
+				// EB Line
+				if ((ID >= 838861313) && (ID <= 838970216)){ //&& (plot_EB)){
+					//EB_count += 1;
+					//cout << "EB Line\n";
+					if (!ideal_weights){ 
+						for (int i = 0; i < 10; i++) weights[i] = EB_w[i];
+						}
+					}
 
-		/*if(d1 == 872418966){ // should have abs(eta) between 1.8 and 2.1 
-			
-			//cout << "debug\n";
-			verbosity = true;
-			cout << "d1 = " << d1 << endl;
-			cout << "row = " << row << endl;
-			//cout << "eta = " << eta << endl;
-			//cout << "abs(eta) = " << abs(eta) << endl;
+				// EE Line
+				if ((ID >= 872415401)){ //&& ( (plot_EE_minus) || (plot_EE_plus) )){
+					// EE_count += 1;
+					//cout << "EE Line\n";
+					if (!ideal_weights){
+						for (int i = 0; i < 10; i++) weights[i] = EE_w[i];
+						}
+					}
 
-		}*/
+				if (ideal_weights){
 
-		bool leave = false; // set true when ID's match
-		bool in_range = false; // set true when ID's match and eta in range 
+					for (int i = 0; i < 10; i++){
+						weights[i] = i_weights[i];		
+					}				
 
-		// Match ID's between Params and Info files, then
-		// get EB, EE DOF for given ID.
-		//int i = 0;
-		while( (getline(inparamFile, param_line)) && (leave == false)) { // read EB/EE_DOF line
+				}
 
-		bool five_params = false;
+				// Get Params
 
-		verbosity = true;
+				//double A = pd2, t_0 = pd3, alpha = pd4, beta = pd5; 
 
-		double d1_, d2_, d3_, d4_, d5_; 
-                stringstream ss(param_line);
-	
-		//if(verbosity) cout << "reading DOF file\n";
-		//if(verbosity) cout << "(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_) = " << bool((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_)) << endl;
-                    
-		//while( (getline(inparamFile, param_line)) && (getline(inweightsFile, weights_line)) &&  (leave == false)) { // read EB/EE_DOF line
-			//cout << "Extra_lines = " << extra_lines << "\n";
-			// d1_ = cmsswID, d2_ = ieta or ix, d3_ = iphi or iy, d4_ = 0 or iz (+/-1), d5_ = eta
-			// ^^ For Compact_DOF.txt
+				if (normalized_A == true) A = 1.0; // amp of 1
+				if (normalized_t0 == true) t_0 = 125.0; // 125 ns
+				      
+				// Reconstruct Amplitude 
 
-			// w0 = CMSSWID, w1 = first weight, w2 = ... (not necessarily starting at 0ns)
+				double ratio = 0.0;
 
-			//if (row == 4625){
+				// Check for nan weights 
+				bool zero_weights = true; // assume true so one non zero value triggers false
+				for (int ii = 0; ii < 10; ii++) { 
+				  //cout << "weights[" << ii << "] = " << weights[ii] << endl;
+				  if (weights[ii] != 0)zero_weights = false;
+				}
 
-			
+				if (zero_weights){
+				  cout << "Merged Data Row " << merged_row << endl;
+				  //cout << "debug_val = " << debug_val << endl;
+				  cout << "check weights array.\n";
+				  cout << "exiting program.\n";
+				  exit(1);
+				}
 
-			  //cout << "row = " << row << endl;
-			  //cout << "(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) = " << bool(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) << endl;
-			  //cout << "(ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5) = " << bool(ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5) << endl;	
-			  //debug_val += 1;
+				// Calculate Bias 
+
+				if (ideal_weights){ratio = (recon_amp_noclhep(A, t_0, ts, alpha, beta, weights) / A ) ;} // Non-normalized A
+				if (!ideal_weights){ratio = recon_amp_noclhep(A, t_0, ts, alpha, beta, weights);} // Normalized A	
+
+				double bias = (ratio - 1);
+				//cout << "bias = " << bias << "\n";
+				// add to total error 
+
+				total_bias += bias; 
+				XTAL_count += 1;
+				//cout << "XTAL count = " << XTAL_count << endl;
+
+				// See if things are going well 
+//			    	if ((merged_row%1000) == 0){
+//				    cout << "merged_row " << merged_row << endl;
+//				    for (int ii = 0; ii < 10; ii++) { cout << "weights[" << ii << "] = " << weights[ii] << endl;}
+//				    cout << "ratio = " << ratio << endl;
+//				    cout << "bias = " << bias << endl;
+//				    cout << "abs(bias) = " << abs(bias) << endl;
+//				    cout << "total_bias =  " << total_bias << endl;
+//				}
+				
+			} // eta in range 		
+
+			// Check if entire eta range has been read 
+//			else if (eta >= eta_max){ // This only works if eta file is ordered by eta, and ranges in main are also in order. 
+//				cout << "Finished reading eta range\n";
+//				cout << "eta = " << eta;
+//				cout << "eta row = " << merged_row;
+//				//past_range = true;
 			//}
 
+//			else if (eta < eta_min){ // This only works if eta file is ordered by eta, and ranges in main are also in order. 
+//				//cout << "Not up to range start yet\n";
+//			}
 
-			// Need to handle 5 or 10 weights. 
+			//else{ // eta not in range 
 
-			//if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5 >> w6 >> w7 >> w8 >> w9 >> w10)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
-			//if((ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_ >> d6_) && (ww >> w0 >> w1 >> w2 >> w3 >> w4 >> w5)){ // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan). If they do, see if IDs match.
+				//cout << "There may be something wrong. Check eta value.\n";
+				//cout << "eta = " << eta << endl;	
+			//}
 
-			// If There are only two double parameters, you will skip DOF lines even if the ID's match
-			// If 
+		} // if 6 doubles on eta line
 
-			if(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_){ // If DOF line contains 5 doubles
-	
-				five_params = true;
+		// Check row
+		if (merged_row == max_rows){
+			cout << "Maximum desired rows reached." << endl;
+			break;
+		}
 
-				if (verbosity){
-					cout.precision(17);
-					//cout << "d1 = " << d1 << endl;
-					//cout << "d1_ = " << d1_ << endl;
-					//cout << "w0 = " << w0 << endl;
-					//i += 1;
-				  }
+		if ((merged_row%30000) == 0){
+			cout << "Reading merged data row " << merged_row << endl;
+		}
 
-				//if (i == 20) exit(0);
+		merged_row += 1;
 
-				//if (d1 == d1_){ // can pair DOF with XTAL, and extract correct weights 
-
-				if ((d1 == d1_) && (d1 == w0)){ // All ID's match. Now check eta
-
-					double eta = d5_;
-
-//					if(d1_ == 838926858){ // should have abs(eta) between 0, 1.4
-
-//						//cout << "debugging\n";
-//						cout << "Past non 5 params lines.\n";
-//						cout << "d1_ = " << d1_ << endl;
-//						cout << "eta = " << eta << endl;
-//						cout << "abs(eta) = " << abs(eta) << endl;
-
-//					}
-
-					if(verbosity){ // should have abs(eta) between 1.8 and 2.1 
-
-						//cout << "debugging\n";
-						//cout << "All ID's match\n";
-						//cout << "d1_ = " << d1_ << endl;
-						//cout << "eta = " << eta << endl;
-						//cout << "abs(eta) = " << abs(eta) << endl;
-						verbosity = false;
-					}
-
-
-					//cout << "eta_min = " << eta_min << endl;
-					//cout << "eta = " << eta << endl;
-					//cout << "eta_max = " << eta_max << endl;
-
-					// if eta is out of range, don't extract weights 
-					// check if eta is in range
-					//if ( ( eta_min <= abs(eta) ) && ( eta_max > abs(eta) )  ){
-					if ( ( eta_min <= eta ) && ( eta_max > eta )  ){
-
-					  in_range = true;
-					  //cout << "All three ID's match and eta in range\n";
-
-					}
-	
-					else{
-	
-					  // in_range remains false
-
-					  //cout << "All three ID's match but eta is out of range\n";
-					  //continue;
-					  //stringstream s_(line);
-
-					  //getline(inFile, line);
-					  //getline(inweightsFile, weights_line);
-
-					  //inFile.ignore(1000,'\n');
-					  //inweightsFile.ignore(1000,'\n');
-
-					  //debug_val += 1;
-					  //if (debug_val == 3) exit(0);
-				
-					  }
-					
-					if (ideal_weights){
-
-						weights[0] = w1;
-						weights[1] = w2;
-						weights[2] = w3;				
-						weights[3] = w4;				
-						weights[4] = w5;				
-						weights[5] = w6;				
-						weights[6] = w7;				
-						weights[7] = w8;
-						weights[8] = w9;
-						weights[9] = w10;
-					}
-
-					  //for (int l = 0; l < 10; l++)
-						//{
-						//cout << "weights[" << l <<"] = " << weights[l] << endl;
-						//}
-
-		                          //}
-
-					  leave = true;
-
-					} // All ID's match 
-			
-				else { // DOF ID doesn't match Params and Weights. Read next DOF line. 
-
-				  extra_lines += 1;
-				  //if (eta_max == 1.8){debug_val += 1;
-				  //if (debug_val == 3) exit(0);}
-				} // keep track of number of extra lines to skip next time 
-
-			} // if DOF line contains 5 doubles
-
-		if(!five_params){
-	
-		  //cout << "Five params not read on this line\n";
-		  cout.precision(17);
-		  //cout << "d1 = " << d1 << endl;
-		  //cout << "d1_ = " << d1_ << endl;
-		  //cout << "w0 = " << w0 << endl;
-		  leave = true;
-
-		  }
-
-		} // read EB/EE_DOF line
-
-	  // Only compute the bias, add to total bias, and add XTAL if eta is in range. 
-	  if (in_range){
-
-		  double A = d2, t_0 = d3, alpha = d4, beta = d5; // Double_t ?  
-
-		  if (normalized_A == true) A = 1.0; // amp of 1
-		  if (normalized_t0 == true) t_0 = 125.0; // 125 ns
-		      
-		  // Reconstruct Amplitude 
-		  //recon_amp(A, t_0, ts, alpha, beta, weights);
-
-		  //cout << "Recon_amp = " << recon_amp(A, t_0, ts, alpha, beta, weights,ideal_weights) << "\n";
-		  double ratio = 0.0;
-
-		  // Check for nan weights 
-		  bool zero_weights = true; // assume true so one non zero value triggers false
-		  for (int ii = 0; ii < 10; ii++) { 
-		    //cout << "weights[" << ii << "] = " << weights[ii] << endl;
-		    if (weights[ii] != 0)zero_weights = false;
-		  }
-
-		  if (zero_weights){
-		    cout << "row " << row << endl;
-		    //cout << "debug_val = " << debug_val << endl;
-		    cout << "check weights array.\n";
-		    cout << "exiting program.\n";
-		    exit(1);
-		  }
-
-		  //if(in_range){
-		    if (ideal_weights){ratio = (recon_amp_noclhep(A, t_0, ts, alpha, beta, weights) / A ) ;} // Non-normalized A
-		    if (!ideal_weights){ratio = recon_amp_noclhep(A, t_0, ts, alpha, beta, weights);} // Normalized A	
-		  
-		  //cout << "ratio = " << ratio << endl;
-
-		  double amp_error = (ratio - 1);
-		  //cout << "amp_error = " << amp_error << "\n";
-		  // add to total error 
-
-		  //total_error += abs(amp_error);
-		  total_error += amp_error; // Only do this if eta is in range 
-		  XTAL_count += 1;
-
-		  // See if things are going well 
-	    	  /*if ((row%100000) == 0){
-		      cout << "row " << row << endl;
-		      for (int ii = 0; ii < 10; ii++) { cout << "weights[" << ii << "] = " << weights[ii] << endl;}
-		      cout << "ratio = " << ratio << endl;
-		      cout << "amp_error = " << amp_error << endl;
-		      cout << "abs(amp_error) = " << abs(amp_error) << endl;
-		      cout << "total_error =  " << total_error << endl;
-		      }*/
-
-	  } // if in_range
-
-	  inparamFile.close();
-
-	 } // Do if on XTAL_params and weights line with desired 's' stream extraction values
-
-	  row += 1; // Finished reading XTAL_params, weights rows 
-
-	} // Loop while still lines left in XTAL_params and weights, and desired maximum hasn't been reached
-	  // Only break this if you want to leave this entire function 
+	} // While there are merged data lines left to read 
 	  
-      inFile.close();
+        //inMergedFile.close();
 
-
-    return make_tuple(total_error, XTAL_count);
+	return make_tuple(total_bias, XTAL_count);
 
 }

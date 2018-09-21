@@ -323,7 +323,7 @@ int main(int argc, char** argv)
 	
 		cout << "Plotting Eta Curve\n";
 
-		vector<double> eta_boundaries = {-3.0,-2.6, -2.3, -2.0, -1.479, -1.133, -0.78477, -0.04362, 0.45396, 0.80182, 1.1479, 2.0, 2.3, 2.6, 3.0};
+		vector<double> eta_boundaries = {-3.0,-2.6, -2.3, -2.0, -1.479, -1.133, -0.78477, -0.04362, 0.45396, 0.80182, 1.1497, 1.479, 2.0, 2.3, 2.6, 3.0};
 		//vector<double> eta_boundaries = {-3.0,-2.6};
 
 		// Define first abs_eta_max
@@ -332,6 +332,7 @@ int main(int argc, char** argv)
 		//double ieta_max = 0.0; // eta being iterated over 
 		double ieta_min = eta_boundaries[0], ieta_max = eta_boundaries[1]; // initial values for eta being iterated over 
 		int total_eta_skip = 0, single_eta_skip = 0; // number of rows to skip in eta file. Update every time an eta range is finished.
+		int skip = 0;
 		//for (ieta_max = abs_eta_max; ieta_max < 3.1; ieta_max += 0.3){ // want last run to be at eta_max
 		for (int i = 0; i < eta_boundaries.size() - 1; i += 1){ // for debugging 
 						
@@ -344,7 +345,7 @@ int main(int argc, char** argv)
 			// in EC_bias, max_rows is max number of eta rows to read. Does not include eta_skip.
 			for (ts = ts_min; ts < ts_max + dts; ts += dts){
 				//tie(total, XTAL_count, single_eta_skip) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, ieta_min, ieta_max, total_eta_skip); // if function has eta_skip feature 
-				tie(total, XTAL_count) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, ieta_min, ieta_max);
+				tie(total, XTAL_count) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, ieta_min, ieta_max, skip);
 				if (XTAL_count != 0){ 
 					EC->Fill(ts,total/XTAL_count); // Set histo point 
 					cout << "eta_min = " << ieta_min << ", eta_max = " << ieta_max << ", ts = " << ts << "\n";
