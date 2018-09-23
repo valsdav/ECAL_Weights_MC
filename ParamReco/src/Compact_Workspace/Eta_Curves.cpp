@@ -4,16 +4,34 @@
 
 #include "recon_amp_noclhep.cpp"
 
-tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_w[], bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY, double eta_min, double eta_max, int merged_skip) 
+tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_w[], bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY, double eta_min, double eta_max, int merged_skip, bool check_eta) 
 {
+
+	// four cases: min and max are EE, min and max are EB, min EE max EB, min EB max EE. 
+	// if both EE/EB, only check EE/EB eta/DOF1
+	// if last EE-, change second eta to -1.479
+	// if first EE+, change first eta to 1.479
+
+	//if >= 25 it's ieta
+
+
+	// at end get check_eta = true or false 
+
 
 	//cout.precision(17);
 
-	cout << "*****************************************\n";
-	cout << "Computing Average Bias for:\n";
-	cout << "Eta: [" << eta_min << ", " << eta_max << "]" << endl;
+
+//	cout << "*****************************************\n";
+//	cout << "Computing Average Bias for:\n";
+
+//	if (check_eta) cout << "Eta: [" << eta_min << ", " << eta_max << "]" << endl;
+//	if (!check_eta) cout << "iEta: [" << eta_min << ", " << eta_max << "]" << endl;
+
+//	cout << "Time Shift = " << ts << "ns\n";
+//	cout << "*****************************************\n";
+
 	cout << "Time Shift = " << ts << "ns\n";
-	cout << "*****************************************\n";
+
 
 	// Open Merged Data file 
 	stringstream merged_ss;
@@ -48,10 +66,13 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 		//cout << "On Merged data row: " << merged_row << endl;
 
 		stringstream m_s(merged_line);
+
 		double d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19;
 
 		if (m_s >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7 >> d8 >> d9 >> d10 >> d11 >> d12 >> d13 >> d14 >> d15 >> d16 >> d17 >> d18 >> d19){ // if 19 double on line  
 	
+			bool in_range = false; 
+
 			vector <double> XTAL_Params = {d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19};
 		
 			//double ID, DOF1, DOF2, DOF3, eta, A, t_0, alpha, beta, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10;
@@ -67,8 +88,28 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 				i_weights.push_back(XTAL_Params[i+9]);
 			}
 
+			if ( (check_eta) && (ID >= 872415401) ){
+		
+				if ( (eta >= eta_min ) && ( eta < eta_max) ) in_range = true;
 
-			if ( (eta >= eta_min ) && ( eta < eta_max) ){ // eta in range 
+			}
+
+			else if ( (!check_eta) && ((ID >= 838861313) && (ID <= 838970216)) ){ // EB only 
+		
+				if (eta_max == 85){
+					if ( (DOF1 >= eta_min ) && ( DOF1 <= eta_max) ) in_range = true; // If last EB range, need to include iEta = 85 because it won't be includede in first EE range
+				}
+
+				else{
+					if ( (DOF1 >= eta_min ) && ( DOF1 < eta_max) ) in_range = true;
+				}
+				
+
+			}
+
+			// if ( (eta >= eta_min ) && ( eta < eta_max) ){ // eta in range 
+
+			if(in_range){ // if in range 
 
 				// Set Weights 
 
@@ -149,25 +190,18 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 //				    cout << "total_bias =  " << total_bias << endl;
 //				}
 				
-			} // eta in range 		
+			} // if in range 
 
-			// Check if entire eta range has been read 
-//			else if (eta >= eta_max){ // This only works if eta file is ordered by eta, and ranges in main are also in order. 
-//				cout << "Finished reading eta range\n";
-//				cout << "eta = " << eta;
-//				cout << "eta row = " << merged_row;
-//				//past_range = true;
-			//}
 
-//			else if (eta < eta_min){ // This only works if eta file is ordered by eta, and ranges in main are also in order. 
-//				//cout << "Not up to range start yet\n";
-//			}
+			if ( (!in_range) && ( (abs(eta_min) == 1.479) || (abs(eta_min) == 85) || (abs(eta_max) == 85) || (abs(eta_max) == 1.479) ) ){
 
-			//else{ // eta not in range 
+				if ( (ID >= 1.479) || (ID <= 85) || (ID >= 1.479) || (ID <= 85) ){
+					cout << "Missing ID = " << ID << endl;
+				}
+//-84 838903809
+//-85 838904680
+			}	
 
-				//cout << "There may be something wrong. Check eta value.\n";
-				//cout << "eta = " << eta << endl;	
-			//}
 
 		} // if 6 doubles on eta line
 

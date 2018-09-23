@@ -323,34 +323,80 @@ int main(int argc, char** argv)
 	
 		cout << "Plotting Eta Curve\n";
 
-		vector<double> eta_boundaries = {-3.0,-2.6, -2.3, -2.0, -1.479, -1.133, -0.78477, -0.04362, 0.45396, 0.80182, 1.1497, 1.479, 2.0, 2.3, 2.6, 3.0};
+		//vector<double> eta_boundaries = {-3.0,-2.6, -2.3, -2.0, -1.479, -1.133, -0.78477, -0.04362, 0.45396, 0.80182, 1.1497, 1.479, 2.0, 2.3, 2.6, 3.0};
+		vector<double> eta_boundaries = {-3.0, -2.6, -2.3, -2.0, -1.479, -65, -45, -25, 0, 25, 45, 65, 1.479, 2.0, 2.3, 2.6, 3.0}; // eta, ieta combination 
+
+		//int EE_boundaries = 4; // number of boundaries measured by eta, not ieta (on each side)
+		//int ieta_boundaries = 4; // " " ieta, not eta (on each side), not including zero. 
+
+		// For now: if abs value of boundary is greater than 3, it's ieta. If less than or equal to 3, it's eta. 
+
 		//vector<double> eta_boundaries = {-3.0,-2.6};
 
 		// Define first abs_eta_max
 		//abs_eta_max = 1.4; // Start here, increase by 0.4 first time, then 0.3 till 2.7
 		//abs_eta_max = 1.8; // Start here, increase by 0.4 first time, then 0.3 till 2.7
-		//double ieta_max = 0.0; // eta being iterated over 
-		double ieta_min = eta_boundaries[0], ieta_max = eta_boundaries[1]; // initial values for eta being iterated over 
+		//double eta_max = 0.0; // eta being iterated over 
+		double eta_min = eta_boundaries[0], eta_max = eta_boundaries[1]; // initial values for eta being iterated over 
 		int total_eta_skip = 0, single_eta_skip = 0; // number of rows to skip in eta file. Update every time an eta range is finished.
 		int skip = 0;
-		//for (ieta_max = abs_eta_max; ieta_max < 3.1; ieta_max += 0.3){ // want last run to be at eta_max
+		//for (eta_max = abs_eta_max; eta_max < 3.1; eta_max += 0.3){ // want last run to be at eta_max
+		int total_XTALS = 0;
+
 		for (int i = 0; i < eta_boundaries.size() - 1; i += 1){ // for debugging 
 						
-			ieta_min = eta_boundaries[i];
-			ieta_max = eta_boundaries[i+1];
+			eta_min = eta_boundaries[i];
+			eta_max = eta_boundaries[i+1];
+
+			bool eta_min_ieta = false, eta_max_ieta = false; // eta min/max is/isn't in ieta form 
+			bool check_eta = false; // check eta or ieta 
+
+			if( (eta_min == 0) || (eta_max == 0) ) check_eta = false; 
+
+			else{
+
+				if ( abs(eta_min) > 3 ) eta_min_ieta = true; // This assumes the smallest ieta boundary is larger than 3. 
+				if ( abs(eta_max) > 3 ) eta_max_ieta = true;
+
+				// EE 
+				if (!(eta_min_ieta) && !(eta_max_ieta) ) check_eta = true;
+
+				// EB 
+				if ((!eta_min_ieta) && (eta_max_ieta) ){ 
+					eta_min = -85;
+					//check_eta = false;
+				}
+		
+				// EB 
+				//if ( (eta_min_ieta) && (eta_max_ieta) ) check_eta = false;
+
+				// EB
+				if ((eta_min_ieta) && (!eta_max_ieta) ){ 
+
+					eta_max = 85;
+					//check_eta = false;
+				}
+
+			}
+
+			cout << "*****************************************\n";
+			cout << "Computing Average Bias for:\n";
+			cout << "Eta/iEta: [" << eta_min << ", " << eta_max << "]" << endl; // ieta means iterative here. 
+			cout << "*****************************************\n";
 
 			TH1F *EC = new TH1F("EC",ts_range_title_string,tsr_bins,ts_min,ts_max + dts); // ts range
 			ts = 0.0;
 			double XTAL_count = 0;
 			// in EC_bias, max_rows is max number of eta rows to read. Does not include eta_skip.
 			for (ts = ts_min; ts < ts_max + dts; ts += dts){
-				//tie(total, XTAL_count, single_eta_skip) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, ieta_min, ieta_max, total_eta_skip); // if function has eta_skip feature 
-				tie(total, XTAL_count) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, ieta_min, ieta_max, skip);
+				//tie(total, XTAL_count, single_eta_skip) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, eta_min, eta_max, total_eta_skip); // if function has eta_skip feature 
+				tie(total, XTAL_count) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, eta_min, eta_max, skip, check_eta);
 				if (XTAL_count != 0){ 
 					EC->Fill(ts,total/XTAL_count); // Set histo point 
-					cout << "eta_min = " << ieta_min << ", eta_max = " << ieta_max << ", ts = " << ts << "\n";
+					cout << "eta_min = " << eta_min << ", eta_max = " << eta_max << ", ts = " << ts << "\n";
 					cout << "Total Bias = " << total << ", XTAL_count = " << XTAL_count << "\n";
 					cout << "Average Bias = " << total/XTAL_count << "\n";
+					if (ts == ts_max) total_XTALS += XTAL_count;
 				}
 
 				else{
@@ -359,13 +405,15 @@ int main(int argc, char** argv)
 
 				}
 			  }
+
 		//cout << "single_eta_skip = " << single_eta_skip << endl;
 		//total_eta_skip += single_eta_skip;
 		// Save histogram as root file, do again for next eta range.
 		// Save etamin and etamax in root file title, extract in plot.py.
 		// destroy histogram from memory 
+
 		ostringstream eta_title;
-		eta_title << "bin/EC_" << ieta_min << "_" << ieta_max << "_" << ts_min << "_" << ts_max << "_";
+		eta_title << "bin/EC_" << eta_min << "_" << eta_max << "_" << ts_min << "_" << ts_max << "_";
 		if (ideal_weights) eta_title << weights_type << "_" << PY;
 		if (!ideal_weights) eta_title << "online_" << PY;
 
@@ -377,12 +425,15 @@ int main(int argc, char** argv)
 		EC->SaveAs(eta_title_string);
 		EC->~TH1F();
 
-		ieta_min = ieta_max;	
-		if (ieta_max == 1.4) ieta_max += 0.1; // after loop, this will make next ietamax 1.8
+		eta_min = eta_max;	
 	
 		}
 
+	cout << "Total XTALS in eta ranges: " << total_XTALS << endl;
+
 	}
+
+	
 
 	if (plot_BC){
 		ts = 0.0;

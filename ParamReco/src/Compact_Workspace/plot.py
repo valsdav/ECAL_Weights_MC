@@ -15,6 +15,7 @@ parser = argparse.ArgumentParser(description='Process some files')
 #parser.add_argument('-f', '--files', type = str, nargs='+' , help='files to plot from')
 parser.add_argument('-d', '--directory', type = str, nargs='+',  help='directory to root files')
 parser.add_argument('-t', '--plot_type', type = str, nargs='+',  help='Type of Plot, BC or EC')
+parser.add_argument('-st', '--sub_plot_type', type = str, nargs='+',  help='What to show on one plot. All eta ranges (ETR), Weights/Params combos (WPC)') 
 args = parser.parse_args()
 
 # Open all flies from desired directory
@@ -22,6 +23,7 @@ args = parser.parse_args()
 paths = []
 data_folder = args.directory[0]
 plot_type = str(args.plot_type[0]) # BC or EC
+sub_plot_type = str(args.sub_plot_type[0]) # ETR or WPC 
 
 print "plot type = ",plot_type
 
@@ -29,301 +31,216 @@ print "plot type = ",plot_type
 # for data_folder path in current directory
 for file in os.listdir(str(os.getcwd()) + '/' + str(data_folder)):
     if file.endswith(".root"):
-        print(os.path.join(file))
+        print '	Found File: ',os.path.join(file)
 	paths.append(str(data_folder) + '/' + os.path.join(file))
 
-print "paths = ",paths
+#print "Number of paths = ",len(paths)
+#gStyle.SetOptStat(0); # no stats box
 
-print "len(paths) = ",len(paths)
+mg = TMultiGraph()
+l1 = TLegend(0.7, 0.1, 0.9, 0.3) # Bottom right
+l1.SetHeader("Legend") # I actually can't believe you can declare l1 in an if statement then access outside
 
-#elem0 = paths[0]
-#elem1 = paths[1]
-
-#paths[0] = elem1
-#paths[1] = elem0
-
-gStyle.SetOptStat(0); # no stats box
-
-# figure out how to loop 
-# Set maximum number of files 
-f1 = TFile()
-f2 = TFile()
-f3 = TFile()
-f4 = TFile() 
-f5 = TFile()
-f6 = TFile()
-f7 = TFile()
-f8 = TFile()
-f9 = TFile() 
-f10 = TFile()
-f11 = TFile()
-f12 = TFile()
-f13 = TFile()
-f14 = TFile()
-
-h1 = TH1F()
-h2 = TH1F()
-h3 = TH1F()
-h4 = TH1F()
-h5 = TH1F()
-h6 = TH1F()
-h7 = TH1F()
-h8 = TH1F()
-h9 = TH1F()
-h10 = TH1F()
-h11 = TH1F()
-h12 = TH1F()
-h13 = TH1F()
-h14 = TH1F()
-
-g1 = TGraph()
-g2 = TGraph()
-g3 = TGraph()
-g4 = TGraph()
-g5 = TGraph()
-g6 = TGraph()
-g7 = TGraph()
-g8 = TGraph()
-g9 = TGraph()
-g10 = TGraph()
-g11= TGraph()
-g12 = TGraph()
-g13= TGraph()
-g14 = TGraph()
+EB_ranges = 0
+EE_ranges = 0 
 
 
-files = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14]
-histos = [h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14]
-graphs = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g11, g12, g13, g14]
+colors = [kRed, kOrange, kGreen, kCyan, kAzure + 4, kBlue, kViolet, kMagenta, kGray]
+line_styles = []
+
+static_line_styles = []
+
+for i in range(10):
+	static_line_styles.append(i+1)
+
+num_paths = len(paths) 
+num_colors = len(colors)
+
+for i in range(num_colors):
+	line_styles.append(1)
+
+if ( num_paths > num_colors ):
+	for i in range(num_paths - num_colors):
+		#for j in range(num_paths - num_colors): 
+		colors.append(colors[i])   #+ 4)
+		line_styles.append(2)	
+
+
 
 i = 0
 
-for path in paths: # Should start with this and create 
-	files[i] = TFile.Open(paths[i])
+for path in paths:
+	#f = TFile()
+	h = TH1F()
+	#g = TGraph()
+
+	f = TFile().Open(path)
+
 	if plot_type == 'EC':
-		histos[i] = files[i].Get("EC")
+		h = f.Get("EC")
 	elif plot_type == 'BC':
-		histos[i] = files[i].Get("tsr")
-	i += 1
-	#files.append()	
-	#f1 = TFile.Open(path) 
-
-extra = len(histos) - len(paths)
-
-while extra > 0:
-	files = files[:-1]
-	histos = histos[:-1]
-	graphs = graphs[:-1]
-	extra -= 1
-
-# Doing the following because g = TGraph(h) seems to incorrectly translate values. 
-
-abs_val = False
-
-for h, hist in enumerate(histos, 1): 
-
+		h = f.Get("tsr")
+	
 	counter = 1
 	value = 0
 	ts = 0
-	dt = hist.GetXaxis().GetBinLowEdge(3) - hist.GetXaxis().GetBinLowEdge(2)
+	dt = h.GetXaxis().GetBinLowEdge(3) - h.GetXaxis().GetBinLowEdge(2)
 
 	x = array('d')
 	y = array('d')
 
-	#print'x = ',x
-	#print'y = ',y
 
-	while(hist.GetBinContent(counter) != 0):
+	while(h.GetBinContent(counter) != 0):
 		#print ("hist.GetXaxis().GetBinContent(" + str(counter) + ") = " + str(hist.GetXaxis().GetBinLowEdge(counter)))
-		ts = hist.GetXaxis().GetBinLowEdge(counter)
+		ts = h.GetXaxis().GetBinLowEdge(counter)
 		#print ("hist.GetBinContent(" + str(counter) + ") = " + str(hist.GetBinContent(counter)))
-		value = hist.GetBinContent(counter)
+		value = h.GetBinContent(counter)
 
 		#cout << "abs(" << value << ") = " << abs(value) << endl;
 		#h2->Fill(ts,fabs(value));
 		x.append(ts)
-		if (abs_val): y.append(fabs(value))
-		else: y.append(value)
+		#if (abs_val): y.append(fabs(value))
+		#else: y.append(value)
+		y.append(value)
 		#print("ts = " + str(ts) )
 		#print("value = " + str(value) )
 		#print("counter = " + str(counter) )
 		ts += dt
 		counter += 1
 
-	#graphs[h - 1] = TGraph(counter - 1, x, y)
-	graphs[h - 1] = TGraph(counter - 1,x,y)
+	g = TGraph(counter - 1, x, y)
 
-i = 0
-
-# Read weight type and year 
-
-# paths[i].split('_')[-4] # weights type
-# paths[i].split('_')[-3] # year
-
-if plot_type == 'BC':
-	for g in graphs:
+	if plot_type == 'BC':
 		g.SetMarkerStyle(8)
 
-		if paths[i].split('_')[-4] == "online": 
-			if paths[i].split('_')[-3] == "2017":
+		if path.split('_')[-4] == "online": 
+			if path.split('_')[-3] == "2017":
 				g.SetMarkerColor(kRed + 2) 
 				g.SetLineColor(kRed + 2)
-			elif paths[i].split('_')[-3] == "2018":
+			elif path.split('_')[-3] == "2018":
 				g.SetMarkerColor(kRed) 
 				g.SetLineColor(kRed)
 
-		if paths[i].split('_')[-4] == "PedSub1+4": 
-			if paths[i].split('_')[-3] == "2017":
-				print 'year = 2017'
+		if path.split('_')[-4] == "PedSub1+4": 
+			if path.split('_')[-3] == "2017":
+				#print 'year = 2017'
 				g.SetMarkerColor(kGreen + 4) 
 				g.SetLineColor(kGreen + 4)
-			elif paths[i].split('_')[-3] == "2018":
-				print 'year = 2018'
+			elif path.split('_')[-3] == "2018":
+				#print 'year = 2018'
 				g.SetMarkerColor(kGreen) 
 				g.SetLineColor(kGreen)
-		i += 1
+			
+	elif plot_type == 'EC':
 
-elif plot_type == 'EC':
+		#gStyle.SetPalette(55) # kRainbow
 
-	#gStyle.SetPalette(55) # kRainbow
+		#eta_boundaries = [-3.0,-2.6, -2.3, -2.0, -1.479, -1.133, -0.78477, -0.04362, 0.45396, 0.80182, 1.1479, 1.479, 2.0, 2.3, 2.6, 3.0]
+		#eta_boundaries = [-3.0, -2.6, -2.3, -2.0, -1.479, -65, -45, -25, 0, 25, 45, 65, 1.479, 2.0, 2.3, 2.6, 3.0]
 
-	eta_boundaries = [-3.0,-2.6, -2.3, -2.0, -1.479, -1.133, -0.78477, -0.04362, 0.45396, 0.80182, 1.1479, 1.479, 2.0, 2.3, 2.6, 3.0]
-	EB_ranges = 0
-	EE_ranges = 0
-	i = 0
+		# i = 0
 
-	for g in graphs:
-		min_eta = float(paths[i].split('_')[-7]) #min is -7 when there's a note. With no note, one less '_'
-		max_eta = float(paths[i].split('_')[-6])
-		print'min_eta = ',min_eta
-		print'max_eta = ',max_eta
-		g.SetMarkerStyle(8)
+		min_eta = float(path.split('_')[-7]) #min is -7 when there's a note. With no note, one less '_'
+		max_eta = float(path.split('_')[-6])
+
+		EE_range = True
+		
+		if ( ( (abs(min_eta) > 3.1) and (abs(max_eta) > 3.1) ) or (min_eta == 0) or (max_eta == 0)): EE_range = False # Then these are ieta values, not eta
+
+		color = colors[i]
+		line_style = line_styles[i]
+
+		#print"color = ",color 
+
+		g.SetMarkerStyle(kFullDotMedium)
+#		g.SetMarkerColor(color)
+		g.SetLineStyle(line_style)
+#		g.SetLineColor(color)
+
+		#g.SetMarkerColor(kRed - EE_ranges)
+		#g.SetMarkerColorAlpha(kRed, (1 - (0.1)*(EE_ranges) ) )
+		#g.SetLineColorAlpha(kRed,(1 - (0.1)*(EE_ranges) ) )
+		
+
+		if(EE_range):
+			#print'i = ',i
+			#print'EE'
+			#g.SetMarkerColor(kRed - EE_ranges)
+			#g.SetMarkerColorAlpha(kRed, (1 - (0.1)*(EE_ranges) ) )
+			#g.SetLineColorAlpha(kRed,(1 - (0.1)*(EE_ranges) ) )
+			g.SetMarkerColor(kRed)
+			g.SetLineColor(kRed)
+			g.SetLineStyle(static_line_styles[EE_ranges])
+			EE_ranges += 1	
+
+		if(not EE_range):
+			#print'i = ',i
+			#print'EB'
+			#g.SetMarkerColor(kRed - EE_ranges)
+			#g.SetMarkerColorAlpha(kGreen, (1 - (0.1)*(EB_ranges) ) )
+			#g.SetLineColorAlpha(kGreen,(1 - (0.1)*(EB_ranges) ) )
+			g.SetMarkerColor(kGreen)
+			g.SetLineColor(kGreen)
+			g.SetLineStyle(static_line_styles[EB_ranges])
+			EB_ranges += 1			
 
 		# Greater abs(eta), less transparent 
 
-		# EE
-		if ( (min_eta < -1.479) or (min_eta >= 1.479) ): 
-			print'i = ',i
-			print'EE'
-			#g.SetMarkerColor(kRed - EE_ranges)
-			g.SetMarkerColorAlpha(kRed, 1 + 0.1*EE_ranges)
-			g.SetLineColorAlpha(kRed, 1 + 0.1*EE_ranges)
-			EE_ranges += 1
+#		# EE
+#		if ( (min_eta < -1.479) or (min_eta >= 1.479) ): 
+#			#print'i = ',i
+#			#print'EE'
+#			#g.SetMarkerColor(kRed - EE_ranges)
+#			g.SetMarkerColorAlpha(kRed, (1 - (0.1)*(EE_ranges) ) )
+#			g.SetLineColorAlpha(kRed,(1 - (0.1)*(EE_ranges) ) )
+#			EE_ranges += 1
 
-		# EB
-		elif ( (min_eta >= -1.479) and (min_eta < 1.479) ): 
-			print'i = ',i
-			print'EB'
-			g.SetMarkerColorAlpha(kGreen, 0 + 0.1*EB_ranges)
-			g.SetLineColorAlpha(kGreen, 0 + 0.1*EB_ranges)
-			EB_ranges += 1
-		i += 1
+#		# EB
+#		elif ( (min_eta >= -1.479) and (min_eta < 1.479) ): 
+#			#print'i = ',i
+#			#print'EB'
+#			g.SetMarkerColorAlpha(kGreen, 0 + 0.1*EB_ranges)
+#			g.SetLineColorAlpha(kGreen, 0 + 0.1*EB_ranges)
+#			EB_ranges += 1
+#		#i += 1
 
-#		if (min_eta == '0') and (max_eta == '1.4'):
-#				g.SetMarkerColor(kRed) 
-#				g.SetLineColor(kRed)
+	#l1 = TLegend(0.7, 0.3, 0.9, 0.5)
+	#l1 = TLegend(0.1, 0.7, 0.3, 0.9) # Upper left
 
-#		if (min_eta == '1.4') and (max_eta == '1.8'):
-#				g.SetMarkerColor(kGreen) 
-#				g.SetLineColor(kGreen)
-
-#		if (min_eta == '1.8') and (max_eta == '2.1'):
-#				g.SetMarkerColor(kBlue) 
-#				g.SetLineColor(kBlue)
-
-#		if (min_eta == '2.1') and (max_eta == '2.4'):
-#				g.SetMarkerColor(kMagenta) 
-#				g.SetLineColor(kMagenta)
-
-#		if (min_eta == '2.4') and (max_eta == '2.7'):
-#				g.SetMarkerColor(kCyan) 
-#				g.SetLineColor(kCyan)
-
-#		if (min_eta == '2.7') and (max_eta == '3'):
-#				g.SetMarkerColor(kOrange + 6) 
-#				g.SetLineColor(kOrange + 6)
-#		i += 1
-	#g.SetMarkerColor(2+i)
-	#g.SetLineColor(2+i)
-	#i += 1	
-
-#graphs[0].SetMarkerColor(kBlue)
-#graphs[0].SetLineColor(kBlue)
-
-#graphs[1].SetMarkerColor(kGreen)
-#graphs[1].SetLineColor(kGreen)
-
-#graphs[2].SetMarkerColor(kRed)
-#graphs[2].SetLineColor(kRed)
-
-
-
-#g1.SetMarkerStyle(8)
-#g1.SetMarkerColor(3)
-#g1.SetLineColor(3)
-
-#if(abs_val) g1->SetTitle("EB abs(Average Bias) vs. Time Shift")
-#else g1->SetTitle("EB Average Bias vs. Time Shift");
-#g1->GetXaxis()->SetTitle("Time Shift (ns)");
-#g1->GetXaxis()->SetTitleOffset(1.3);
-#if(abs_val) g1->GetYaxis()->SetTitle("abs(Average Bias)");
-#else g1->GetYaxis()->SetTitle("Average Bias");
-#g1->GetYaxis()->SetTitleOffset(1.5);
-
-#g1->Draw();
-i = 0
-for g in graphs:
 	g.SetName("g" + str(i))
-	i += 1
 
-#if (abs_val): l1 = TLegend(0.5, 0.5, 0.8, 0.8)
-#else: l1 = TLegend(0.7, 0.1, 0.9, 0.3)
-#else: l1 = TLegend(0.5, 0.1, 0.8, 0.4)
-
-#l1 = TLegend(0.7, 0.3, 0.9, 0.5) 
-
-l1 = TLegend(0.7, 0.1, 0.9, 0.3) # Bottom right
-#l1 = TLegend(0.1, 0.7, 0.3, 0.9) # Upper left
-
-#l1.SetHeader("Legend") # I actually can't believe you can declare l1 in an if statement then access outside 
-
-i = 0
-
-for g in graphs:
 	if plot_type == 'BC':
-		label = paths[i].split('_')[-4] + '_' + paths[i].split('_')[-3]
+		label = path.split('_')[-4] + '_' + path.split('_')[-3]
 		l1.AddEntry(g, label, "lp")
 
 	if plot_type == 'EC':
 		#label = paths[i].split('_')[-7] + ' #leq #||{#eta} < ' + paths[i].split('_')[-6]
-		label = paths[i].split('_')[-7] + ' #leq #eta < ' + paths[i].split('_')[-6]
-		l1.AddEntry(g, label, "lp")	
+		if (EE_range): label = path.split('_')[-7] + ' #leq #eta < ' + path.split('_')[-6]
+		if (not EE_range): 
+			if max_eta == 85:
+				label = path.split('_')[-7] + ' #leq i#eta #leq ' + path.split('_')[-6]
+			else:
+				label = path.split('_')[-7] + ' #leq i#eta < ' + path.split('_')[-6]
+		l1.AddEntry(g, label, "lp")
 
-	i += 1
+	if plot_type == 'BC':
+		section = path.split('_')[-5] #.split('/')[-1]
+		minimum = path.split('_')[-2] + 'ns'
+		maximum = path.split('.')[-2].split('_')[-1] + 'ns'
+		#print 'section = ',section
 
-#paths[0].slice('_')[1] # section_weights_range.root
-#section = str(paths[0])[10:-17] # EE+/-, EB
-#section = paths[0].split('_')[-3].split('/')[-1]
-if plot_type == 'BC':
-	section = paths[0].split('_')[-5] #.split('/')[-1]
-	minimum = paths[0].split('_')[-2] + 'ns'
-	maximum = paths[0].split('.')[-2].split('_')[-1] + 'ns'
-	#print 'section = ',section
+	if plot_type == 'EC':
+		weights_type = paths[0].split('_')[-3]
+		#print 'weights type:',weights_type
+		if weights_type == 'online': weights_type = 'Online'
+		#print 'weights type = ',weights_type
+		PY = path.split('_')[-2]
 
-if plot_type == 'EC':
-	weights_type = paths[0].split('_')[-3]
-	print 'weights type:',weights_type
-	if weights_type == 'online': weights_type = 'Online'
-	print 'weights type = ',weights_type
-	PY = paths[0].split('_')[-2]
+		minimum = path.split('_')[-5]   
+		maximum = path.split('_')[-4] 
 
-	minimum = paths[0].split('_')[-5]   
-	maximum = paths[0].split('_')[-4] 
-
-mg = TMultiGraph()
-
-for g in graphs:
 	mg.Add(g, "LP")
+	i += 1
 
 if plot_type == 'BC': mg.SetTitle(section + " Average Bias vs. Time Shift")
 if plot_type == 'EC': mg.SetTitle(weights_type + ' Weights, ' + PY + ' Parameters')
@@ -337,7 +254,6 @@ mg.GetXaxis().SetTitle("Time Shift (ns)")
 #mg.GetYaxis().SetRangeUser(-0.04,0.02)
 mg.GetYaxis().SetTitle("Average Bias")
 mg.GetYaxis().SetTitleOffset(1.3)
-
 
 xline = TLine(c0.GetUxmin(),0,c0.GetUxmax(),0)
 #xline = TLine(-3,0,3,0)
