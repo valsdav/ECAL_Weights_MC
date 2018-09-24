@@ -9,30 +9,40 @@ from array import array
 import os
 import argparse
 
+gROOT.SetBatch(kTRUE)
+
 # dashed line across zero? 
 
 parser = argparse.ArgumentParser(description='Process some files')
 #parser.add_argument('-f', '--files', type = str, nargs='+' , help='files to plot from')
 parser.add_argument('-d', '--directory', type = str, nargs='+',  help='directory to root files')
-parser.add_argument('-t', '--plot_type', type = str, nargs='+',  help='Type of Plot, BC or EC')
-parser.add_argument('-st', '--sub_plot_type', type = str, nargs='+',  help='What to show on one plot. All eta ranges (ETR), Weights/Params combos (WPC)') 
+#parser.add_argument('-t', '--plot_type', type = str, nargs='+',  help='Type of Plot, BC or EC')
+#parser.add_argument('-st', '--sub_plot_type', type = str, nargs='+',  help='What to show on one plot. All eta ranges (ETR), Weights/Params combos (WPC)') 
 args = parser.parse_args()
 
 # Open all flies from desired directory
 
 paths = []
+dist_paths = []
 data_folder = args.directory[0]
-plot_type = str(args.plot_type[0]) # BC or EC
-sub_plot_type = str(args.sub_plot_type[0]) # ETR or WPC 
+#sub_plot_type = str(args.sub_plot_type[0]) # ETR or WPC 
 
-print "plot type = ",plot_type
+#print "plot type = ",plot_type
 
 # Find all files in current working directory ending in ".root"
 # for data_folder path in current directory
 for file in os.listdir(str(os.getcwd()) + '/' + str(data_folder)):
-    if file.endswith(".root"):
-        print '	Found File: ',os.path.join(file)
-	paths.append(str(data_folder) + '/' + os.path.join(file))
+    #if file.endswith(".root"):
+    if 'EC_' in file:
+        #print '	Found File: ',os.path.join(file)
+	paths.append(str(data_folder) + '/' + os.path.join(file)) # Why am I saving the 'bin/' part of the path? 
+
+#plot_type = str(paths[0].split('/')[-1].split('_')[-8])
+
+plot_type = "EC"
+weights_type = "whatever"
+
+#print 'plot type = ',plot_type
 
 #print "Number of paths = ",len(paths)
 #gStyle.SetOptStat(0); # no stats box
@@ -64,8 +74,6 @@ if ( num_paths > num_colors ):
 		#for j in range(num_paths - num_colors): 
 		colors.append(colors[i])   #+ 4)
 		line_styles.append(2)	
-
-
 
 i = 0
 
@@ -143,9 +151,17 @@ for path in paths:
 		min_eta = float(path.split('_')[-7]) #min is -7 when there's a note. With no note, one less '_'
 		max_eta = float(path.split('_')[-6])
 
+		#print'min eta = ',min_eta
+		#print'max eta = ',max_eta
+
 		EE_range = True
 		
-		if ( ( (abs(min_eta) > 3.1) and (abs(max_eta) > 3.1) ) or (min_eta == 0) or (max_eta == 0)): EE_range = False # Then these are ieta values, not eta
+		#if ( ( (abs(min_eta) > 3.1) and (abs(max_eta) > 3.1) ) or (min_eta == 0) or (max_eta == 0)): EE_range = False # Then these are ieta values, not eta
+		#if ( ( (abs(min_eta) > 3.1) and (abs(max_eta) > 3.1) ) or (min_eta == 0) or (max_eta == 0)): EE_range = False # Then these are ieta values, not eta
+
+		#print 'i = ',i
+
+		if ( (min_eta >= -1.485) and (1.482 > min_eta) ): EE_range = False
 
 		color = colors[i]
 		line_style = line_styles[i]
@@ -171,6 +187,7 @@ for path in paths:
 			g.SetMarkerColor(kRed)
 			g.SetLineColor(kRed)
 			g.SetLineStyle(static_line_styles[EE_ranges])
+			
 			EE_ranges += 1	
 
 		if(not EE_range):
@@ -215,12 +232,15 @@ for path in paths:
 
 	if plot_type == 'EC':
 		#label = paths[i].split('_')[-7] + ' #leq #||{#eta} < ' + paths[i].split('_')[-6]
-		if (EE_range): label = path.split('_')[-7] + ' #leq #eta < ' + path.split('_')[-6]
-		if (not EE_range): 
-			if max_eta == 85:
-				label = path.split('_')[-7] + ' #leq i#eta #leq ' + path.split('_')[-6]
-			else:
-				label = path.split('_')[-7] + ' #leq i#eta < ' + path.split('_')[-6]
+#		if (EE_range): label = path.split('_')[-7] + ' #leq #eta < ' + path.split('_')[-6]
+#		if (not EE_range): 
+#			#if max_eta == 85:
+#				#label = path.split('_')[-7] + ' #leq i#eta #leq ' + path.split('_')[-6]
+#			#else:
+#			label = path.split('_')[-7] + ' #leq i#eta < ' + path.split('_')[-6]
+
+		label = path.split('_')[-7] + ' #leq #eta < ' + path.split('_')[-6]
+
 		l1.AddEntry(g, label, "lp")
 
 	if plot_type == 'BC':
@@ -275,3 +295,102 @@ if plot_type == 'BC': Save_Title = "pyplot/pyplot" + section + "_" + minimum + '
 if plot_type == 'EC': Save_Title = "pyplot/pyplot_EC_" + weights_type + "_" + PY + "_" + minimum + '_' + maximum + ".pdf"
 
 c0.SaveAs(Save_Title)
+
+# Create Canvas with all ts0ns bias distributions
+
+#for file in os.listdir(str(os.getcwd()) + '/' + str(data_folder) + '/dist'):
+#for file in 
+for file in os.listdir(str(os.getcwd()) + '/' + str(data_folder)):
+    if 'ts0ns' in file:
+       # print '	Found dist File: ',os.path.join(file)
+	#print ' file = ',str(file)
+	#dist_paths.append(str(data_folder) + '/' + os.path.join(file))
+	dist_paths.append(str(data_folder) + '/' + os.path.join(file))
+
+#print'Dist paths = ',dist_paths
+
+# Create Canvas
+# Loop paths
+	# titles, figure ranges (set range? dynamic)
+	# equal number of bins, same ranges? 
+	# add to next canvas pad 
+
+# save pad image 
+
+cc = TCanvas('cc', 'cc', 3000, 1000)
+#pp = TPad()
+#cc.Divide(6,3)
+cc.Divide(6,3)
+#cc.SetBatch(kTRUE)
+#pp.Divide(6,3)
+
+#if even
+
+#if odd 
+
+# For now 18 intervals
+
+#print'dist_paths[0] = ',dist_paths[0]
+
+i = 1
+
+test_hists = []
+tfiles = []
+
+# order by eta min 
+
+#for j in range(len(dist_paths)):
+min_etas = []
+#ordered_files = [] #(path, eta_min)
+
+temp_list = []
+
+for i in range(len(dist_paths)):
+	print'i = ',i
+	current_min = 1000
+	for path in dist_paths:
+		emi = float(path.split('/')[-1].split('_')[-6])
+		#print'emi = ',emi
+		if (emi < current_min): 
+			current_min = emi
+			#print'new current min = ',current_min
+		#min_etas.append(emi)
+
+	#i = 0
+	for path in dist_paths:
+		emi = float(path.split('/')[-1].split('_')[-6])
+		if emi == current_min:
+			print'appending: ',path
+			temp_list.append(path)	
+			dist_paths.remove(path)
+	#i += 1
+		
+	#if (emi < current_min): current_min = emi
+
+print'temp_list = ',temp_list
+
+i = 1
+#for path in ordered_files[0]:
+for path in temp_list:
+	print'path = ',path
+	emi = path.split('/')[-1].split('_')[-6]
+	ema = path.split('/')[-1].split('_')[-5]
+	wt = path.split('/')[-1].split('_')[-3]
+	wy = path.split('/')[-1].split('_')[-2]
+
+	tfiles.append(TFile().Open(path))
+	test_hists.append(tfiles[i-1].Get("bias_dist"))
+
+	#test_hists[i-1] = f.Get("bias_dist")
+	#h = f.Get("bias_dist")
+	#print'cc.cd(i)
+	cc.cd(i)
+	test_hists[i-1].GetXaxis().SetRangeUser(-0.02,0.2)
+	test_hists[i-1].SetTitle('Bias, ' + str(emi) + '_' + str(ema) + '_' + str(wt) + '_' + str(wy))
+	test_hists[i-1].Draw()
+	i += 1
+	#if i == 5: break
+
+cc.cd()
+cc.SaveAs("pyplot/Bias_Dists.pdf")
+

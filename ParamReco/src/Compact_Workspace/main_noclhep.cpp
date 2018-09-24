@@ -299,12 +299,8 @@ int main(int argc, char** argv)
   	TString single_ts_title_string = single_ts_title.str(); 
 	//TH1F *tsr = new TH1F("tsr",ts_range_title_string,((ts_max - ts_min) / (dts)) + 1,ts_min,ts_max + dts); // ts range
 	TH1F *tsr = new TH1F("tsr",ts_range_title_string,tsr_bins,ts_min,ts_max + dts); // ts range
-	//cout << "bins = " << ((ts_max - ts_min) / (dts)) + 1 << endl;
-	//cout << "min = " << ts_min << endl;
-	//cout << "max = " << ts_max << endl;
 	TH2F *sts = new TH2F("sts",single_ts_title_string,(DOF1max - DOF1min),DOF1min,DOF1max,(DOF2max - DOF2min),DOF2min,DOF2max); // single ts
 
-	// For debugging
 	TH1F *values = new TH1F("values","values",1000,-0.3,0.3);
 
 	//TH2F *sts = new TH2F("sts",single_ts_title_string); //,,,,,);
@@ -324,7 +320,10 @@ int main(int argc, char** argv)
 		cout << "Plotting Eta Curve\n";
 
 		//vector<double> eta_boundaries = {-3.0,-2.6, -2.3, -2.0, -1.479, -1.133, -0.78477, -0.04362, 0.45396, 0.80182, 1.1497, 1.479, 2.0, 2.3, 2.6, 3.0};
-		vector<double> eta_boundaries = {-3.0, -2.6, -2.3, -2.0, -1.479, -65, -45, -25, 0, 25, 45, 65, 1.479, 2.0, 2.3, 2.6, 3.0}; // eta, ieta combination 
+		//vector<double> eta_boundaries = {-3.0, -2.75, -2.5, -2.3, -2.0, -1.479, -66, -46, -26, 0, 26, 46, 66, 1.479, 2.0, 2.5, 2.6, 3.0}; // eta, ieta combination
+		//vector<double> eta_boundaries = {-3.0, -2.75, -2.5, -2.25, -2.0, -1.75, -1.485, -1.16, -0.81, -0.46, 0, 0.44, 0.80, 1.14, 1.482, 1.75, 2, 2.25, 2.5, 2.75, 3.0}; // eta, ieta combination  
+		vector<double> eta_boundaries = {-3.0, -2.75, -2.5, -2.15, -1.8, -1.485, -1.16, -0.81, -0.46, 0, 0.44, 0.80, 1.14, 1.482, 1.8, 2.15, 2.5, 2.75, 3.0};
+		// -- Figure out EB Module eta values by looking at eta's at ietas? find min/max and separate by eta values? Would be better for plot 
 
 		//int EE_boundaries = 4; // number of boundaries measured by eta, not ieta (on each side)
 		//int ieta_boundaries = 4; // " " ieta, not eta (on each side), not including zero. 
@@ -344,53 +343,60 @@ int main(int argc, char** argv)
 		int total_XTALS = 0;
 
 		for (int i = 0; i < eta_boundaries.size() - 1; i += 1){ // for debugging 
-						
+							
+			// Set loop boundaries
 			eta_min = eta_boundaries[i];
 			eta_max = eta_boundaries[i+1];
+	
+//			// Determine if EB or EE (read by ieta or eta) 
+//			bool eta_min_ieta = false, eta_max_ieta = false; // eta min/max is/isn't in ieta form 
+//			bool check_eta = false; // check eta or ieta 
 
-			bool eta_min_ieta = false, eta_max_ieta = false; // eta min/max is/isn't in ieta form 
-			bool check_eta = false; // check eta or ieta 
+//			if( (eta_min == 0) || (eta_max == 0) ) check_eta = false; 
 
-			if( (eta_min == 0) || (eta_max == 0) ) check_eta = false; 
+//			else{
 
-			else{
+//				if ( abs(eta_min) > 3 ) eta_min_ieta = true; // This assumes the smallest ieta boundary is larger than 3. 
+//				if ( abs(eta_max) > 3 ) eta_max_ieta = true;
 
-				if ( abs(eta_min) > 3 ) eta_min_ieta = true; // This assumes the smallest ieta boundary is larger than 3. 
-				if ( abs(eta_max) > 3 ) eta_max_ieta = true;
+//				// EE 
+//				if (!(eta_min_ieta) && !(eta_max_ieta) ) check_eta = true;
 
-				// EE 
-				if (!(eta_min_ieta) && !(eta_max_ieta) ) check_eta = true;
+//				// EB 
+//				if ((!eta_min_ieta) && (eta_max_ieta) ){ 
+//					eta_min = -85;
+//					//check_eta = false;
+//				}
+//		
+//				// EB 
+//				//if ( (eta_min_ieta) && (eta_max_ieta) ) check_eta = false;
 
-				// EB 
-				if ((!eta_min_ieta) && (eta_max_ieta) ){ 
-					eta_min = -85;
-					//check_eta = false;
-				}
-		
-				// EB 
-				//if ( (eta_min_ieta) && (eta_max_ieta) ) check_eta = false;
+//				// EB
+//				if ((eta_min_ieta) && (!eta_max_ieta) ){ 
 
-				// EB
-				if ((eta_min_ieta) && (!eta_max_ieta) ){ 
+//					eta_max = 86;
+//					//check_eta = false;
+//				}
 
-					eta_max = 85;
-					//check_eta = false;
-				}
+//			}
 
-			}
+
+
+			TH1F *EC = new TH1F("EC",ts_range_title_string,tsr_bins,ts_min,ts_max + dts); // ts range
+			//TH1F *bias_values = new TH1F("bias_values","bias_values",1000,-0.3,0.3);
+
+			ts = 0.0;
+			double XTAL_count = 0;
 
 			cout << "*****************************************\n";
 			cout << "Computing Average Bias for:\n";
-			cout << "Eta/iEta: [" << eta_min << ", " << eta_max << "]" << endl; // ieta means iterative here. 
+			cout << "Eta/iEta: [" << eta_min << ", " << eta_max << ")" << endl; // ieta means iterative here. 
 			cout << "*****************************************\n";
 
-			TH1F *EC = new TH1F("EC",ts_range_title_string,tsr_bins,ts_min,ts_max + dts); // ts range
-			ts = 0.0;
-			double XTAL_count = 0;
 			// in EC_bias, max_rows is max number of eta rows to read. Does not include eta_skip.
 			for (ts = ts_min; ts < ts_max + dts; ts += dts){
 				//tie(total, XTAL_count, single_eta_skip) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, eta_min, eta_max, total_eta_skip); // if function has eta_skip feature 
-				tie(total, XTAL_count) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, eta_min, eta_max, skip, check_eta);
+				tie(total, XTAL_count) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, eta_min, eta_max, skip, note_exists, note);
 				if (XTAL_count != 0){ 
 					EC->Fill(ts,total/XTAL_count); // Set histo point 
 					cout << "eta_min = " << eta_min << ", eta_max = " << eta_max << ", ts = " << ts << "\n";
@@ -404,18 +410,13 @@ int main(int argc, char** argv)
 					cout << "XTAL_count = " << XTAL_count << ", not filling histogram.\n"; // should equal zero
 
 				}
-			  }
+			  } 
 
-		//cout << "single_eta_skip = " << single_eta_skip << endl;
-		//total_eta_skip += single_eta_skip;
-		// Save histogram as root file, do again for next eta range.
-		// Save etamin and etamax in root file title, extract in plot.py.
-		// destroy histogram from memory 
-
+		// Save 2d histo, later to be plotted by plot.py 
 		ostringstream eta_title;
 		eta_title << "bin/EC_" << eta_min << "_" << eta_max << "_" << ts_min << "_" << ts_max << "_";
 		if (ideal_weights) eta_title << weights_type << "_" << PY;
-		if (!ideal_weights) eta_title << "online_" << PY;
+		if (!ideal_weights) eta_title << "Online_" << PY;
 
 		if (note_exists) eta_title << "_" << note;
 
@@ -429,7 +430,7 @@ int main(int argc, char** argv)
 	
 		}
 
-	cout << "Total XTALS in eta ranges: " << total_XTALS << endl;
+	cout << "Total XTALS in all eta ranges: " << total_XTALS << endl;
 
 	}
 
@@ -744,4 +745,6 @@ int main(int argc, char** argv)
 	cout << "Total time: " << total_time / 60. << " minutes\n";
 
 	return 0;
+
+
 }

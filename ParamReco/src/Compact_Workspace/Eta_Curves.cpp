@@ -4,34 +4,13 @@
 
 #include "recon_amp_noclhep.cpp"
 
-tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_w[], bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY, double eta_min, double eta_max, int merged_skip, bool check_eta) 
+tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_w[], bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY, double eta_min, double eta_max, int merged_skip, bool note_exists, string note) 
 {
-
-	// four cases: min and max are EE, min and max are EB, min EE max EB, min EB max EE. 
-	// if both EE/EB, only check EE/EB eta/DOF1
-	// if last EE-, change second eta to -1.479
-	// if first EE+, change first eta to 1.479
-
-	//if >= 25 it's ieta
-
-
-	// at end get check_eta = true or false 
-
-
-	//cout.precision(17);
-
-
-//	cout << "*****************************************\n";
-//	cout << "Computing Average Bias for:\n";
-
-//	if (check_eta) cout << "Eta: [" << eta_min << ", " << eta_max << "]" << endl;
-//	if (!check_eta) cout << "iEta: [" << eta_min << ", " << eta_max << "]" << endl;
-
-//	cout << "Time Shift = " << ts << "ns\n";
-//	cout << "*****************************************\n";
 
 	cout << "Time Shift = " << ts << "ns\n";
 
+	// Can choose to save distribution of bias values for given eta range 
+	TH1F *bias_dist = new TH1F("bias_dist","bias_dist",1000,-0.3,0.3);
 
 	// Open Merged Data file 
 	stringstream merged_ss;
@@ -47,7 +26,6 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 
 	string merged_line;
 
-
 	// Initial skip, number of eta lines already read. 
 	cout << "Skipping " << merged_skip << " merged data rows..." << endl;
 
@@ -60,6 +38,8 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 
 	double total_bias = 0.0, XTAL_count = 0.0; // Set double because want double division later 
 	int merged_row = 0;
+
+	double min = 50., max = -50;
 
 	while( getline(inMergedFile, merged_line) ){ // While there are merged data file rows to read 
 
@@ -88,28 +68,36 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 				i_weights.push_back(XTAL_Params[i+9]);
 			}
 
-			if ( (check_eta) && (ID >= 872415401) ){
+			// Switch to only check_eta, include transition regions
+
+			//if ( (check_eta) && (ID >= 872415401) ){
 		
-				if ( (eta >= eta_min ) && ( eta < eta_max) ) in_range = true;
+				//if ( (eta >= eta_min ) && ( eta < eta_max) ) in_range = true;
 
-			}
+			//}
 
-			else if ( (!check_eta) && ((ID >= 838861313) && (ID <= 838970216)) ){ // EB only 
+			//else if ( (!check_eta) && ((ID >= 838861313) && (ID <= 838970216)) ){ // EB only 
 		
-				if (eta_max == 85){
-					if ( (DOF1 >= eta_min ) && ( DOF1 <= eta_max) ) in_range = true; // If last EB range, need to include iEta = 85 because it won't be includede in first EE range
-				}
 
-				else{
-					if ( (DOF1 >= eta_min ) && ( DOF1 < eta_max) ) in_range = true;
-				}
+//				if (eta_max == 85){
+//					if ( (DOF1 >= eta_min ) && ( DOF1 <= eta_max) ) in_range = true; // If last EB range, need to include iEta = 85 because it won't be includede in first EE range
+//				}
+
+//				else{
+//					if ( (DOF1 >= eta_min ) && ( DOF1 < eta_max) ) in_range = true;
+//				}
 				
 
-			}
+				//if ( (DOF1 >= eta_min ) && ( DOF1 < eta_max) ) in_range = true;
 
-			// if ( (eta >= eta_min ) && ( eta < eta_max) ){ // eta in range 
+			//}
+
+			if ( (eta >= eta_min ) && ( eta < eta_max) ) in_range = true;  // eta in range 
 
 			if(in_range){ // if in range 
+
+				if (eta < min) min = eta;
+				if (eta > max) max = eta; 
 
 				// Set Weights 
 
@@ -178,6 +166,9 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 
 				total_bias += bias; 
 				XTAL_count += 1;
+
+				bias_dist->Fill(bias);
+
 				//cout << "XTAL count = " << XTAL_count << endl;
 
 				// See if things are going well 
@@ -193,14 +184,14 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 			} // if in range 
 
 
-			if ( (!in_range) && ( (abs(eta_min) == 1.479) || (abs(eta_min) == 85) || (abs(eta_max) == 85) || (abs(eta_max) == 1.479) ) ){
+//			if ( (!in_range) && ( (abs(eta_min) == 1.479) || (abs(eta_min) == 85) || (abs(eta_max) == 85) || (abs(eta_max) == 1.479) ) ){
 
-				if ( (ID >= 1.479) || (ID <= 85) || (ID >= 1.479) || (ID <= 85) ){
-					cout << "Missing ID = " << ID << endl;
-				}
-//-84 838903809
-//-85 838904680
-			}	
+//				if ( (ID >= 1.479) || (ID <= 85) || (ID >= 1.479) || (ID <= 85) ){
+//					cout << "Missing ID = " << ID << endl;
+//				}
+////-84 838903809
+////-85 838904680
+//			}	
 
 
 		} // if 6 doubles on eta line
@@ -220,6 +211,22 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 	} // While there are merged data lines left to read 
 	  
         //inMergedFile.close();
+
+	cout << "min eta value in range = " << min << endl;
+	cout << "max eta value in range = " << max << endl;
+
+	ostringstream bias_dist_title;
+	bias_dist_title << "bin/dist/Bias_Dist_" << eta_min << "_" << eta_max << "_ts" << ts << "ns_";
+	if (ideal_weights) bias_dist_title << weights_type << "_" << PY;
+	if (!ideal_weights) bias_dist_title << "Online_" << PY;
+
+	if (note_exists) bias_dist_title << "_" << note;
+
+	bias_dist_title << ".root";
+
+	TString bias_dist_title_string = bias_dist_title.str();
+	if (ts == 0) bias_dist->SaveAs(bias_dist_title_string); // only save 0ts distributions 
+	bias_dist->~TH1F();
 
 	return make_tuple(total_bias, XTAL_count);
 
