@@ -225,7 +225,9 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 	bias_dist_title << ".root";
 
 	TString bias_dist_title_string = bias_dist_title.str();
-	if (ts == 0) bias_dist->SaveAs(bias_dist_title_string); // only save 0ts distributions 
+	if ( (ts > -1*pow(10,-13)) && ( ts < pow(10,-13) ) ){
+ 		bias_dist->SaveAs(bias_dist_title_string); // only save 0ts distributions 
+	}	
 	bias_dist->~TH1F();
 
 	return make_tuple(total_bias, XTAL_count);
