@@ -319,10 +319,6 @@ int main(int argc, char** argv)
 	
 		cout << "Plotting Eta Curve\n";
 
-		//vector<double> eta_boundaries = {-3.0,-2.6, -2.3, -2.0, -1.479, -1.133, -0.78477, -0.04362, 0.45396, 0.80182, 1.1497, 1.479, 2.0, 2.3, 2.6, 3.0};
-		//vector<double> eta_boundaries = {-3.0, -2.75, -2.5, -2.3, -2.0, -1.479, -66, -46, -26, 0, 26, 46, 66, 1.479, 2.0, 2.5, 2.6, 3.0}; // eta, ieta combination
-		//vector<double> eta_boundaries = {-3.0, -2.75, -2.5, -2.25, -2.0, -1.75, -1.485, -1.16, -0.81, -0.46, 0, 0.44, 0.80, 1.14, 1.482, 1.75, 2, 2.25, 2.5, 2.75, 3.0}; // eta, ieta combination  
-		//vector<double> eta_boundaries = {-3.0, -2.75, -2.5, -2.15, -1.8, -1.485, -1.16, -0.81, -0.46, 0, 0.44, 0.80, 1.14, 1.482, 1.8, 2.15, 2.5, 2.75, 3.0};
 		vector<double> eta_boundaries = {-3.0, -2.5, -1.485, -1.16, -0.81, -0.46, 0, 0.44, 0.80, 1.14, 1.482, 2.5, 3.0};
 		// -- Figure out EB Module eta values by looking at eta's at ietas? find min/max and separate by eta values? Would be better for plot 
 
@@ -334,9 +330,6 @@ int main(int argc, char** argv)
 		//vector<double> eta_boundaries = {-3.0,-2.6};
 
 		// Define first abs_eta_max
-		//abs_eta_max = 1.4; // Start here, increase by 0.4 first time, then 0.3 till 2.7
-		//abs_eta_max = 1.8; // Start here, increase by 0.4 first time, then 0.3 till 2.7
-		//double eta_max = 0.0; // eta being iterated over 
 		double eta_min = eta_boundaries[0], eta_max = eta_boundaries[1]; // initial values for eta being iterated over 
 		int total_eta_skip = 0, single_eta_skip = 0; // number of rows to skip in eta file. Update every time an eta range is finished.
 		int skip = 0;

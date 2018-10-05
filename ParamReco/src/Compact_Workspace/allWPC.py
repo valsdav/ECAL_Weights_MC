@@ -24,12 +24,11 @@ parser.add_argument('-d', '--bias_dist_only', action='store_true')
 # Legend_Location: BR: Bottom Right, MR: Middle Right
 # y_min: -2
 # y_max: 2
+# eta_range_lower_index: 4
 #
-# python plot.py -p bin,-10_10,BR,-2,2
+# python plot.py -p bin,-10_10,BR,-2,2,4
 
 args = parser.parse_args()
-
-# Open all flies from desired directory
 
 argument = args.params[0].split(',')
 
@@ -39,39 +38,43 @@ for param in argument:
 	params.append(param)
 
 data_folder = params[0]
-print'params[0] = ',params[0]
-print'params[1] = ',params[1]
 time_range = params[1]
 
 paths = []
-#dist_paths = [] 3 4 
 
 ymin = float(params[3])
 ymax = float(params[4])
+eta_range_lower_index = int(params[5])
 
-print'ymin = ',ymin
-print'ymax = ',ymax
+print'eta_range_lower_index = ',eta_range_lower_index
 
-#sub_plot_type = str(args.sub_plot_type[0]) # ETR or WPC 
+eta_boundaries = [-3, -2.5, -1.485, -1.16, -0.81, -0.46, 0, 0.44, 0.80, 1.14, 1.482, 2.5, 3]
 
+eta_range_lower = eta_boundaries[eta_range_lower_index]
+eta_range_upper = eta_boundaries[eta_range_lower_index + 1]
 
+print'eta lower = ',eta_range_lower
+
+# Open all flies from desired directory
 
 if args.bias_dist_only is False:
 
-
-
 	# Find all files in current working directory containing ""
 	# for data_folder path in current directory
-	for file in os.listdir(str(os.getcwd()) + '/' + str(data_folder)):
-	    #if file.endswith(".root"):
-	    #if 'EC_' in file:
-	    if time_range in file:
-		print '	Found File: ',os.path.join(file)
-		paths.append(str(data_folder) + '/' + os.path.join(file)) # Why am I saving the 'bin/' part of the path? 
+
+	directs = ['PedSub1+4_2017', 'PedSub1+4_2018', 'online_2017', 'online_2018']
+
+	for direct in directs:
+		for file in os.listdir(str(os.getcwd()) + '/' + str(data_folder) + '/' + direct):
+		    #if file.endswith(".root"):
+		    #if 'EC_' in file:
+		    if time_range in file:
+			if str(eta_range_lower) + '_' + str(eta_range_upper) in file:
+				print '	Found File: ',os.path.join(file)
+				paths.append(str(data_folder) + '/' +  direct + '/' + os.path.join(file)) # Why am I saving the 'bin/' part of the path? 
 
 	plot_type = str(paths[0].split('/')[-1].split('_')[-8])
-
-	#plot_type = str(paths
+	#plot_type = 'EC'
 
 	#gStyle.SetOptStat(0); # no stats box
 
@@ -178,7 +181,7 @@ if args.bias_dist_only is False:
 		g = TGraph(counter - 1, x, y)
 
 		if plot_type == 'BC':
-			g.SetMarkerStyle(8)
+			g.SetMarkerStyle(kFullDotMedium)
 
 			if path.split('_')[-4] == "online": 
 				if path.split('_')[-3] == "2017":
@@ -207,58 +210,78 @@ if args.bias_dist_only is False:
 
 			# i = 0
 
-			min_eta = float(path.split('_')[-7]) #min is -7 when there's a note. With no note, one less '_'
-			max_eta = float(path.split('_')[-6])
-
-			#print'min eta = ',min_eta
-			#print'max eta = ',max_eta
-
-			EE_range = True
-		
-			#if ( ( (abs(min_eta) > 3.1) and (abs(max_eta) > 3.1) ) or (min_eta == 0) or (max_eta == 0)): EE_range = False # Then these are ieta values, not eta
-			#if ( ( (abs(min_eta) > 3.1) and (abs(max_eta) > 3.1) ) or (min_eta == 0) or (max_eta == 0)): EE_range = False # Then these are ieta values, not eta
-
-			#print 'i = ',i
-
-			if ( (min_eta >= -1.485) and (1.482 > min_eta) ): EE_range = False
-
-			color = colors[i]
-			line_style = line_styles[i]
-
-			#print"color = ",color 
-
 			g.SetMarkerStyle(kFullDotMedium)
-	#		g.SetMarkerColor(color)
-			g.SetLineStyle(line_style)
-	#		g.SetLineColor(color)
 
-			#g.SetMarkerColor(kRed - EE_ranges)
-			#g.SetMarkerColorAlpha(kRed, (1 - (0.1)*(EE_ranges) ) )
-			#g.SetLineColorAlpha(kRed,(1 - (0.1)*(EE_ranges) ) )
-		
+			if path.split('_')[-3] == "Online": 
+				if path.split('_')[-2] == "2017":
+					g.SetMarkerColor(kRed + 2) 
+					g.SetLineColor(kRed + 2)
+				elif path.split('_')[-2] == "2018":
+					g.SetMarkerColor(kRed) 
+					g.SetLineColor(kRed)
 
-			if(EE_range):
-				#print'i = ',i
-				#print'EE'
-				#g.SetMarkerColor(kRed - EE_ranges)
-				#g.SetMarkerColorAlpha(kRed, (1 - (0.1)*(EE_ranges) ) )
-				#g.SetLineColorAlpha(kRed,(1 - (0.1)*(EE_ranges) ) )
-				g.SetMarkerColor(kRed)
-				g.SetLineColor(kRed)
-				g.SetLineStyle(static_line_styles[EE_ranges])
-			
-				EE_ranges += 1	
+			if path.split('_')[-3] == "PedSub1+4": 
+				if path.split('_')[-2] == "2017":
+					#print 'year = 2017'
+					g.SetMarkerColor(kGreen + 4) 
+					g.SetLineColor(kGreen + 4)
+				elif path.split('_')[-2] == "2018":
+					#print 'year = 2018'
+					g.SetMarkerColor(kGreen) 
+					g.SetLineColor(kGreen)
 
-			if(not EE_range):
-				#print'i = ',i
-				#print'EB'
-				#g.SetMarkerColor(kRed - EE_ranges)
-				#g.SetMarkerColorAlpha(kGreen, (1 - (0.1)*(EB_ranges) ) )
-				#g.SetLineColorAlpha(kGreen,(1 - (0.1)*(EB_ranges) ) )
-				g.SetMarkerColor(kGreen)
-				g.SetLineColor(kGreen)
-				g.SetLineStyle(static_line_styles[EB_ranges])
-				EB_ranges += 1			
+#			min_eta = float(path.split('_')[-7]) #min is -7 when there's a note. With no note, one less '_'
+#			max_eta = float(path.split('_')[-6])
+
+#			#print'min eta = ',min_eta
+#			#print'max eta = ',max_eta
+
+#			EE_range = True
+#		
+#			#if ( ( (abs(min_eta) > 3.1) and (abs(max_eta) > 3.1) ) or (min_eta == 0) or (max_eta == 0)): EE_range = False # Then these are ieta values, not eta
+#			#if ( ( (abs(min_eta) > 3.1) and (abs(max_eta) > 3.1) ) or (min_eta == 0) or (max_eta == 0)): EE_range = False # Then these are ieta values, not eta
+
+#			#print 'i = ',i
+
+#			if ( (min_eta >= -1.485) and (1.482 > min_eta) ): EE_range = False
+
+#			color = colors[i]
+#			line_style = line_styles[i]
+
+#			#print"color = ",color 
+
+#			g.SetMarkerStyle(kFullDotMedium)
+#	#		g.SetMarkerColor(color)
+#			g.SetLineStyle(line_style)
+#	#		g.SetLineColor(color)
+
+#			#g.SetMarkerColor(kRed - EE_ranges)
+#			#g.SetMarkerColorAlpha(kRed, (1 - (0.1)*(EE_ranges) ) )
+#			#g.SetLineColorAlpha(kRed,(1 - (0.1)*(EE_ranges) ) )
+#		
+
+#			if(EE_range):
+#				#print'i = ',i
+#				#print'EE'
+#				#g.SetMarkerColor(kRed - EE_ranges)
+#				#g.SetMarkerColorAlpha(kRed, (1 - (0.1)*(EE_ranges) ) )
+#				#g.SetLineColorAlpha(kRed,(1 - (0.1)*(EE_ranges) ) )
+#				g.SetMarkerColor(kRed)
+#				g.SetLineColor(kRed)
+#				g.SetLineStyle(static_line_styles[EE_ranges])
+#			
+#				EE_ranges += 1	
+
+#			if(not EE_range):
+#				#print'i = ',i
+#				#print'EB'
+#				#g.SetMarkerColor(kRed - EE_ranges)
+#				#g.SetMarkerColorAlpha(kGreen, (1 - (0.1)*(EB_ranges) ) )
+#				#g.SetLineColorAlpha(kGreen,(1 - (0.1)*(EB_ranges) ) )
+#				g.SetMarkerColor(kGreen)
+#				g.SetLineColor(kGreen)
+#				g.SetLineStyle(static_line_styles[EB_ranges])
+#				EB_ranges += 1			
 
 			# Greater abs(eta), less transparent 
 
@@ -285,39 +308,44 @@ if args.bias_dist_only is False:
 
 		g.SetName("g" + str(i))
 
-		if plot_type == 'BC':
-			label = path.split('_')[-4] + '_' + path.split('_')[-3]
-			l1.AddEntry(g, label, "lp")
+#		if plot_type == 'BC':
+#			label = path.split('_')[-4] + '_' + path.split('_')[-3]
+#			l1.AddEntry(g, label, "lp")
 
 		if plot_type == 'EC':
-			label = path.split('_')[-7] + ' #leq #eta < ' + path.split('_')[-6]
+			WT = path.split('_')[-3] 
+			WY = path.split('_')[-2] 
+			label = WT + ' ' + WY
 			l1.AddEntry(g, label, "lp")
 
-		if plot_type == 'BC':
-			section = path.split('_')[-5] #.split('/')[-1]
-			minimum = path.split('_')[-2] + 'ns'
-			maximum = path.split('.')[-2].split('_')[-1] + 'ns'
-			#print 'section = ',section
+#		if plot_type == 'BC':
+#			section = path.split('_')[-5] #.split('/')[-1]
+#			minimum = path.split('_')[-2] + 'ns'
+#			maximum = path.split('.')[-2].split('_')[-1] + 'ns'
+#			#print 'section = ',section
 
 		if plot_type == 'EC':
-			weights_type = paths[0].split('_')[-3]
-			#print 'weights type:',weights_type
-			if weights_type == 'online': weights_type = 'Online'
-			#print 'weights type = ',weights_type
-			PY = path.split('_')[-2]
+#			weights_type = paths[0].split('_')[-3]
+#			#print 'weights type:',weights_type
+#			if weights_type == 'online': weights_type = 'Online'
+#			#print 'weights type = ',weights_type
+#			PY = path.split('_')[-2]
 
 			minimum = path.split('_')[-5]   
 			maximum = path.split('_')[-4] 
+
+#		label = path.split()[]
+#		l1.AddEntry()
 
 		mg.Add(g, "LP")
 		i += 1
 
 	if plot_type == 'BC': mg.SetTitle(section + " Average Bias vs. Time Shift")
-	if plot_type == 'EC': mg.SetTitle(weights_type + ' Weights, ' + PY + ' Parameters')
+	#if plot_type == 'EC': mg.SetTitle(weights_type + ' Weights, ' + PY + ' Parameters')
+	if plot_type == 'EC': mg.SetTitle('All Weight Type / Year Combinations, ' + str(eta_range_lower) + ' #leq #eta < ' + str(eta_range_upper))
 
 	c0 = TCanvas('c0', 'c0', 800, 600)
 	c0.SetBatch(kTRUE)
-
 
 	mg.Draw("A")
 	mg.GetYaxis().SetRangeUser(ymin,ymax) 
@@ -345,10 +373,13 @@ if args.bias_dist_only is False:
 	print'y range min = ',c0.GetUymin()
 	print'y range max = ',c0.GetUymax()
 
+#eta_range_lower = eta_boundaries[eta_range_lower_index]
+#eta_range_upper = eta_boundaries[eta_range_lower_index + 1]
+
 	#Save_Title = "plots/plot" + section + str(int(histos[0].GetXaxis().GetBinLowEdge(1))) + ".pdf"
 	#Save_Title = "bin/pyplot" + section + "_" + str(int(histos[0].GetXaxis().GetBinLowEdge(1))) + ".pdf"
 	if plot_type == 'BC': Save_Title = "pyplot/pyplot" + section + "_" + minimum + '_' + maximum + ".pdf"
-	if plot_type == 'EC': Save_Title = "pyplot/pyplot_EC_" + weights_type + "_" + PY + "_" + minimum + '_' + maximum + ".pdf"
+	if plot_type == 'EC': Save_Title = "pyplot/pyplot_AllWPC_" + str(eta_range_lower) + '_' + str(eta_range_upper) + '_' +  minimum + '_' + maximum + ".pdf"
 
 	c0.SaveAs(Save_Title)
 
@@ -383,8 +414,8 @@ if args.bias_dist_only is True:
 	#pp = TPad()
 	#cc.Divide(6,3)
 	#cc.Divide(6,3)
-	columns = 4
-	rows = 3
+	columns = 3
+	rows = 1
 	num_plots = columns*rows
 	cc.Divide(columns,rows)
 	#cc.SetBatch(kTRUE)
@@ -437,13 +468,7 @@ if args.bias_dist_only is True:
 
 	i = 1
 
-	#indices = [0,5,11]
-
-	indices = []
-	for k in range(13):	
-		indices.append(k)
-
-	print'ind = ',indices
+	indices = [0,5,11]
 
 	for j in indices:
 
