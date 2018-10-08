@@ -1,5 +1,17 @@
-// Compute Weights
-// 1 August 2018
+/* \file ComputeWeights.cc
+ *
+ *  $Date: 2006/07/19 22:04:42 $
+ *  $Revision: 1.2 $
+ *  \author R. Bruneliere - CERN
+ *
+ * $Date: 2006/07/19 22:04:42 $
+ * $Revision: 1.2 $
+ * Updated by Alex Zabi.
+
+  Modified by Abe Tishelman-Charny
+  November 1, 2017
+
+ */
 
 bool Correlation_Sim = false; // Set to false if don't want to simulate Correlation matrix
 
@@ -36,7 +48,7 @@ ComputeWeights::ComputeWeights(int verbosity,
 	          << " pulse is " << nPulseSamples_ << std::endl; 
 	
 	// nPulseSamples_: # Samples to used to extract amplitude 
-	// nPrePulseSamples_: # Samples used to extract baseline 
+	// nPrePulseSamples_: # Samples used to extract baseline (pedestal?)
 
     if (doFitBaseline_)
         std::cout << "  - the number of samples used to extract baseline in the"
@@ -59,16 +71,18 @@ ComputeWeights::~ComputeWeights()
 // Compute weights from an input pulse shape
 // tmax only used to figure out first sample
 // pulseshape derivative used for dofittime (finding time jitter weights) (see documentation)
+// might want to create matrices by hand, will need inverse of 10x10, need to take transposes, multiply matrices.
 
 bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 			     const std::vector<double>& pulseShapeDerivative,
 			     const double tMax)
 {
 
-  int nSamples = pulseShape.size(); // Number of samples 
-  int nParams = 1 + int(doFitBaseline_) + int(doFitTime_); // 3 Possible parameters 
+  int nSamples = pulseShape.size(); // Number of samples (size of pulseShape vector)
+  int nParams = 1 + int(doFitBaseline_) + int(doFitTime_); // number of parameters. Add one if doing fitbaseline or fitting time.
 
   // Check if nSamples is large enough
+  // '||' = 'or'
   if (nSamples < nPulseSamples_ || (doFitBaseline_ && 
       nSamples < (nPulseSamples_ + nPrePulseSamples_) ) ) 
   	{
@@ -101,8 +115,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 
   // DETERMINATION OF THE FIRST SAMPLE
   
-  int firstSample = int(tMax) - 1; // Start one before tMax. We want two/3 before. 
-  //int firstSample = int(tMax) - 2;
+  int firstSample = int(tMax) - 1;
   if(nPulseSamples_ == 1) firstSample = int(tMax); // if only 1 sample -> the max sample is chosen
 
   if(verbosity_) {
@@ -116,19 +129,15 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 		<< firstSample << " because there are too few samples beyond." 
 		<< std::endl << "firstSample is set to "
 		<< nSamples - nPulseSamples_ << std::endl;
-
-	cout << "nSamples = " << nSamples << endl;
-	cout << "nPulseSamples_ = " << nPulseSamples_ << endl;
-    firstSample = nSamples - nPulseSamples_; // Custom first sample. 
-    //firstSample = 
-	// Change first sample to be independent of tMax? 
+    firstSample = nSamples - nPulseSamples_;
   }//check max samples considered
 
   // pulseshape[] -> coef
+
   // Fill coef matrix
 
   int size = nPulseSamples_;
-  if (doFitBaseline_) size += nPrePulseSamples_; // size = nPulseSamples + nPrePulseSamples 
+  if (doFitBaseline_) size += nPrePulseSamples_;
   CLHEP::HepMatrix coef(size, nParams);
   for (int iRow = 0; iRow < nPulseSamples_; iRow++)
     for (int iColumn = 0; iColumn < nParams; iColumn++) {
@@ -171,8 +180,8 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   if (verbosity_)
   	std::cout<<" coef ="<< coef << std::endl;
 
-//  if (verbosity_)
-//  	std::cout<<" tcoef ="<< tCoef << std::endl;
+  if (verbosity_)
+  	std::cout<<" tcoef ="<< tCoef << std::endl;
 
   // Covariance matrix
   CLHEP::HepSymMatrix  invCov(size, 1); // If no noise correlation, set it to identity (1)
@@ -181,7 +190,7 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   // Want to simulate different expoential fall offs of noise correlation, and plot different average amplitudes
   // This corresponds to expected noise.
 
-  /*if (Correlation_Sim)
+  if (Correlation_Sim)
   	{
 
 	if(verbosity_)
@@ -200,18 +209,17 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
 	    }
  	  }
 
-	}*/
+	}
 
-//  if (verbosity_)
-//  	std::cout<<" invCov = "<< invCov <<std::endl;
 
+  if (verbosity_)
+  	std::cout<<" invCov = "<< invCov <<std::endl;
   // Variance matrix = [tCoef * invCov * coef]^-1
   CLHEP::HepMatrix tCoeffInvCov = tCoef*invCov;
   //std::cout << "about to invert variance" << std::endl;
   CLHEP::HepMatrix variance = tCoeffInvCov*coef;
   int ierr;
-  
-  //variance.invert(ierr);
+
   variance.invert(ierr);
 
   if (ierr) {
@@ -224,8 +232,8 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   //if (verbosity_)
   // 	std::cout<<" tCoeffInvCov ="<< tCoeffInvCov << std::endl;
 
-//  if (verbosity_)
-//  	std::cout<<" variance ="<< variance << std::endl;
+  if (verbosity_)
+  	std::cout<<" variance ="<< variance << std::endl;
 
   // Weights matrix = variance * tCoef * invCov 
   // from eq. A.6 in documentation
@@ -279,11 +287,22 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
       chi2_[iRow][iColumn] = chi2[iRow][iColumn]; 
   }
 
+
+/*
+  for(int i=0;i<10;i++)
+  {
+    for(int j =0 ; j<10; j++)
+    {
+      std::cout<<"b["<<i<<"]["<<j<<"]="<< chi2_[i][j]<<";"<<std::endl;
+    }
+  }
+*/
+
   if(verbosity_)
   	{
-//  	std::cout<<" chi2_=" << chi2_ << std::endl;
-//  	std::cout<<" weights_ "<< weights_ << std::endl;
-//  	std::cout<<" chi2=" << chi2 << std::endl;
+  	std::cout<<" chi2_=" << chi2_ << std::endl;
+  	std::cout<<" weights_ "<< weights_ << std::endl;
+  	std::cout<<" chi2=" << chi2 << std::endl;
   	std::cout << " weights "<< weights << std::endl;
 
 	}
@@ -364,4 +383,3 @@ double ComputeWeights::getChi2Matrix(int iSample1, int iSample2) const
   }
   return chi2_[iSample1][iSample2];
 } // Get chi2
-
