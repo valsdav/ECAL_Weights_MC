@@ -176,7 +176,7 @@ int main(int argc, char** argv){
 		inDOFFile.open(DOF_path); 
 
 		if (!inDOFFile) {
-		  cout << "Unable to open Info file\n";
+		  cout << "Unable to open DOF file\n";
 		  exit(1); // terminate with error
 		}
 
