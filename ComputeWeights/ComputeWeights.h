@@ -15,12 +15,8 @@
 #include <vector>
 
 // Include Class Libraries for High Energy Physics
-//#include "CLHEP/Matrix/Matrix.h"
-//#include "CLHEP/Matrix/SymMatrix.h"
-
-#include "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/Build_CLHEP/install_directory/include/CLHEP/Matrix/Matrix.h"
-#include "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/Build_CLHEP/install_directory/include/CLHEP/Matrix/SymMatrix.h"
-#include "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/Build_CLHEP/install_directory/include/CLHEP/Matrix/defs.h"
+#include "CLHEP/Matrix/Matrix.h"
+#include "CLHEP/Matrix/SymMatrix.h"
 
 class ComputeWeights
 {
@@ -37,42 +33,13 @@ class ComputeWeights
 
   // Member functions to obtain variable values
 
-  // I don't know if this is inefficent, but instance.variable didn't seem to be working, saying variables were private. There may be a much better way to do this.
-
-  int GetVerbosity()
-  	{
-	return verbosity_;
-	}
-
-  bool GetDoFitBaseline()
-	{
-	return doFitBaseline_;
-	}
-  
-  bool GetDoFitTime()
-	{
-	return doFitTime_;
-	}
-
-  int GetnPulseSamples()
-  	{
-	return nPulseSamples_;
-	}
-
-  int GetnPrePulseSamples()
-  	{
-	return nPrePulseSamples_;
-	}
-
-  CLHEP::HepMatrix GetWeights()
-  	{
-	return weights_;
-	}
-
-  CLHEP::HepSymMatrix GetChi2()
-  	{
-	return chi2_;
-	}
+  int getVerbosity() {return verbosity_;}
+  bool getDoFitBaseline() {return doFitBaseline_;}
+  bool getDoFitTime() {return doFitTime_;}
+  int getnPulseSamples() {return nPulseSamples_;}
+  int getnPrePulseSamples() {return nPrePulseSamples_;}
+  CLHEP::HepMatrix GetWeights() {return weights_;}
+  CLHEP::HepSymMatrix GetChi2() {return chi2_;}
 
   // Compute weights from an input pulse shape
   bool compute(const std::vector<double>& pulseShape,
@@ -94,11 +61,11 @@ class ComputeWeights
  // Only accessible through class methods 
  private:
 
-  int verbosity_;        //< Messages verbosity
-  bool doFitBaseline_;   //< Fit baseline or not
-  bool doFitTime_;       //< Fit time jitter or not
-  int nPulseSamples_;    //< Number of samples in the pulse
-  int nPrePulseSamples_; //< Number of samples in the pre-pulse
+  int verbosity_;        // Messages verbosity
+  bool doFitBaseline_;   // Fit baseline or not
+  bool doFitTime_;       // Fit time jitter or not
+  int nPulseSamples_;    // Number of samples in the pulse
+  int nPrePulseSamples_; // Number of samples in the pre-pulse
   CLHEP::HepMatrix weights_; // Type CLHEP, class HepMatrix, instance weights
   CLHEP::HepSymMatrix chi2_;
 

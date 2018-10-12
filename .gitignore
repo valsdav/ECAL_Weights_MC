@@ -1,6 +1,6 @@
-*.DS_store
-*.sublime-project
-*.sublime-workspace
-a.out
-output/*
-
+extra/*
+*.x
+*.txt
+*.__afs*
+*.pdf
+ParamReco/extra/*

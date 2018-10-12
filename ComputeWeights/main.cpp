@@ -1,257 +1,371 @@
-/* 
+// Abraham Tishelman-Charny
+// 5 October 2018
+//
+// The purpose of this program is to start with XTAL params (A, t0, alpha, beta) and DOF (DOF1, DOF2, DOF3, eta).
+// XTAL params ID is matched with DOF ID, and then weights are computed from analytic waveform.
+// Output is a merged data file containing, for each XTAL ID:
+// ID, DOF1, DOF2, DOF3, eta, A, t0, alpha, beta, w1->w10. 
+//
+// The output file can then be read by main.cpp associated functions to produce plots. 
+//
+// Need CLHEP libraries to compile. With my setup on lxplus, this requires the command:
+// g++ -std=c++11 -o run.x main.cpp -L"/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/Tools/clhep/install/lib" -lCLHEP-2.4.1.0 -I"/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/Tools/clhep/install/include" `root-config --ldflags --glibs --cflags`
+//
+// After installing CLHEP, can check necessary compilation flags with: clhep-config --include, clhep-config --libs
 
- The purpose of this file is to run computeweights and produce desired outcomes
- Abe Tishelman-Charny 
- 2/24/18
+using namespace std;
 
-*/
-
-// Current way to compile:
-// g++ -std=c++11 main.cpp ComputeWeights.cpp -lCLHEP
-
-// 2 July 2018: Want to obtain 5 weights to reconstruct amp of 1, signifying ideal weights since this is one way it's currently done with L1 Trigger. 
-// Want to obtain an Amp of 1 from (3,4,5,6,7) where (1,2,3) is when in-time energy deposity in XTAL did not happen yet, use for pedestal. At (4) energy deposity has happened, and (5,6,7,8,9,10) is when scintillation process and shaping creates the pulse.
-// I think I want 5 weights, for (3,4,5,6,7), where 6 is the peak. 
-
-using namespace std; 
-
+// Include root header files
+#include "TString.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TF1.h"
+#include "TCanvas.h"
+#include "TStyle.h"
 #include <vector>
-#include <iostream>
+//#include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <iterator>
 #include <string>
 #include <chrono>
+#include <cmath>
 
-#include "ComputeWeights.h"
+#include "ComputeWeights.cpp"
 
-int main() {
+int main(int argc, char** argv){
 
-  // Choose data file
-  cout << "Enter File Name: ";  
-  std::string file = "Data/template_histograms_ECAL_Run2017_runs_304209_304292.txt" ;
-
-  // template_histograms_ECAL_Run2017_runs_304209_304292.txt has row format:
-  // (1) (ID Number) (sample 1) (sample 2) ... 
-
-  // For manual file input
-
-/*  
-  std::string input;
-  std::cin >> input;
-  cin.ignore(100, '\n');
-  getline(cin, input);
-  if ( !input.empty() ) {
-      std::istringstream istr( input );
-      istr >> file;
-  }
-*/
-
-  // For reading file from command line
-  // ifstream inFile(argv[1]);
-
-  ifstream inFile;
-  inFile.open(file);
-
-  if (!inFile) {
-        cout << "Unable to open file ";
-        exit(1);  // terminate with error
-  }
-
-  int verbosity = 1;
-
-  //cout << "Enter 1 or 0 for verbosity: ";
-  //cin >> verbosity;
-  //cout << "Verbosity = " << verbosity << endl;
-
-  // dummy pulse shape derivative
-  // calculate derivative with some method here precisely.
-
-  // nSamples, nPulseSamples_ 
-
-  vector <double> pulseShapeDerivative;
-  pulseShapeDerivative.push_back(0.0);
-  pulseShapeDerivative.push_back(0.0);
-  pulseShapeDerivative.push_back(0.05);
-  pulseShapeDerivative.push_back(0.1);
-  pulseShapeDerivative.push_back(0.35);
-  pulseShapeDerivative.push_back(0.25);
-  pulseShapeDerivative.push_back(-0.25);
-  pulseShapeDerivative.push_back(-0.25);
-  pulseShapeDerivative.push_back(-0.25);
-  pulseShapeDerivative.push_back(0.0);
-
-  int max = 1; // max number of rows to read
-
-  //cout << "Enter number of pulses to read per file: ";
-  //cin >> max;
-  //cout << "max pulses = "<< max << endl;
-
-  // Create instance of object ComputeWeights
-
-  // (int verbosity, bool doFitBaseline, bool doFitTime, int nPulseSamples, int nPrePulseSamples)
-  // ComputeWeights A(verbosity, true, false, nSamples,3);
-
-  // Want to try 1 prepulse and 4 nSamples 
-
-  double tMax = 5; // time of peak
-  bool fitbaseline = false, fittime = false;
-  int nSamples = 6;
-  int prepulsesamples = 0;
-
-  ComputeWeights A(verbosity, fitbaseline, fittime, nSamples,prepulsesamples);
-
-  cout << "Reading from the file" << endl; 
-
-  std::vector<std::vector<double> > rows;
-  std::string line;
-
-  std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
-  std::chrono::system_clock::duration dtn = tp.time_since_epoch();
-  std::stringstream ss;
-
-  ss << "python/" << "output-" << dtn.count() << ".txt"; // Path of output file with current time since epoch 
-  std::ofstream output_file(ss.str());
-
-  int count = 1;
-  while(std::getline(inFile, line)) {
-    count = count +1;
-    if (count == -1) {
-      // if want whole file checkvariable set to < 0 
-      break;
-    }
-
-    std::stringstream s(line);
-    double d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14;
-
-    // To add custom pedestal for closure tests
-
-    double a = 0, b = 0, c = 0;
-
- /*
-
-  cout << "First pedestal value: ";
-  cin >> a;
-  cout << "First pedestal = "<< a << endl;
-
-  cout << "Second pedestal value: ";
-  cin >> b;
-  cout << "Second pedestal = "<< b << endl;
-
-  cout << "Third pedestal value: ";
-  cin >> c;
-  cout << "Third pedestal = "<< c << endl;
-
- */
-
-
-    // There are 14 numbers on each line, should check this with all data files 
-    if(s >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7 >> d8 >> d9 >> d10 >> d11 >> d12 >> d13 >> d14) {
-      std::vector<double> pulseShape;
-      // Make sure to be setting the ones to zero that we want to
-      // set to zero and taking the data points that we want to be taking 
-      pulseShape.push_back(a);
-      pulseShape.push_back(b);
-      pulseShape.push_back(c);
-      //pulseShape.push_back(d1);
-      //pulseShape.push_back(d2)
-      pulseShape.push_back(d3);
-      pulseShape.push_back(d4);
-      pulseShape.push_back(d5);
-      pulseShape.push_back(d6);
-      pulseShape.push_back(d7);
-      pulseShape.push_back(d8);
-      pulseShape.push_back(d9);
-      //pulseShape.push_back(d10);
-      // pulseShape.push_back(d11);
-      // pulseShape.push_back(d12);
-      // pulseShape.push_back(d13);
-      // pulseShape.push_back(d14);
-
-      A.compute(pulseShape,pulseShapeDerivative,tMax); // Run member function
-
-      if (verbosity > 0) {
-        cout << "verbosity_ = " << A.GetVerbosity() << endl;
-        cout << "doFitBaseline_ = " << A.GetDoFitBaseline() << endl;
-        cout << "doFitTime_ = " << A.GetDoFitTime() << endl;
-        cout << "nPulseSamples_ = " << A.GetnPulseSamples() << endl;
-        cout << "nPrePulseSamples_ = " << A.GetnPrePulseSamples() << endl;
-
-        //cout << "A.getAmpWeight(5) returns: " << A.getAmpWeight(5) << endl;
-        //cout << "A.getChi2Matrix(5,5) returns: " << A.getChi2Matrix(5,5) << endl;
-      }
-
-      // Calculating ampltiude
-
-      int firstsample = tMax - 1;
-
-      double amplitude = 0.0;
-      for ( int i = firstsample; i < firstsample + nSamples; i++) {
-	//cout << "A.getPedWeight(" << i << ") = " << A.getPedWeight(i) << endl;
-	cout << "A.getAmpWeight(" << i - firstsample << ") = " << A.getAmpWeight(i - firstsample) << endl; 
-	cout << "pulseShape[" << i << "] = " << pulseShape[i] << endl; 
-	amplitude += A.getAmpWeight(i - firstsample)*pulseShape[i];
-	}
-      cout << "Ampltiude = " << amplitude << endl; 
-
-      double factor = 0;
-
-      cout << "Choose factor to multiply sample vector by: " ;
-      cin >> factor;
-      cout << "factor = "<< factor << endl;
-
-      amplitude = 0;
-
-      for ( int i = firstsample; i < firstsample + nSamples; i++) {
-	cout << "pulseShape[" << i << "] = " << pulseShape[i] << endl; 
-	pulseShape[i] *= factor;
-	cout << "pulseShape[" << i << "] = " << pulseShape[i] << endl; 
-	}
-
-      for ( int i = firstsample; i < firstsample + nSamples; i++) {
-	cout << "A.getAmpWeight(" << i - firstsample << ") = " << A.getAmpWeight(i - firstsample) << endl; 
-	cout << "pulseShape[" << i << "] = " << pulseShape[i] << endl; 
-	amplitude += A.getAmpWeight(i - firstsample)*pulseShape[i];
-	}
-
-      cout << "Ampltiude after scaling by " << factor << " = " << amplitude << endl;
-
-      // Saving data 
-
-      rows.push_back(pulseShape);
-  
-      output_file << d2 << "\t";
-
-      for(int i = 0; i < pulseShape.size(); i ++){
-
-        output_file << pulseShape[i] << "\t";
+	// Print command line arguments 
+	cout << "argc = " << argc << endl;
+	for (int i = 0; i < argc; i++){
+		cout << "argv[" << i << "] = " << argv[i] << endl;
+		}
 	
-      }
-      for(int i = 0; i < pulseShape.size(); i ++){
-	if (i == (pulseShape.size() - 1)){
-	  output_file << A.getAmpWeight(i);
+	// Grab command line arguments 
+	int verbosity = stoi(argv[1]); // 1 for lots of comments 
+ 	int tMax = stoi(argv[2]); // 5 or 6 ? I think this is zero indexed. First sample can be zero, therefore tMax can be 1. 
+  	bool dofitbaseline = stoi(argv[3]); // 0 or 1
+	bool dofittime = stoi(argv[4]); // 0 or 1
+  	static int nPulseSamples = stoi(argv[5]); // 0 to 10
+  	int prepulsesamples = stoi(argv[6]); // 0 to 10 (need to understand correlation to npulsesamples)
+  	double P = stod(argv[7]); // Simulated pedestal value 
+	string PY = string(argv[8]); // Parameter year. Currently 2017 or 2018. Might change to month/year
+	int max_lines = stoi(argv[9]); // Max lines to read from XTAL Params (A, t0, alpha, beta)
+	string note = string(argv[10]);  // Note to add to output file name 
+
+	// Create output File 
+	stringstream a;
+	a << "bin/XTAL_Info_Full_" << PY << "_PedSub" << to_string(prepulsesamples) << "+" << to_string(nPulseSamples) << "_" << note << ".txt";
+	string output_file = a.str();
+
+	cout << "output file path = " << output_file << endl;
+
+	ofstream weights_file;
+	weights_file.open(output_file);
+	weights_file << "cmsswid\tietaix\tiphiiy\t0iz\teta\tA\tt_0\talpha\tbeta\tw1\tw2\tw3\tw4\tw5\tw6\tw7\tw8\tw9\tw10\n";
+
+	// Open XTAL Params file (A, t0, alpha, beta)
+	stringstream aa;
+	aa << "data/XTAL_Params_" << PY << ".txt";
+	string params_path = aa.str();
+  	ifstream inParamsFile; //, inweightsFile; // Input File stream objects 
+  	inParamsFile.open(params_path); // XTAL_Params: inParamsFile stream
+
+  	if (!inParamsFile) {
+  	  cout << "Unable to open Param file\n";
+  	  exit(1); // terminate with error
+ 	 }
+
+	// Create histogram for studying weights (or anything you want)
+	TH1F *h1 = new TH1F("h1","h1",100,-1,1); // plot weights 
+
+	// Loop Parameters
+	int current_line = 0;
+	bool manual_exit = false;
+	bool skip = false;	
+
+	// Create variables here, update during loop 
+	stringstream cw;
+	cw.precision(17);
+
+	vector<double> pulseShape;
+	vector<double> pulseShapeDerivative;
+
+	pulseShapeDerivative.push_back(0.0);
+	pulseShapeDerivative.push_back(0.0);
+	pulseShapeDerivative.push_back(0.05);
+	pulseShapeDerivative.push_back(0.1);
+	pulseShapeDerivative.push_back(0.35);
+	pulseShapeDerivative.push_back(0.25);
+	pulseShapeDerivative.push_back(-0.25);
+	pulseShapeDerivative.push_back(-0.25);
+	pulseShapeDerivative.push_back(-0.25);
+	pulseShapeDerivative.push_back(0.0);
+
+	for (int i = 0; i < 10; i++){
+		pulseShape.push_back(0.0);
+
 	}
-	else{
-        output_file << A.getAmpWeight(i) << "\t";
-	}
-      }
 
-      output_file << "\n";
+	double A, t_0, alpha, beta, ID, DOF1, DOF2, DOF3, eta;
+	double ts = 0.0; // Simulated Time Shift
+	bool normalize_A = true;
+	bool normalize_t0 = false;
 
-      if (count%1000 ==0)
-        cout << " Line = " << count << endl;
+	TString *name = new TString("function_alphabeta");
+	TString *formula = new TString("( (1 + (x-[1]) / ([2]*[3]) ) > 0.0)*([0] * pow( 1 + (x-[1]) / ([2]*[3]) , [2] ) * exp ( - (x-[1]) / [3])) + ((1 + (x-[1]) / ([2]*[3]) <= 0.0 ))*(0)");
 
-      if (count > max){
-	cout << "All lines read." << endl;
-        break;
-	}
+	// Sampling start, stop, interval
+	double xmin = 0.; 
+	double xmax = 250.; 
+	double dt = 25; 
 
-    } // Looking at Row
+	TF1 *function_alphabeta = new TF1(*name,*formula,xmin,xmax);
+	int firstsample = 2;
 
-      
-  } // While still rows left
-    
-  inFile.close();
+	double A_hat = 0.0;
+	double weights_sum = 0.0;
+	double Ped_val = 0.0;
 
-}
+	int samp_number = 0;
+
+	int count_ = 0;
+	int DOFl = 0;
+	int extra_lines = 0;
+	bool five_params;
+	
+	bool leave = false;
+	int DOF_skip_count = 0; 
+	double DOF_ID = 0;
+
+	string line; // string to hold XTAL params line information 
+
+	while((getline(inParamsFile, line)) && (!manual_exit) ) { // get line of XTAL_Params.txt loop
+	// why is getline executed just from being in the while condition? 
+
+	   skip = false;
+
+	   if (current_line == max_lines){
+		cout << "Maximum desired lines reached.\n"; 
+		cout << "Exiting.\n";
+
+		break;
+		}
+
+	   stringstream s(line); // convert 'line' to stream 's'
+
+	   double d1, d2, d3, d4, d5; // d1 = ID, d2 = A, d3 = t_0, d4 = alpha, d5 = beta   
+
+	   if((s >> d1 >> d2 >> d3 >> d4 >> d5)){ // Do if on XTAL_params line with 5 doubles	  
+
+		// If params are zero, skip param line. 
+
+		if (d2 == 0){
+			cout << "Param file Amplitude is zero\n";
+			leave = true;
+		}
+	
+		else leave = false;
+
+		stringstream ssDOF;
+		ssDOF << "data/DOF.txt";
+		string DOF_path = ssDOF.str();
+
+		ifstream inDOFFile; 
+		inDOFFile.open(DOF_path); 
+
+		if (!inDOFFile) {
+		  cout << "Unable to open Info file\n";
+		  exit(1); // terminate with error
+		}
+
+		string DOF_line; 
+
+		
+		DOF_skip_count = 0;
+
+		//DOF_skip_count += good_line_count;
+		DOF_skip_count += extra_lines; // extra_lines updated every line 
+		//DOF_skip_count += i;
+		DOF_skip_count += DOFl;
+
+		//cout << "skipping " << DOF_skip_count << "lines\n";
+
+		while(DOF_skip_count !=0){
+		  //cout << "skipping " << DOF_skip_count << "lines\n";
+		  inDOFFile.ignore(1000,'\n'); // count is number of rows read before this one
+		  DOF_skip_count -= 1;
+		}
+
+		while((getline(inDOFFile, DOF_line)) && (leave == false)) { // read EB/EE_DOF line // DOF while 
+		
+		//cout << "In DOF while\n";
+
+		five_params = false;
+
+                stringstream ss(DOF_line);
+
+		double d1_, d2_, d3_, d4_, d5_;
+	
+			if(ss >> d1_ >> d2_ >> d3_ >> d4_ >> d5_){ // If DOF line contains 5 doubles // DOF 5 
+
+				//cout << "DOF line has 5\n";
+
+				DOF_ID = d1_;
+
+				five_params = true; 
+	
+				cout.precision(17);
+
+				if ((d1_ == d1)){ // All ID's match
+
+
+					ID = d1_, DOF1 = d2_, DOF2 = d3_, DOF3 = d4_, eta = d5_;
+					A = d2;
+					t_0 = d3;
+					alpha = d4;
+					beta = d5;
+					
+					if (string(PY) == "2017"){
+						// A, t0, alpha, beta are zero.
+						if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ) {
+							cout << "Manual Skip\n"; 	
+							skip = true;
+
+							}
+					}
+		
+					// 2018 params and weights 
+					if (string(PY) == "2018"){
+						// A, t0, alpha, beta are zero.
+						if ( (d1 == 838864037) || (d1 == 838869123) || (d1 == 838874865) || (d1 == 838891641) || (d1 == 838958295) || (d1 == 838966532) ){ 
+							cout << "Manual Skip\n"; 
+							skip = true;
+
+							}
+					}
+
+					// Compute Weights
+
+					//--------------------------------------------------------------------------------------------------------------------------
+			
+					// As long as ID has computable weights for PY, compute weights 
+					if (!skip){
+
+
+
+						cw.precision(17);
+						cw << ID << "\t";
+						cw.precision(9);					
+
+						cw << DOF1 << "\t" << DOF2 << "\t" << DOF3 << "\t" << eta << "\t" << A << "\t" << t_0 << "\t" << alpha << "\t" << beta << "\t";
+						cw.precision(17);
+
+						if (normalize_t0) t_0 = 125;
+						if (normalize_A) A = 1;
+
+						function_alphabeta->SetParameter (0, A);    
+						function_alphabeta->SetParameter (1, t_0 + ts); // time shift     
+						function_alphabeta->SetParameter (2, alpha);  
+						function_alphabeta->SetParameter (3, beta);  
+
+						ComputeWeights A_(verbosity, dofitbaseline, dofittime, nPulseSamples, prepulsesamples);
+
+						// pulse is moved to right by time_shift, so move sampling to right by time_shift.
+						count_ = 0;
+
+						// Want samples from non-timeshifted wave to see how time shift affects recon amp 
+						// time_shift moves pulse to right by N, so move sampling beginning to right by N 
+
+						for(double i = xmin + ts; i < xmax + ts; i += dt){
+						  //cout << "in pulse shape value " << i << endl;
+					
+						  //if ( i <= (t_0 + ts - alpha*beta) ) pulseShape.push_back(0 + P) ; // if waveform undefined, set value to zero + pedestal 
+						  if ( i <= (t_0 + ts - alpha*beta) ) pulseShape.at(count_) = (0 + P) ;	
+						  //else pulseShape.push_back( ( function_alphabeta->Eval(i) + P ) / (A) );/// (A + P) ); // divide by A to get weights for S*W = A 
+						  //else pulseShape.push_back( ( function_alphabeta->Eval(i) + P ) );/// (A + P) ); // divide by A to get weights for S*W = A 
+						  else pulseShape[count_] = ( ( function_alphabeta->Eval(i) + P ) );
+						  // if (d1 >= 838861947) cout << "pulseShape[" << count_ << "] = " << pulseShape[count_] << endl;
+						  //cout << "pulseShape[" << count_ << "] = " << pulseShape.at(count_) << endl;
+						  count_ += 1;
+						}
+
+						A_.compute(pulseShape,pulseShapeDerivative,tMax); // Run member function
+
+						//cout << "Right after compute\n";
+
+						firstsample = 2;
+						A_hat = 0.0;
+						weights_sum = 0.0;
+						Ped_val = 0.0;
+
+
+						for (int i = 0; i < 2; i++){ 
+							cw << "0\t";
+						}
+
+						for ( int i = firstsample; i < firstsample + nPulseSamples; i++) {
+
+							cw << A_.getAmpWeight(i - firstsample) << "\t";
+							h1->Fill(A_.getAmpWeight(i - firstsample)); // fill histogram 
+							weights_sum += A_.getAmpWeight(i - firstsample);
+
+
+						  }
+
+						//cout << "cw = " << cw.str() << endl;
+
+						for (int i = 0; i < 3; i++){
+							cw << "0\t";
+						}
+	
+						cw << "\n";
+						weights_file << cw.str();
+						cw.str("");				
+
+					} // if(!skip)
+
+					//--------------------------------------------------------------------------------------------------------------------------
+					// weights computed 
+
+					leave = true; // Using double equals sign here caused frustration for a bit  
+
+
+					DOFl += 1; // line used, so skip on next read 
+
+				} // All ID's match
+
+				else{ extra_lines += 1;} // ID's don't match 
+
+			} // If DOF line contains 5 doubles 
+
+			else{ five_params = false;} // doesn't contain 5 doubles
+
+			if (!five_params){	
+
+				extra_lines += 1; 
+
+
+				if (d1 == d1_){
+					leave = true; // if ID's match on less than 5 param line in DOF, need to skip to next param line. 
+				}
+
+
+			} // if (!five_params) 
+
+
+			} //readEBEEDOFLINE
+
+		} // XTAL_params line with 5 doubles 
+
+	current_line += 1;
+	//cout << "current_line = " << current_line << endl;
+	if (current_line%5000 == 0) cout << "current_line = " << current_line << endl;
+	} // get line of XTAL_Params.txt 
+	
+	TCanvas *c1 = new TCanvas("c1","c1",800,600);
+	h1->Draw();
+	c1->SaveAs("plot.pdf");
+
+} // End of main function 

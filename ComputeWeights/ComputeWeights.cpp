@@ -383,4 +383,3 @@ double ComputeWeights::getChi2Matrix(int iSample1, int iSample2) const
   }
   return chi2_[iSample1][iSample2];
 } // Get chi2
-
