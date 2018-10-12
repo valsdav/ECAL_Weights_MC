@@ -347,8 +347,8 @@ if args.bias_dist_only is False:
 
 	#Save_Title = "plots/plot" + section + str(int(histos[0].GetXaxis().GetBinLowEdge(1))) + ".pdf"
 	#Save_Title = "bin/pyplot" + section + "_" + str(int(histos[0].GetXaxis().GetBinLowEdge(1))) + ".pdf"
-	if plot_type == 'BC': Save_Title = "pyplot/pyplot" + section + "_" + minimum + '_' + maximum + ".pdf"
-	if plot_type == 'EC': Save_Title = "pyplot/pyplot_EC_" + weights_type + "_" + PY + "_" + minimum + '_' + maximum + ".pdf"
+	if plot_type == 'BC': Save_Title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/pyplot" + section + "_" + minimum + '_' + maximum + ".pdf"
+	if plot_type == 'EC': Save_Title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/pyplot_EC_" + weights_type + "_" + PY + "_" + minimum + '_' + maximum + ".pdf"
 
 	c0.SaveAs(Save_Title)
 
@@ -477,6 +477,6 @@ if args.bias_dist_only is True:
 	maxeta = temp_list[0].split('/')[-1].split('_')[-7]
 	ts = temp_list[0].split('/')[-1].split('_')[-4]
 
-	Save_Title = "pyplot/pyplot_Bias_Dist_" + weights_type + "_" + PY + "_" + mineta + '_' + maxeta + '_' + ts + ".pdf"
+	Save_Title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/pyplot_Bias_Dist_" + weights_type + "_" + PY + "_" + mineta + '_' + maxeta + '_' + ts + ".pdf"
 
 	cc.SaveAs(Save_Title)
