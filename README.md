@@ -44,5 +44,4 @@ In this directory, the main function main.cpp is compiled in the same way as the
 
 ## Plot
 
-In order to combine output root files from ParamReco, for example all eta ranges into a single plot, you can use plot.py. An example of how to run this is with the command ```python plot.py -p ../ParamReco/bin,-3_3,BR,-0.22,0.16
-```. This will search the directory bin for data files with the time shift range -3ns to 3ns, and plot them on the same axis with the legend in the bottom right with a y range of -0.22 to 0.16. 
+In order to combine output root files from ParamReco, for example all eta ranges into a single plot, you can use plot.py. An example of how to run this is with the command ```python plot.py -p ../ParamReco/bin,-3_3,BR,-0.22,0.16```. This will search the directory bin for data files with the time shift range -3ns to 3ns, and plot them on the same axis with the legend in the bottom right with a y range of -0.22 to 0.16. 

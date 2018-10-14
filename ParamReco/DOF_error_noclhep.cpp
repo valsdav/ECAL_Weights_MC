@@ -14,48 +14,47 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	// Tuple parameters
 	bool full = false; // If this tuple is running, the histogram is not full. 
 	bool side_filled = false;
-	int DOF1, DOF2; // probably will change to DOF1, DOF2
+	int DOF1, DOF2;
 	double error;
 	int row = sts_row;
 
   	// Open Files
 
-	// XTAL_Params: (rawid, A, t0, alpha, beta) values
-	// weights.txt: (rawid, desired number of weights)
+	// XTAL_Info_Full_PY_WT.txt
 
 	stringstream params_ss;
-	params_ss << "data/XTAL_Params_" << PY << ".txt";	
+	params_ss << "data/XTAL_Info_Full_" << PY << "_" << weights_type <<  ".txt";	
 	string params_path = params_ss.str();
 
-  	ifstream inFile; // Input File stream class object  
-  	inFile.open(params_ss.str()); // apply XTAL_Params to in file stream
+  	ifstream inInfoFile; // Input File stream class object  
+  	inInfoFile.open(params_ss.str()); // apply XTAL_Params to in file stream
 
-	stringstream weights_ss;
-	weights_ss << "data/" << weights_type << "_" << PY << ".txt";	
-	string weights_path = weights_ss.str();
+//	stringstream weights_ss;
+//	weights_ss << "data/" << weights_type << "_" << PY << ".txt";	
+//	string weights_path = weights_ss.str();
 
-        ifstream inweightsFile;
-        inweightsFile.open(weights_path); // precomputed weights 
+//        ifstream inweightsFile;
+//        inweightsFile.open(weights_path); // precomputed weights 
 
-  	if (!inFile) {
+  	if (!inInfoFile) {
   	  cout << "Unable to open Param file\n";
   	  exit(1); // terminate with error
  	 }
 
-  	if (!inweightsFile) {
-  	  cout << "Unable to open weights file\n";
-  	  exit(1); // terminate with error
- 	 }
+//  	if (!inweightsFile) {
+//  	  cout << "Unable to open weights file\n";
+//  	  exit(1); // terminate with error
+// 	 }
 
-	string line, weights_line; 	  
+	string InfoLine; 	  
 
 	// Skip to current row in main loop
 	
 	int initial_skip = row;
 
 	for(initial_skip; initial_skip > 0; initial_skip --){ 
-		inFile.ignore(1000,'\n');
-		inweightsFile.ignore(1000,'\n');
+		inInfoFile.ignore(1000,'\n');
+		//inweightsFile.ignore(1000,'\n');
 		}
 
 	if ((plot_EB == false) && ( (plot_EE_minus) || (plot_EE_plus) )){ // if EE only
@@ -64,8 +63,8 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	  // skip to first row of EE params and weights, aka skip 60494 rows.
 	 
 	    while(EE_Skip !=0){ // Skip 1000 characters or until new line 
-	      inFile.ignore(1000,'\n'); // count is number of rows read before this one
-	      inweightsFile.ignore(1000,'\n');
+	      inInfoFile.ignore(1000,'\n'); // count is number of rows read before this one
+	      //inweightsFile.ignore(1000,'\n');
 	      EE_Skip -= 1;
 	    }
 
@@ -80,41 +79,25 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	  
 	        while(EE_plus_Skip !=0){
 		
-		  inFile.ignore(1000,'\n');
-	          inweightsFile.ignore(1000,'\n');
+		  inInfoFile.ignore(1000,'\n');
+	          //inweightsFile.ignore(1000,'\n');
 		  EE_plus_Skip -= 1;
 		}		
 
 	  }
 
-	// Read line of (rawid, A, t0, alpha, beta) values
-
-	// Variables that reset before going through XTAL_Params.txt
-	
-	//cout << "Right before checking XTAL_Params and Weights lines.\n";
-	//cout << "bool(getline(inFile, line)) = " << bool(getline(inFile, line)) << endl;
-	//cout << "bool(getline(inweightsFile, weights_line)) = " << bool(getline(inweightsFile, weights_line)) << endl;
-
-
-	//while((getline(inFile, line))) { // XTAL_Params.txt loop
-	//while((getline(inFile, line)) && (getline(inweightsFile, weights_line))) { // get line of XTAL_Params.txt and weights, loop
-
 	  // Check that there are still lines to read 
-	  if (!(getline(inFile, line)) || !(getline(inweightsFile, weights_line))){
+	  if (!(getline(inInfoFile, InfoLine))){
 
-		cout << "No lines to read in XTAL_Params.txt or weights.txt.\n";
+		//cout << "No lines to read in XTAL_Params.txt or weights.txt.\n";
+		cout << "No lines to read in XTAL Info file.\n";
 		skip_this_line = true;
 		full = true;
 		return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
 
 	    }
 
-	   getline(inFile, line);
-	   getline(inweightsFile, weights_line);
-
-	   // Variables that reset each line 
-	   //int ieta = 0, iphi = 0; // EB DOF
-	   //int ix = 0, iy = 0; // EE DOF
+	   getline(inInfoFile, InfoLine);
 
 	   // Check row
 	   if (row == max_rows){
@@ -129,30 +112,30 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	      cout << "Reading line " << row << endl;
 	      }
 
-	   stringstream s(line); // stringstream 's' operates on string 'line'
+	   stringstream s(InfoLine); // stringstream 's' operates on string 'InfoLine'
 	   double d1, d2, d3, d4, d5; // d1 = ID, d2 = A, d3 = t_0, d4 = alpha, d5 = beta   
 
 	   if(s >> d1 >> d2 >> d3 >> d4 >> d5){ // XTAL_params row has numbers    
 
-		// 2018 Params
-		if (string(PY) == "2018"){
-			if ( (d1 == 838864037) || (d1 == 838869123) || (d1 == 838874865) || (d1 == 838891641) || (d1 == 838958295) || (d1 == 838966532) ){ 
-			skip_this_line = true;
-			row += 1;
-			cout << "Line skipped by hand.\n";
-			return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full);
-			}
-		}
-		// 2017 Params
-		if (string(PY) == "2017"){
-			if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ){
-				skip_this_line = true;
-				row += 1;
-				cout << "Line skipped by hand.\n";
-				return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
+//		// 2018 Params
+//		if (string(PY) == "2018"){
+//			if ( (d1 == 838864037) || (d1 == 838869123) || (d1 == 838874865) || (d1 == 838891641) || (d1 == 838958295) || (d1 == 838966532) ){ 
+//			skip_this_line = true;
+//			row += 1;
+//			cout << "Line skipped by hand.\n";
+//			return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full);
+//			}
+//		}
+//		// 2017 Params
+//		if (string(PY) == "2017"){
+//			if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ){
+//				skip_this_line = true;
+//				row += 1;
+//				cout << "Line skipped by hand.\n";
+//				return make_tuple(skip_this_line, EB_count, EE_count, extra_lines, skip_count, DOF1, DOF2, error, row, full); 
 
-			  } // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful. 
-		}  
+//			  } // These cmsswid's yield nan (not a number) weights. For now skipping them, but should investigate why nan weights are obtained from these waveforms. This could be insightful. 
+//		}  
 		
 		double weights[10] = {0.}; // reset weights for current line  
 		string Parameters;
@@ -161,7 +144,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 		// EB Line
 		if ((d1 >= 838861313) && (d1 <= 838970216) && (plot_EB)){
 			EB_count += 1;
-			Parameters = "data/EB_DOF.txt";
+			//Parameters = "data/DOF.txt";
 			int skip_count = EB_count;
 			//cout << "skip_count = " << skip_count << "\n";
 			if (!ideal_weights){ 
@@ -174,7 +157,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 			//cout << "On EE\n";
 			//if (EB_Only) break;
 			EE_count += 1;
-			Parameters = "data/EE_DOF.txt";
+			//Parameters = "data/DOF.txt";
 			int skip_count = EE_count;
 			if (!ideal_weights){
 				for (int i = 0; i < 10; i++) weights[i] = EE_w[i];
@@ -183,8 +166,8 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 	
 		//cout << "Parameters = " << Parameters << "\n";
 		//cout << "plot_EE = " << plot_EE << "\n";
-		ifstream inparamFile; // Input File stream class object  
-		inparamFile.open(Parameters); // open from beginning each time and skip desired number of lines 
+		//ifstream inparamFile; // Input File stream class object  
+		//inparamFile.open(Parameters); // open from beginning each time and skip desired number of lines 
 		// There may be a way to just open once and not need to skip lines every time. This may be much more efficient.
 		
 		if ((!inparamFile) && (!plot_EE_minus) && (!plot_EE_plus) ){ 
@@ -224,7 +207,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 
 		// Match ID's between Params and Info files, then
 		// get EB, EE DOF for given ID.
-		while( (getline(inparamFile, param_line)) && (leave == false)) { // read EB/EE_DOF line
+		//while( (getline(inparamFile, param_line)) && (leave == false)) { // read EB/EE_DOF line //
 	
 		//while( (getline(inparamFile, param_line)) && (getline(inweightsFile, weights_line)) &&  (leave == false)) { // read EB/EE_DOF line
 			//cout << "Extra_lines = " << extra_lines << "\n";
@@ -238,7 +221,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 			// w0 = CMSSWID, w1 = first weight, w2 = ... (not necessarily starting at 0ns)
 
                         stringstream ss(param_line);
-                        stringstream ww(weights_line);
+                        //stringstream ww(weights_line);
 
 			//if (debug condition){
 			  //cout << "row = " << row << endl;
@@ -338,7 +321,7 @@ tuple<bool, int, int, int, int, int, int, double, int, bool> DOF_error(bool plot
 
 			} // If EB/EE_DOF.txt and weights.txt line contains doubles (if not, may have nan)
 
-		} // read EB/EE_DOF line
+		//} // read EB/EE_DOF line //
 
 	  double A = d2, t_0 = d3, alpha = d4, beta = d5; // Double_t ?  
 
