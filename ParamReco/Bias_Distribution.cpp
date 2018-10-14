@@ -2,6 +2,7 @@
 // 14 October 2018
 // Bias Distribution
 
+#include "BD_Plotter.cpp"
 #include "recon_amp_noclhep.cpp"
 
 int DOF_bias(TString single_ts_title_string, bool plot_EB, bool plot_EE_minus, bool plot_EE_plus, double EB_w[], double EE_w[], int max_rows, double ts, bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY)
@@ -140,7 +141,7 @@ int DOF_bias(TString single_ts_title_string, bool plot_EB, bool plot_EE_minus, b
 
 				// Not up to EE lines yet
 				if ((ID >= 838861313) && (ID <= 838970216)){
-					cout << "Not up to EE- yet\n"
+					cout << "Not up to EE- yet\n";
 					plot_line = false;
 				}
 
@@ -154,7 +155,7 @@ int DOF_bias(TString single_ts_title_string, bool plot_EB, bool plot_EE_minus, b
 				// Finished reading EE- lines
 				if ( (ID >= 872415401) && (DOF3 == 1) ){
 					cout << "Finished reading EE- lines\n";
-					BD_Plotter(DOF_h, bias_dist);
+					BD_Plotter(DOF_h, bias_dist, plot_EB, plot_EE_minus, plot_EE_plus);
 					return 0;
 				}
 
@@ -165,7 +166,7 @@ int DOF_bias(TString single_ts_title_string, bool plot_EB, bool plot_EE_minus, b
 
 				// Not up to EE+ lines yet
 				if ((ID >= 838861313) && (ID <= 838970216)){
-					cout << "Not up to EE- yet\n"
+					cout << "Not up to EE- yet\n";
 					plot_line = false;
 				}
 
@@ -248,12 +249,12 @@ int DOF_bias(TString single_ts_title_string, bool plot_EB, bool plot_EE_minus, b
 				bias_dist->Fill(bias);
 
 				// See if things are going well 
-			    	if ((row%1000) == 0){
-				    cout << "row " << row << endl;
-				    for (int ii = 0; ii < 10; ii++) { cout << "weights[" << ii << "] = " << weights[ii] << endl;}
-				    cout << "ratio = " << ratio << endl;
-				    cout << "bias = " << bias << endl;
-				}
+//			    	if ((row%1000) == 0){
+//				    cout << "row " << row << endl;
+//				    for (int ii = 0; ii < 10; ii++) { cout << "weights[" << ii << "] = " << weights[ii] << endl;}
+//				    cout << "ratio = " << ratio << endl;
+//				    cout << "bias = " << bias << endl;
+//				}
 
 			} // if line should be plotted 
 
@@ -262,7 +263,7 @@ int DOF_bias(TString single_ts_title_string, bool plot_EB, bool plot_EE_minus, b
 		// Check row
 		if (row == max_rows){
 			cout << "Maximum desired rows reached." << endl;
-			BD_Plotter(DOF_h, bias_dist);
+			BD_Plotter(DOF_h, bias_dist, plot_EB, plot_EE_minus, plot_EE_plus);
 			return 0;
 		}
 
@@ -274,9 +275,9 @@ int DOF_bias(TString single_ts_title_string, bool plot_EB, bool plot_EE_minus, b
 
 	} // While there are XTAL Info Full lines left to read 
 
-	cout << "Reached end of Bias_Distribution.cpp\n"
+	cout << "Reached end of Bias_Distribution.cpp\n";
 	
-	BD_Plotter(DOF_h, bias_dist);
+	BD_Plotter(DOF_h, bias_dist, plot_EB, plot_EE_minus, plot_EE_plus);
 	return 0;
 
 }

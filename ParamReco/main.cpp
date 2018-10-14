@@ -138,7 +138,7 @@ int main(int argc, char** argv)
 			plot_EE_plus = true;
 			}
 		else {
-			cout << "Since you selected BD plot,\n"
+			cout << "Since you selected BD plot,\n";
 			cout << "please set 3rd argument after executable to either 'EB', 'EE-', or 'EE+'\n";
 			cout << "Terminating\n";
 
@@ -258,7 +258,7 @@ int main(int argc, char** argv)
   	TString single_ts_title_string = single_ts_title.str(); 
 	//TH1F *tsr = new TH1F("tsr",ts_range_title_string,((ts_max - ts_min) / (dts)) + 1,ts_min,ts_max + dts); // ts range
 	TH1F *tsr = new TH1F("tsr",ts_range_title_string,tsr_bins,ts_min,ts_max + dts); // ts range
-	TH2F *sts = new TH2F("sts",single_ts_title_string,(DOF1max - DOF1min),DOF1min,DOF1max,(DOF2max - DOF2min),DOF2min,DOF2max); // single ts
+	//TH2F *sts = new TH2F("sts",single_ts_title_string,(DOF1max - DOF1min),DOF1min,DOF1max,(DOF2max - DOF2min),DOF2min,DOF2max); // single ts
 
 	TH1F *values = new TH1F("values","values",1000,-0.3,0.3);
 
@@ -347,7 +347,7 @@ int main(int argc, char** argv)
 	if (plot_BD){ // plot_BD
 
 		// Call function 
-		DOF_bias(single_ts_title_string, plot_EB, plot_EE_minus, plot_EE_plus, EB_w[], EE_w[], max_rows, ts, normalized_A, normalized_t0, ideal_weights, weights_type, PY);
+		DOF_bias(single_ts_title_string, plot_EB, plot_EE_minus, plot_EE_plus, EB_w, EE_w, max_rows, ts, normalized_A, normalized_t0, ideal_weights, weights_type, PY);
 
 	} // plot_BD
 
