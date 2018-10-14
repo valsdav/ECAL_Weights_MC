@@ -6,7 +6,6 @@
 
 tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_w[], bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY, double eta_min, double eta_max, int merged_skip, bool note_exists, string note) 
 {
-
 	cout << "Time Shift = " << ts << "ns\n";
 
 	// Can choose to save distribution of bias values for given eta range 

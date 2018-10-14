@@ -4,7 +4,7 @@
 // The purpose of this main function is to handle reconstructed amplitude 
 // for EB and EE with desired time shift and weights.
 
-// Current compile command:
+// Lxplus Compile command:
 // g++ -std=c++11 -o run.x main.cpp `root-config --ldflags --glibs --cflags`
 
 using namespace std;
@@ -37,20 +37,21 @@ using namespace std;
 #include "Bias_Distribution.cpp" 
 #include "Eta_Curves.cpp"
 
+// Main function
 int main(int argc, char** argv)
 {
 	time_t initial_time = time(0); // initial time 
 
-	// Parameters
+	// Command Line Arguments
 	cout << "argc = " << argc << endl;
 	for (int i = 0; i < argc; i++){
 		cout << "argv[" << i << "] = " << argv[i] << endl;
 		}
 
 	// argv[0] = ./run.x
-	// argv[1] = (BC) or (BD) or (EC)
+	// argv[1] = (EC) or (BD)
 	// argv[2] = (ts_min,ts_max,dts) or (ts)
-	// argv[3] = (EB) or (EE+) or (EE-)  ------- leave this argument empty if plotting EC.
+	// argv[3] = if (BD){ (EB) or (EE+) or (EE-) }  *** if (EC) {leave empty} ------- leave this argument empty if plotting EC.
 	// argv[4] = (online) or (PedSubM+N) // Weights Type
 	// argv[5] = (2017) or (2018) // parameter year 
 	// argv[6] = max_rows
@@ -59,16 +60,24 @@ int main(int argc, char** argv)
 	string note = "";
 
 	// Study Parameters
- 	int max_rows; 
-	double ts_min, ts_max, dts; 
-	double ts; // +/- time shift moves waveform +/- ns to right/left
 
+ 	int max_rows = 0; 
+	double ts_min = 0, ts_max = 0, dts = 0; 
+	double ts = 0; // +/- time shift moves waveform +/- ns to right/left
+
+	bool plot_EC = false; // Plot Eta Curves
 	bool plot_BD = false; // Plot Bias Distribution
-	bool plot_EC = false; // Plot Eta Curve. This is BC plot for each eta range 
-	// Plot EB, EE-, EE+ or by eta
+
+	// If Bias Distribution, choose ECAL Section 
 	bool plot_EB = false; 
 	bool plot_EE_minus = false; 
 	bool plot_EE_plus = false;
+
+	// Weights
+	
+	bool ideal_weights = false; // True: Compute ideal weights during runtime or read from text file. False: Use single sets defined below 
+	bool online_weights = false;
+	string weights_type = "PedSub0+5"; // Default weight type
 
 	// Read plot type 
 
@@ -93,6 +102,7 @@ int main(int argc, char** argv)
 	if(plot_EC){
 
 	  	// extract ts_min, ts_max, dts
+
 		string BC_tsr = string(argv[2]);
 		vector<double> BC_tsr_vec;
 		stringstream tsr_ss(BC_tsr);
@@ -128,20 +138,14 @@ int main(int argc, char** argv)
 			plot_EE_plus = true;
 			}
 		else {
-			cout << "Please set 3rd argument to either 'EB', 'EE-', or 'EE+'\n";
+			cout << "Since you selected BD plot,\n"
+			cout << "please set 3rd argument after executable to either 'EB', 'EE-', or 'EE+'\n";
 			cout << "Terminating\n";
 
 			exit(0);
 			}
 
 	}
-
-
-	// Weights
-	
-	bool ideal_weights = false; // True: Compute ideal weights during runtime or read from text file. False: Use single sets defined below 
-	bool online_weights = false;
-	string weights_type = "PedSub0+5"; // Default type of Weights used 
 
 	// Skip one argument if plotting eta curve, since this doesn't require 3rd argument of EB/EB+-
 	if ( ( string(argv[4 - (plot_EC)]) == "online" ) || ( string(argv[4 - (plot_EC)]) == "Online" ) ){
@@ -166,29 +170,28 @@ int main(int argc, char** argv)
 	string PY = string(argv[5 - (plot_EC)]); // Parameter year
 	max_rows = stoi(string(argv[6 - (plot_EC)]));
 
+	// For now these are not command line arguments
 	bool normalized_A = false;
   	bool normalized_t0 = false; 
 
 	if (ideal_weights) normalized_A = false;
 	if (!ideal_weights) normalized_A = true;
 
-	int tsr_bins = ( (ts_max - ts_min) / (dts) ) + 1 ;
-	cout << "tsr_bins = " << tsr_bins << endl;
-	int DOF1min, DOF1max, DOF2min, DOF2max;
+	int tsr_bins = 0;
+
+	if (plot_EC){
+		int tsr_bins = ( (ts_max - ts_min) / (dts) ) + 1 ;
+		cout << "tsr_bins = " << tsr_bins << endl;
+	}
 
 	// Weights
        
 	//double online[10] = {-0.3812788, -0.3812788, -0.3812788, 0, 0.235699, 0.4228363, 0.3298652, 0.1575187, -0.002082776, 0}; // old, pre-multifit weights 
-	double online_EB[10] = {0, 0, -0.5625, -0.546875, 0.25, 0.484375, 0.375, 0, 0, 0}; 
-	double online_EE[10] = {0, 0, -0.65625, -0.515625, 0.25, 0.515625, 0.40625, 0, 0, 0};
+	double online_EB[10] = {0, 0, -0.5625, -0.546875, 0.25, 0.484375, 0.375, 0, 0, 0}; // Current EB TPG weights
+	double online_EE[10] = {0, 0, -0.65625, -0.515625, 0.25, 0.515625, 0.40625, 0, 0, 0}; // Current EE TPG weights
  
 	// Initialize
 	double EB_w[10] = {0.}, EE_w[10] = {0.};
-
-	//for (int i = 0; i < 10; i++){
-	//	EB_w[i] = 0.0;
-	//	EE_w[i] = 0.0;
-	//}
 
 	if (online_weights){
 		for (int i = 0; i < 10; i++){
@@ -197,17 +200,7 @@ int main(int argc, char** argv)
 
 		}
 
-        }        
-
-	/*if (presentation_weights){
-		for (int i = 0; i < 10; i++){
-			EB_w[i] = presentationEB[i];
-			EE_w[i] = presentationEE[i];
-			
-		}
-	}*/
-
-	// Make histogram(s)
+	}        
 
 	// Titles
 	ostringstream ts_range_title, single_ts_title;
@@ -239,8 +232,8 @@ int main(int argc, char** argv)
 	}
 
 	if (ideal_weights) {
-		ts_range_title << "Ideal Weights";
-		single_ts_title << "Ideal Weights";
+		ts_range_title << weights_type;
+		single_ts_title << weights_type;
 		}
 
 	if (!ideal_weights) {
@@ -351,113 +344,11 @@ int main(int argc, char** argv)
 
 	} // plot EC
 
-
-//	if (plot_BC){
-//		ts = 0.0;
-//		double XTAL_count = 0;
-//		for (ts = ts_min; ts < ts_max + dts; ts += dts){
-//			// total = total_error()
-//			tie(total, XTAL_count) = total_error(max_rows, ts, EB_w, EE_w, plot_EB, plot_EE_minus, plot_EE_plus, normalized_A, normalized_t0, ideal_weights, weights_type, PY);
-//			tsr->Fill(ts,total/XTAL_count); // want this to also return number of entries so average can be taken and plotted.
-//			cout << "ts = " << ts << ", total = " << total << ", XTAL_count = " << XTAL_count << "\n";
-//		  }
-
-//	}
-
-	double max_bias = 0.0, min_bias = 0.0;
-
-	if (plot_BD){
+	if (plot_BD){ // plot_BD
 
 		// Call function 
-		DOF_bias();
+		DOF_bias(single_ts_title_string, plot_EB, plot_EE_minus, plot_EE_plus, EB_w[], EE_w[], max_rows, ts, normalized_A, normalized_t0, ideal_weights, weights_type, PY);
 
-	}
-
-//	if (plot_BD){
-//	
-//	  if (plot_EB){
-//	    bool skip_this_line = false;
-//	    int EB_count = 0, EE_count = 0, extra_lines = 0, skip_count = 0;
-//	    int ieta, iphi;
-//	    double error; 
-//	    int sts_row = 0; // single time shift loop row 
-//	    bool full = false; // Start not full
-
-//	    while(!full){ // run while lines left to read. Check DOF_error for bool
-//		skip_this_line = false;
-//	    	tie(skip_this_line, EB_count, EE_count, extra_lines, skip_count, ieta, iphi, error, sts_row ,full) = DOF_error(plot_EE_minus, plot_EE_plus, sts_row, EB_count, EE_count, extra_lines, skip_count, max_rows, ts, EB_w, EE_w, plot_EB, normalized_A, normalized_t0, ideal_weights, weights_type, PY); //, argv[1]);
-
-//	        //cout << "ieta = " << ieta << endl;
-//	        //cout << "iphi = " << iphi << endl;
-//	        //cout << "error = " << error << endl;
-//	        //cout << "sts_row = " << sts_row << endl;
-//		//cout << "int(full) = " << int(full) << endl;
-
-//		if (full) break;
-//		
-//	        if (!skip_this_line){ 
-//			sts->Fill(ieta, iphi, error);
-//			values->Fill(error);
-//			if (error > max_bias) max_bias = error;
-//			if (error < min_bias) min_bias = error;
-//			total_error_ += error;
-//			count += 1;	
-//		}
-//		//if (!skip_this_line) errors->Fill(error);
-
-//		//full = true;
-
-//	    }
-
-//	  } // if (plot_EB)
-//	
-//	  if (plot_EE_minus || plot_EE_plus){
-//	    bool skip_this_line = false;
-//	    int EB_count = 0, EE_count = 0, extra_lines = 0, skip_count = 0;
-//	    int ix, iy;
-//	    double error; 
-//	    int sts_row = 0; // single time shift loop row 
-//	    bool full = false; // Start not full
-
-//	    while(!full){ // run while files left to read. Check DOF_error for bool
-//	    	skip_this_line = false;
-//		tie(skip_this_line, EB_count, EE_count, extra_lines, skip_count, ix, iy, error, sts_row ,full) = DOF_error(plot_EE_minus, plot_EE_plus, sts_row, EB_count, EE_count, extra_lines, skip_count, max_rows, ts, EB_w, EE_w, plot_EB, normalized_A, normalized_t0, ideal_weights, weights_type, PY);
-//		if (sts_row%10000 == 0){
-//		  cout << "skip_this_line = " << skip_this_line << endl;
-//	          cout << "ix = " << ix << endl;
-//	          cout << "iy = " << iy << endl;
-//	          cout << "error = " << error << endl;
-//	          cout << "sts_row = " << sts_row << endl;
-//		  cout << "int(full) = " << int(full) << endl;
-//		}
-//		if (full){ 
-//			cout << "full, breaking.\n";
-//			break;
-//		}
-//		
-//	        if(!skip_this_line){ 
-//			//if ((sts_row > 420) && (sts_row < 425)) {
-//				//cout << "ix = " << ix << endl;
-//				//cout << "iy = " << iy << endl;
-//				//cout << "error = " << error << endl;
-//				//}
-//			 
-//			sts->Fill(ix, iy, error);
-//			total_error_ += error;
-//			if (error > max_bias) max_bias = error;
-//			if (error < min_bias) min_bias = error;
-//			count += 1;
-//			values->Fill(error);
-//		}
-
-//		//full = true;
-
-//	    }
-//	       
-//	  } // if (plot_EE_minus || plot_EE_plus) 
-
-//	} // if(plot_BD)
-
-	time_t current_time = time(0);
+	} // plot_BD
 
 }
