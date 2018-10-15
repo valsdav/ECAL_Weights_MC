@@ -180,7 +180,7 @@ int main(int argc, char** argv)
 	int tsr_bins = 0;
 
 	if (plot_EC){
-		int tsr_bins = ( (ts_max - ts_min) / (dts) ) + 1 ;
+		tsr_bins = ( (ts_max - ts_min) / (dts) ) + 1 ;
 		cout << "tsr_bins = " << tsr_bins << endl;
 	}
 
@@ -209,10 +209,6 @@ int main(int argc, char** argv)
           ts_range_title << "EB, ";
           single_ts_title << "EB, ";
           }
-
-        //if (plot_EE){
-          //ts_range_title << "EE";
-          //single_ts_title << "EE";
 	  if (plot_EE_minus){
 		ts_range_title << "EE-, ";	
 		single_ts_title << "EE-, ";	
@@ -221,7 +217,6 @@ int main(int argc, char** argv)
 		ts_range_title << "EE+, ";	
 		single_ts_title << "EE+, ";	
 	    }
-          //}
 
   	ts_range_title << "Bias vs. Time Shift, ";
 	single_ts_title << "Bias, ts = " << ts << "ns, ";
@@ -251,18 +246,11 @@ int main(int argc, char** argv)
 		single_ts_title << max_rows << " XTALS";	
 		}	
 
-	//TH1F *errors = new TH1F("errors","A/A - 1", 100, -1, 1);
 	// Make tree to store info such as XTAL count and total error 
 
   	TString ts_range_title_string = ts_range_title.str(); 
   	TString single_ts_title_string = single_ts_title.str(); 
-	//TH1F *tsr = new TH1F("tsr",ts_range_title_string,((ts_max - ts_min) / (dts)) + 1,ts_min,ts_max + dts); // ts range
-	TH1F *tsr = new TH1F("tsr",ts_range_title_string,tsr_bins,ts_min,ts_max + dts); // ts range
-	//TH2F *sts = new TH2F("sts",single_ts_title_string,(DOF1max - DOF1min),DOF1min,DOF1max,(DOF2max - DOF2min),DOF2min,DOF2max); // single ts
-
-	TH1F *values = new TH1F("values","values",1000,-0.3,0.3);
-
-	//TH2F *sts = new TH2F("sts",single_ts_title_string); //,,,,,);
+	//TH1F *tsr = new TH1F("tsr",ts_range_title_string,tsr_bins,ts_min,ts_max + dts); // ts range
 
 	// Function variables
 	double total = 0.0;
@@ -271,7 +259,6 @@ int main(int argc, char** argv)
 	double avg_bias = 0.0;
 	
 	// Call Functions
-
 
 	if (plot_EC){
 	
@@ -293,10 +280,11 @@ int main(int argc, char** argv)
 			eta_max = eta_boundaries[i+1];
 
 			TH1F *EC = new TH1F("EC",ts_range_title_string,tsr_bins,ts_min,ts_max + dts); // ts range
-			//TH1F *bias_values = new TH1F("bias_values","bias_values",1000,-0.3,0.3);
 
 			ts = 0.0;
 			double XTAL_count = 0;
+			double stddev = 0;
+			int ts_i = 1; // ts index for adding error bars. Start at 1 because binning is 1 indexed.
 
 			cout << "*****************************************\n";
 			cout << "Computing Average Bias for:\n";
@@ -305,14 +293,18 @@ int main(int argc, char** argv)
 
 			// in EC_bias, max_rows is max number of eta rows to read. Does not include eta_skip.
 			for (ts = ts_min; ts < ts_max + dts; ts += dts){
-				//tie(total, XTAL_count, single_eta_skip) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, eta_min, eta_max, total_eta_skip); // if function has eta_skip feature 
-				tie(total, XTAL_count) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, eta_min, eta_max, skip, note_exists, note);
+				
+				tie(total, XTAL_count, stddev) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, eta_min, eta_max, skip, note_exists, note);
 				if (XTAL_count != 0){ 
 					EC->Fill(ts,total/XTAL_count); // Set histo point 
 					cout << "eta_min = " << eta_min << ", eta_max = " << eta_max << ", ts = " << ts << "\n";
 					cout << "Total Bias = " << total << ", XTAL_count = " << XTAL_count << "\n";
 					cout << "Average Bias = " << total/XTAL_count << "\n";
+					cout << "stddev = " << stddev << "\n";
 					if (ts == ts_max) total_XTALS += XTAL_count;
+					cout << "ts index = " << ts_i << endl;
+					EC->SetBinError(ts_i,stddev);
+					ts_i += 1;
 				}
 
 				else{
@@ -333,6 +325,9 @@ int main(int argc, char** argv)
 		eta_title << ".root";
 
 		TString eta_title_string = eta_title.str();
+
+		//for (int i = 0; i < )
+
 		EC->SaveAs(eta_title_string);
 		EC->~TH1F();
 

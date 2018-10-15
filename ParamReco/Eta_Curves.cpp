@@ -4,7 +4,7 @@
 
 #include "recon_amp_noclhep.cpp"
 
-tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_w[], bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY, double eta_min, double eta_max, int merged_skip, bool note_exists, string note) 
+tuple<double, double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_w[], bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY, double eta_min, double eta_max, int merged_skip, bool note_exists, string note) 
 {
 	cout << "Time Shift = " << ts << "ns\n";
 
@@ -16,11 +16,13 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 	//merged_ss << "data/Merged_data_" << PY << "_" << weights_type << ".txt";
 	merged_ss << "data/XTAL_Info_Full_" << PY << "_" << weights_type << ".txt";
 	string merged_path = merged_ss.str();
+	
 	ifstream inMergedFile;
 	inMergedFile.open(merged_path);
 
   	if (!inMergedFile) {
   	  cout << "Unable to open Merged Data file\n";
+	  cout << "path: " << merged_path << endl;
   	  exit(1); // terminate with error
  	 }
 
@@ -226,6 +228,9 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 	//cout << "min eta value in range = " << min << endl;
 	//cout << "max eta value in range = " << max << endl;
 
+
+	double stddev = bias_dist->GetRMS();
+
 	ostringstream bias_dist_title;
 	bias_dist_title << "bin/dist/Bias_Dist_" << eta_min << "_" << eta_max << "_ts" << ts << "ns_";
 	if (ideal_weights) bias_dist_title << weights_type << "_" << PY;
@@ -241,6 +246,6 @@ tuple<double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_
 	}	
 	bias_dist->~TH1F();
 
-	return make_tuple(total_bias, XTAL_count);
+	return make_tuple(total_bias, XTAL_count, stddev);
 
 }

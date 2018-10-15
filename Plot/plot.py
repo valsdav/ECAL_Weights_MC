@@ -155,6 +155,8 @@ if args.bias_dist_only is False:
 
 		x = array('d')
 		y = array('d')
+		xe = array('d')
+		ye = array('d')
 
 
 		while(h.GetBinContent(counter) != 0):
@@ -166,6 +168,10 @@ if args.bias_dist_only is False:
 			#cout << "abs(" << value << ") = " << abs(value) << endl;
 			#h2->Fill(ts,fabs(value));
 			x.append(ts)
+			xe.append(0)
+			ye.append(h.GetBinError(counter))
+			print'x = ',ts
+			print'y error = ',h.GetBinError(counter)
 			#if (abs_val): y.append(fabs(value))
 			#else: y.append(value)
 			y.append(value)
@@ -175,7 +181,8 @@ if args.bias_dist_only is False:
 			ts += dt
 			counter += 1
 
-		g = TGraph(counter - 1, x, y)
+		#g = TGraph(counter - 1, x, y)
+		g = TGraphErrors(counter - 1, x, y, xe, ye) # x, y, x errors, y errors 
 
 		if plot_type == 'BC':
 			g.SetMarkerStyle(8)
@@ -246,6 +253,8 @@ if args.bias_dist_only is False:
 				g.SetMarkerColor(kRed)
 				g.SetLineColor(kRed)
 				g.SetLineStyle(static_line_styles[EE_ranges])
+				#.SetFillColor(kRed) # make this optional?
+				#g.SetFillStyle(3001)
 			
 				EE_ranges += 1	
 
@@ -258,6 +267,9 @@ if args.bias_dist_only is False:
 				g.SetMarkerColor(kGreen)
 				g.SetLineColor(kGreen)
 				g.SetLineStyle(static_line_styles[EB_ranges])
+				#g.SetFillColor(kGreen)
+				#g.SetFillStyle(3001)
+
 				EB_ranges += 1			
 
 			# Greater abs(eta), less transparent 
@@ -309,7 +321,8 @@ if args.bias_dist_only is False:
 			minimum = path.split('_')[-5]   
 			maximum = path.split('_')[-4] 
 
-		mg.Add(g, "LP")
+		mg.Add(g, "LP") 
+		#mg.Add(g, "LP3") error bar range 
 		i += 1
 
 	if plot_type == 'BC': mg.SetTitle(section + " Average Bias vs. Time Shift")
