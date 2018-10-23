@@ -264,13 +264,12 @@ int main(int argc, char** argv)
 	
 		cout << "Plotting Eta Curve\n";
 
-		vector<double> eta_boundaries = {-3.0, -2.5, -1.485, -1.16, -0.81, -0.46, 0, 0.44, 0.80, 1.14, 1.482, 2.5, 3.0};
+		vector<double> eta_boundaries = {-3.0, -2.9, -2.8, -2.7, -2.6, -2.5, -1.485, -1.16, -0.81, -0.46, 0, 0.44, 0.80, 1.14, 1.482, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0};
+		vector<double> uncertainties = {0.0, 0.0, 0.0}; // 68%, 90%, 100% bands. (1 sigma = 68%)
 
 		// Define first abs_eta_max
 		double eta_min = eta_boundaries[0], eta_max = eta_boundaries[1]; // initial values for eta being iterated over 
-		int total_eta_skip = 0, single_eta_skip = 0; // number of rows to skip in eta file. Update every time an eta range is finished.
-		int skip = 0;
-		//for (eta_max = abs_eta_max; eta_max < 3.1; eta_max += 0.3){ // want last run to be at eta_max
+		int skip = 0; // Manual skip that can be applied if desired 
 		int total_XTALS = 0;
 
 		for (int i = 0; i < eta_boundaries.size() - 1; i += 1){ // for debugging 
@@ -284,11 +283,14 @@ int main(int argc, char** argv)
 			ts = 0.0;
 			double XTAL_count = 0;
 			double stddev = 0;
+			
+			// For multiple error bands, should I just do this in Plot.py using information of 1 sigma? Then just copy graph and plot on same with new error? 
+			
 			int ts_i = 1; // ts index for adding error bars. Start at 1 because binning is 1 indexed.
 
 			cout << "*****************************************\n";
 			cout << "Computing Average Bias for:\n";
-			cout << "Eta/iEta: [" << eta_min << ", " << eta_max << ")" << endl; // ieta means iterative here. 
+			cout << "Eta: [" << eta_min << ", " << eta_max << ")" << endl; // ieta means iterative here. 
 			cout << "*****************************************\n";
 
 			// in EC_bias, max_rows is max number of eta rows to read. Does not include eta_skip.
@@ -301,7 +303,7 @@ int main(int argc, char** argv)
 					cout << "Total Bias = " << total << ", XTAL_count = " << XTAL_count << "\n";
 					cout << "Average Bias = " << total/XTAL_count << "\n";
 					cout << "stddev = " << stddev << "\n";
-					if (ts == ts_max) total_XTALS += XTAL_count;
+					if (ts == ts_max) total_XTALS += XTAL_count; // add to total xtal count 
 					cout << "ts index = " << ts_i << endl;
 					EC->SetBinError(ts_i,stddev);
 					ts_i += 1;
@@ -309,7 +311,7 @@ int main(int argc, char** argv)
 
 				else{
 				
-					cout << "XTAL_count = " << XTAL_count << ", not filling histogram.\n"; // should equal zero
+					cout << "XTAL_count = " << XTAL_count << ", not filling histogram.\n"; // should print 0 XTALS here
 
 				}
 			  } 
@@ -325,8 +327,6 @@ int main(int argc, char** argv)
 		eta_title << ".root";
 
 		TString eta_title_string = eta_title.str();
-
-		//for (int i = 0; i < )
 
 		EC->SaveAs(eta_title_string);
 		EC->~TH1F();

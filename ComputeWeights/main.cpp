@@ -253,8 +253,6 @@ int main(int argc, char** argv){
 					// As long as ID has computable weights for PY, compute weights 
 					if (!skip){
 
-
-
 						cw.precision(17);
 						cw << ID << "\t";
 						cw.precision(9);					
@@ -287,7 +285,7 @@ int main(int argc, char** argv){
 						  //else pulseShape.push_back( ( function_alphabeta->Eval(i) + P ) );/// (A + P) ); // divide by A to get weights for S*W = A 
 						  else pulseShape[count_] = ( ( function_alphabeta->Eval(i) + P ) );
 						  // if (d1 >= 838861947) cout << "pulseShape[" << count_ << "] = " << pulseShape[count_] << endl;
-						  //cout << "pulseShape[" << count_ << "] = " << pulseShape.at(count_) << endl;
+						  cout << "pulseShape[" << count_ << "] = " << pulseShape.at(count_) << endl;
 						  count_ += 1;
 						}
 
@@ -300,19 +298,66 @@ int main(int argc, char** argv){
 						weights_sum = 0.0;
 						Ped_val = 0.0;
 
-
 						for (int i = 0; i < 2; i++){ 
 							cw << "0\t";
 						}
 
+						//double w_sum = 0.0;
+
 						for ( int i = firstsample; i < firstsample + nPulseSamples; i++) {
 
 							cw << A_.getAmpWeight(i - firstsample) << "\t";
+							cout << "weight(" << i - firstsample << ") = " << A_.getAmpWeight(i-firstsample) << endl;
 							h1->Fill(A_.getAmpWeight(i - firstsample)); // fill histogram 
 							weights_sum += A_.getAmpWeight(i - firstsample);
 
-
 						  }
+
+						cout << "weights sum = " << weights_sum << endl;
+
+						vector<double> HC_weights;
+
+						for (int i = 0; i < 10; i++){
+							HC_weights.push_back(0.0);
+
+						}
+
+						//double w_sum = 0.0;
+
+						for (int i = 2; i < 7; i++){
+
+							double HC_weight = 0.0;
+							double f_i = pulseShape[i];
+							double f_j_s = 0.0;
+							double f_j_s_s = 0.0;
+
+							for (int j = 2; j < 7; j++){
+								
+									f_j_s += pulseShape[j];
+									f_j_s_s += pulseShape[j]*pulseShape[j];
+								
+							} 
+
+							cout << "f_i = " << f_i << endl;
+							cout << "f_j_s = " << f_j_s << endl;
+							cout << "f_j_s_s = " << f_j_s_s << endl;
+							HC_weight = ( (f_i - f_j_s) / (f_j_s_s - ( (f_j_s*f_j_s) / 5) ) ); // + 2.198197522;  
+							//HC_weight = (f_j_s_s - (f_j_s)*f_i ) / (5*f_j_s_s - f_j_s*f_j_s); // This gives P weights. 
+
+
+							HC_weights[i] = HC_weight;
+							//w_sum += HC_weight*pulseShape[i];
+							//cout << "Hand Calc. Weight = " << HC_weight << endl;
+
+						}
+
+						//cout << "w sum = " << w_sum << endl;
+
+						for (int i = 0; i < 10; i++){
+
+							cout << "HC_weights[" << i << "] = " << HC_weights[i] << endl;
+
+						}
 
 						//cout << "cw = " << cw.str() << endl;
 
@@ -369,3 +414,6 @@ int main(int argc, char** argv){
 	c1->SaveAs("plot.pdf");
 
 } // End of main function 
+
+
+// 838861313	-1	1	0	-0.0124339	0.240739	121.313	1.18318	40.2921	0	0	-0.58696994338541164	-0.53674677627741252	0.31406295879260338	0.47967364877555996	0.32998011209466094	0	0	0	

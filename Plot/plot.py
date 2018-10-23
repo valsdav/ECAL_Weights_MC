@@ -1,5 +1,4 @@
 # Abe Tishelman-Charny
-# 20 July 2018
 # The purpose of this program is to plot average bias vs. time shift for multiple root files  
 # https://www-zeuthen.desy.de/~middell/public/pyroot/pyroot.html
 
@@ -7,6 +6,9 @@ from ROOT import *
 from array import array
 import os
 import argparse
+import sys
+
+from Sigma_Calc import *
 
 gROOT.SetBatch(kTRUE)
 
@@ -53,8 +55,6 @@ print'ymin = ',ymin
 print'ymax = ',ymax
 
 #sub_plot_type = str(args.sub_plot_type[0]) # ETR or WPC 
-
-
 
 if args.bias_dist_only is False:
 
@@ -170,8 +170,8 @@ if args.bias_dist_only is False:
 			x.append(ts)
 			xe.append(0)
 			ye.append(h.GetBinError(counter))
-			print'x = ',ts
-			print'y error = ',h.GetBinError(counter)
+			#print'x = ',ts
+			#print'y error = ',h.GetBinError(counter)
 			#if (abs_val): y.append(fabs(value))
 			#else: y.append(value)
 			y.append(value)
@@ -253,8 +253,8 @@ if args.bias_dist_only is False:
 				g.SetMarkerColor(kRed)
 				g.SetLineColor(kRed)
 				g.SetLineStyle(static_line_styles[EE_ranges])
-				#.SetFillColor(kRed) # make this optional?
-				#g.SetFillStyle(3001)
+				g.SetFillColor(kRed) # make this optional?
+				g.SetFillStyle(1001)
 			
 				EE_ranges += 1	
 
@@ -267,8 +267,8 @@ if args.bias_dist_only is False:
 				g.SetMarkerColor(kGreen)
 				g.SetLineColor(kGreen)
 				g.SetLineStyle(static_line_styles[EB_ranges])
-				#g.SetFillColor(kGreen)
-				#g.SetFillStyle(3001)
+				g.SetFillColor(kGreen)
+				g.SetFillStyle(1001)
 
 				EB_ranges += 1			
 
@@ -321,7 +321,22 @@ if args.bias_dist_only is False:
 			minimum = path.split('_')[-5]   
 			maximum = path.split('_')[-4] 
 
-		mg.Add(g, "LP") 
+		#g.SetFillColor(kRed)
+		#g.SetFillStyle(1001) # solid 
+		#g.SetFillStyle(1001)
+
+		g2 = Sigma_Calc(g,counter,x,y,xe,ye,90) # using this not knowing how to copy graph and only change y errors. 
+		g3 = Sigma_Calc(g,counter,x,y,xe,ye,99.5)
+
+		#mg.Add(g, "LP2") # 1 sigma error band
+		mg.Add(g3, "L3") # 99.5% error band
+		mg.Add(g2, "L3") # 90% error band
+		mg.Add(g, "L3")
+		#mg.Add(g, "3")
+		# Add function that inputs TGraph with 1 sigma error, returns TGraph with x sigma error. Or pass desired percentage into TGraph. 
+		
+		#g2 = Sigma_Calc(g,90)
+		#mg.Add(g2, "LP2") # 90% error band
 		#mg.Add(g, "LP3") error bar range 
 		i += 1
 
@@ -361,9 +376,12 @@ if args.bias_dist_only is False:
 	#Save_Title = "plots/plot" + section + str(int(histos[0].GetXaxis().GetBinLowEdge(1))) + ".pdf"
 	#Save_Title = "bin/pyplot" + section + "_" + str(int(histos[0].GetXaxis().GetBinLowEdge(1))) + ".pdf"
 	if plot_type == 'BC': Save_Title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/pyplot" + section + "_" + minimum + '_' + maximum + ".pdf"
-	if plot_type == 'EC': Save_Title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/pyplot_EC_" + weights_type + "_" + PY + "_" + minimum + '_' + maximum + ".pdf"
+	if plot_type == 'EC': Save_Title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/pyplot_EC_" + weights_type + "_" + PY + "_" + minimum + '_' + maximum + "__.pdf"
 
 	c0.SaveAs(Save_Title)
+	os.system('evince ' + Save_Title)
+	# Automatically open file
+    #os.system('evince ' + Save_Title)
 
 print'args.bias_dist_only = ',args.bias_dist_only
 
