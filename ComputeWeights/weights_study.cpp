@@ -1,19 +1,6 @@
 // Abraham Tishelman-Charny
-// 5 October 2018
-//
-// The purpose of this program is to start with XTAL params (A, t0, alpha, beta) and DOF (DOF1, DOF2, DOF3, eta).
-// XTAL params ID is matched with DOF ID, and then weights are computed from analytic waveform.
-// Output is a merged data file containing, for each XTAL ID:
-// ID, DOF1, DOF2, DOF3, eta, A, t0, alpha, beta, w1->w10. 
-//
-// The output file can then be read by main.cpp associated functions to produce plots. 
-//
-// Need CLHEP libraries to compile. With my setup on lxplus, this requires the command:
-// g++ -std=c++11 -o run.x Param_Scan.cpp -L"/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/Tools/clhep/install/lib" -lCLHEP-2.4.1.0 -I"/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/Tools/clhep/install/include" `root-config --ldflags --glibs --cflags`
-//
-// After installing CLHEP, can check necessary compilation flags with: clhep-config --include, clhep-config --libs
 
-// Should change this to a function that can be used or not with main. Maybe command line option for plotting weight info. 
+// A version of main.cpp used for activities other than outputting a merged data file. 
 
 using namespace std;
 

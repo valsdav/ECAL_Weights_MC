@@ -43,10 +43,10 @@ int main(int argc, char** argv)
 	time_t initial_time = time(0); // initial time 
 
 	// Command Line Arguments
-	cout << "argc = " << argc << endl;
-	for (int i = 0; i < argc; i++){
-		cout << "argv[" << i << "] = " << argv[i] << endl;
-		}
+	// cout << "argc = " << argc << endl;
+	// for (int i = 0; i < argc; i++){
+	// 	cout << "argv[" << i << "] = " << argv[i] << endl;
+	// 	}
 
 	// argv[0] = ./run.x
 	// argv[1] = (EC) or (BD)
@@ -246,6 +246,9 @@ int main(int argc, char** argv)
 		single_ts_title << max_rows << " XTALS";	
 		}	
 
+	ts_range_title << PY << " Parameters";	
+	single_ts_title << PY << " Parameters";
+
 	// Make tree to store info such as XTAL count and total error 
 
   	TString ts_range_title_string = ts_range_title.str(); 
@@ -303,8 +306,9 @@ int main(int argc, char** argv)
 					cout << "Total Bias = " << total << ", XTAL_count = " << XTAL_count << "\n";
 					cout << "Average Bias = " << total/XTAL_count << "\n";
 					cout << "stddev = " << stddev << "\n";
+					cout << "-----------------\n";
 					if (ts == ts_max) total_XTALS += XTAL_count; // add to total xtal count 
-					cout << "ts index = " << ts_i << endl;
+					//cout << "ts index = " << ts_i << endl;
 					EC->SetBinError(ts_i,stddev);
 					ts_i += 1;
 				}

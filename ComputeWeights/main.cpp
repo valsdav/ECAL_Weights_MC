@@ -91,7 +91,9 @@ int main(int argc, char** argv){
 
 	vector<double> pulseShape;
 	vector<double> pulseShapeDerivative;
+	vector<double> HC_weights; // hand calculated weights for testing weights equations 
 
+	// Used for timing jitter weights 
 	pulseShapeDerivative.push_back(0.0);
 	pulseShapeDerivative.push_back(0.0);
 	pulseShapeDerivative.push_back(0.05);
@@ -105,7 +107,7 @@ int main(int argc, char** argv){
 
 	for (int i = 0; i < 10; i++){
 		pulseShape.push_back(0.0);
-
+		HC_weights.push_back(0.0);
 	}
 
 	double A, t_0, alpha, beta, ID, DOF1, DOF2, DOF3, eta;
@@ -122,7 +124,8 @@ int main(int argc, char** argv){
 	double dt = 25; 
 
 	TF1 *function_alphabeta = new TF1(*name,*formula,xmin,xmax);
-	int firstsample = 2;
+	int firstsample = 2; // Not sure where else to define this. 
+	int lastsample = firstsample + nPulseSamples + prepulsesamples;
 
 	double A_hat = 0.0;
 	double weights_sum = 0.0;
@@ -138,6 +141,11 @@ int main(int argc, char** argv){
 	bool leave = false;
 	int DOF_skip_count = 0; 
 	double DOF_ID = 0;
+
+	double HC_weight = 0.0;
+	double f_i = 0.0;
+	double f_j_s = 0.0;
+	double f_j_s_s = 0.0;
 
 	string line; // string to hold XTAL params line information 
 
@@ -198,13 +206,13 @@ int main(int argc, char** argv){
 		  DOF_skip_count -= 1;
 		}
 
-		while((getline(inDOFFile, DOF_line)) && (leave == false)) { // read EB/EE_DOF line // DOF while 
+		while((getline(inDOFFile, DOF_line)) && (leave == false)) { // read EB/EE_DOF line 
 		
 		//cout << "In DOF while\n";
 
 		five_params = false;
 
-                stringstream ss(DOF_line);
+        stringstream ss(DOF_line);
 
 		double d1_, d2_, d3_, d4_, d5_;
 	
@@ -226,25 +234,6 @@ int main(int argc, char** argv){
 					t_0 = d3;
 					alpha = d4;
 					beta = d5;
-					
-					if (string(PY) == "2017"){
-						// A, t0, alpha, beta are zero.
-						if ( (d1 == 838868019) || (d1 == 838871589) || (d1 == 838882900) || (d1 == 838882985) || (d1 == 838900809) || (d1 == 838949036) || (d1 == 838951621) || (d1 == 872436486) ) {
-							cout << "Manual Skip\n"; 	
-							skip = true;
-
-							}
-					}
-		
-					// 2018 params and weights 
-					if (string(PY) == "2018"){
-						// A, t0, alpha, beta are zero.
-						if ( (d1 == 838864037) || (d1 == 838869123) || (d1 == 838874865) || (d1 == 838891641) || (d1 == 838958295) || (d1 == 838966532) ){ 
-							cout << "Manual Skip\n"; 
-							skip = true;
-
-							}
-					}
 
 					// Compute Weights
 
@@ -280,18 +269,18 @@ int main(int argc, char** argv){
 						  //cout << "in pulse shape value " << i << endl;
 					
 						  //if ( i <= (t_0 + ts - alpha*beta) ) pulseShape.push_back(0 + P) ; // if waveform undefined, set value to zero + pedestal 
+						  //cout << "value = " << t_0 + ts - alpha*beta << endl;
 						  if ( i <= (t_0 + ts - alpha*beta) ) pulseShape.at(count_) = (0 + P) ;	
+						  
 						  //else pulseShape.push_back( ( function_alphabeta->Eval(i) + P ) / (A) );/// (A + P) ); // divide by A to get weights for S*W = A 
 						  //else pulseShape.push_back( ( function_alphabeta->Eval(i) + P ) );/// (A + P) ); // divide by A to get weights for S*W = A 
 						  else pulseShape[count_] = ( ( function_alphabeta->Eval(i) + P ) );
 						  // if (d1 >= 838861947) cout << "pulseShape[" << count_ << "] = " << pulseShape[count_] << endl;
-						  cout << "pulseShape[" << count_ << "] = " << pulseShape.at(count_) << endl;
+						  //cout << "pulseShape[" << count_ << "] = " << pulseShape.at(count_) << endl;
 						  count_ += 1;
-						}
+						} 
 
 						A_.compute(pulseShape,pulseShapeDerivative,tMax); // Run member function
-
-						//cout << "Right after compute\n";
 
 						firstsample = 2;
 						A_hat = 0.0;
@@ -302,46 +291,42 @@ int main(int argc, char** argv){
 							cw << "0\t";
 						}
 
-						//double w_sum = 0.0;
-
-						for ( int i = firstsample; i < firstsample + nPulseSamples; i++) {
+						for ( int i = firstsample; i < lastsample; i++) {
 
 							cw << A_.getAmpWeight(i - firstsample) << "\t";
-							cout << "weight(" << i - firstsample << ") = " << A_.getAmpWeight(i-firstsample) << endl;
-							h1->Fill(A_.getAmpWeight(i - firstsample)); // fill histogram 
+							//cout << "weight(" << i - firstsample << ") = " << A_.getAmpWeight(i-firstsample) << endl;
+							//h1->Fill(A_.getAmpWeight(i - firstsample)); // fill histogram 
 							weights_sum += A_.getAmpWeight(i - firstsample);
+							//cout << A_.getPedWeight(i - firstsample) << endl;
+
+
+							Ped_val += A_.getPedWeight(i - firstsample)*pulseShape[i];
+							//cout << "ped weight = " << A_.getPedWeight(i - firstsample) << endl;
+							//cout << "pulseshape[i] = " << pulseShape[i] << endl;
 
 						  }
 
-						cout << "weights sum = " << weights_sum << endl;
+						//cout << "weights sum = " << weights_sum << endl;
+						//cout << "Ped_val = " << Ped_val << endl;
 
-						vector<double> HC_weights;
+						for (int i = firstsample; i < lastsample; i++){
 
-						for (int i = 0; i < 10; i++){
-							HC_weights.push_back(0.0);
+							HC_weight = 0.0;
+							f_i = pulseShape[i];
+							f_j_s = 0.0;
+							f_j_s_s = 0.0;
 
-						}
-
-						//double w_sum = 0.0;
-
-						for (int i = 2; i < 7; i++){
-
-							double HC_weight = 0.0;
-							double f_i = pulseShape[i];
-							double f_j_s = 0.0;
-							double f_j_s_s = 0.0;
-
-							for (int j = 2; j < 7; j++){
+							for (int j = firstsample; j < lastsample; j++){
 								
 									f_j_s += pulseShape[j];
 									f_j_s_s += pulseShape[j]*pulseShape[j];
 								
 							} 
 
-							cout << "f_i = " << f_i << endl;
-							cout << "f_j_s = " << f_j_s << endl;
-							cout << "f_j_s_s = " << f_j_s_s << endl;
-							HC_weight = ( (f_i - f_j_s) / (f_j_s_s - ( (f_j_s*f_j_s) / 5) ) ); // + 2.198197522;  
+							// cout << "f_i = " << f_i << endl;
+							// cout << "f_j_s = " << f_j_s << endl;
+							// cout << "f_j_s_s = " << f_j_s_s << endl;
+							HC_weight = ( (f_i - (f_j_s/5)) / (f_j_s_s - ( (f_j_s*f_j_s) / 5) ) ); // A weights 
 							//HC_weight = (f_j_s_s - (f_j_s)*f_i ) / (5*f_j_s_s - f_j_s*f_j_s); // This gives P weights. 
 
 
@@ -355,7 +340,7 @@ int main(int argc, char** argv){
 
 						for (int i = 0; i < 10; i++){
 
-							cout << "HC_weights[" << i << "] = " << HC_weights[i] << endl;
+							//cout << "HC_weights[" << i << "] = " << HC_weights[i] << endl;
 
 						}
 
@@ -399,7 +384,6 @@ int main(int argc, char** argv){
 
 			} // if (!five_params) 
 
-
 			} //readEBEEDOFLINE
 
 		} // XTAL_params line with 5 doubles 
@@ -409,11 +393,8 @@ int main(int argc, char** argv){
 	if (current_line%5000 == 0) cout << "current_line = " << current_line << endl;
 	} // get line of XTAL_Params.txt 
 	
-	TCanvas *c1 = new TCanvas("c1","c1",800,600);
-	h1->Draw();
-	c1->SaveAs("plot.pdf");
+	// TCanvas *c1 = new TCanvas("c1","c1",800,600);
+	// h1->Draw();
+	// c1->SaveAs("plot.pdf");
 
 } // End of main function 
-
-
-// 838861313	-1	1	0	-0.0124339	0.240739	121.313	1.18318	40.2921	0	0	-0.58696994338541164	-0.53674677627741252	0.31406295879260338	0.47967364877555996	0.32998011209466094	0	0	0	

@@ -3,4 +3,6 @@ extra/*
 *.txt
 *.__afs*
 *.pdf
+*.png
+*.pyc
 ParamReco/extra/*

@@ -42,6 +42,7 @@ int DOF_bias(TString single_ts_title_string, bool plot_EB, bool plot_EE_minus, b
 	// XTAL_Info_Full_PY_WT.txt
 
 	stringstream Info_ss;
+	
 	Info_ss << "data/XTAL_Info_Full_" << PY << "_" << weights_type <<  ".txt";	
 	string params_path = Info_ss.str();
 
@@ -50,6 +51,7 @@ int DOF_bias(TString single_ts_title_string, bool plot_EB, bool plot_EE_minus, b
 
   	if (!inInfoFile) {
   	  cout << "Unable to open Crystal Info file\n";
+	  cout << "Path: " << Info_ss.str() << endl;
   	  exit(1); // terminate with error
  	 }
 
@@ -128,7 +130,7 @@ int DOF_bias(TString single_ts_title_string, bool plot_EB, bool plot_EE_minus, b
 				// Past EB lines
 				if (ID >= 872415401){
 					cout << "Finished reading EB lines\n";
-					BD_Plotter(DOF_h, bias_dist, plot_EB, plot_EE_minus, plot_EE_plus);
+					BD_Plotter(DOF_h, bias_dist, plot_EB, plot_EE_minus, plot_EE_plus,weights_type,PY,single_ts_title_string);
 					//DOF_h->SaveAs();
 					//bias_dist->SaveAs();
 					return 0;
@@ -155,7 +157,7 @@ int DOF_bias(TString single_ts_title_string, bool plot_EB, bool plot_EE_minus, b
 				// Finished reading EE- lines
 				if ( (ID >= 872415401) && (DOF3 == 1) ){
 					cout << "Finished reading EE- lines\n";
-					BD_Plotter(DOF_h, bias_dist, plot_EB, plot_EE_minus, plot_EE_plus);
+					BD_Plotter(DOF_h, bias_dist, plot_EB, plot_EE_minus, plot_EE_plus,weights_type,PY,single_ts_title_string);
 					return 0;
 				}
 
@@ -263,7 +265,7 @@ int DOF_bias(TString single_ts_title_string, bool plot_EB, bool plot_EE_minus, b
 		// Check row
 		if (row == max_rows){
 			cout << "Maximum desired rows reached." << endl;
-			BD_Plotter(DOF_h, bias_dist, plot_EB, plot_EE_minus, plot_EE_plus);
+			BD_Plotter(DOF_h, bias_dist, plot_EB, plot_EE_minus, plot_EE_plus,weights_type,PY,single_ts_title_string);
 			return 0;
 		}
 
@@ -277,7 +279,7 @@ int DOF_bias(TString single_ts_title_string, bool plot_EB, bool plot_EE_minus, b
 
 	cout << "Reached end of Bias_Distribution.cpp\n";
 	
-	BD_Plotter(DOF_h, bias_dist, plot_EB, plot_EE_minus, plot_EE_plus);
+	BD_Plotter(DOF_h, bias_dist, plot_EB, plot_EE_minus, plot_EE_plus,weights_type,PY,single_ts_title_string);
 	return 0;
 
 }

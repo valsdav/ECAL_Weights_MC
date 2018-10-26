@@ -9,7 +9,7 @@ tuple<double, double, double> EC_bias(int max_rows, double ts, double EB_w[], do
 	cout << "Time Shift = " << ts << "ns\n";
 
 	// Can choose to save distribution of bias values for given eta range 
-	TH1F *bias_dist = new TH1F("bias_dist","bias_dist",40,-0.3,0.3);
+	TH1F *bias_dist = new TH1F("bias_dist","bias_dist",50,-0.3,0.3);
 
 	// Open Merged Data file 
 	stringstream merged_ss;
@@ -241,9 +241,9 @@ tuple<double, double, double> EC_bias(int max_rows, double ts, double EB_w[], do
 	bias_dist_title << ".root";
 
 	TString bias_dist_title_string = bias_dist_title.str();
-	if ( (ts > -1*pow(10,-13)) && ( ts < pow(10,-13) ) ){
+	//if ( (ts > -1*pow(10,-13)) && ( ts < pow(10,-13) ) ){
  		bias_dist->SaveAs(bias_dist_title_string); // only save 0ts distributions 
-	}	
+	//}	
 	bias_dist->~TH1F();
 
 	return make_tuple(total_bias, XTAL_count, stddev);
