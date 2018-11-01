@@ -4,17 +4,28 @@
 
 #include "recon_amp_noclhep.cpp"
 
-tuple<double, double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_w[], bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PY, double eta_min, double eta_max, int merged_skip, bool note_exists, string note) 
+tuple<double, double, double> EC_bias(int max_rows, double ts, double EB_w[], double EE_w[], bool normalized_A, bool normalized_t0, bool ideal_weights, string weights_type, string PD, double eta_min, double eta_max, int merged_skip, bool note_exists, string note, bool plot_BH) 
 {
 	cout << "Time Shift = " << ts << "ns\n";
 
+	//TH2F *outliers = new TH2F("outliers","outliers",100,0,100,100,0,100);
+
 	// Can choose to save distribution of bias values for given eta range 
-	TH1F *bias_dist = new TH1F("bias_dist","bias_dist",50,-0.3,0.3);
+	TH1F *bias_dist = new TH1F("bias_dist","bias_dist",400,-0.3,0.3);
 
 	// Open Merged Data file 
 	stringstream merged_ss;
-	//merged_ss << "data/Merged_data_" << PY << "_" << weights_type << ".txt";
-	merged_ss << "data/XTAL_Info_Full_" << PY << "_" << weights_type << ".txt";
+	//cout << "PD = " << PD << endl;
+	
+	//merged_ss << "data/Merged_data_" << PD << "_" << weights_type << ".txt";
+
+	cout << "weights_type = " << weights_type << endl;
+
+	string path_WT = weights_type; // same for ideal weights, different for online weights
+	if (string(weights_type) == "online" || string(weights_type) == "Online") 
+		path_WT = "PedSub0+5"; // May need to change this for different weights configurations. 
+
+	merged_ss << "data/XTAL_Info_Full_" << PD << "_" << path_WT << ".txt";
 	string merged_path = merged_ss.str();
 	
 	ifstream inMergedFile;
@@ -96,6 +107,8 @@ tuple<double, double, double> EC_bias(int max_rows, double ts, double EB_w[], do
 
 			if ( (eta >= eta_min ) && ( eta < eta_max) ) in_range = true;  // eta in range 
 
+			
+
 			if(in_range){ // if in range 
 
 				if (eta < min) min = eta;
@@ -169,7 +182,26 @@ tuple<double, double, double> EC_bias(int max_rows, double ts, double EB_w[], do
 				total_bias += bias; 
 				XTAL_count += 1;
 
+				// Need to be careful with this cut. Only apply if justified or testing. 
+				//if (bias >= -0.06)
 				bias_dist->Fill(bias);
+
+				//cout << "bias = " << bias << endl;
+
+
+				// if (bias < -0.06){
+				// 	// cout << "Outlier\n";
+				// 	// cout << "ix = " << DOF1 << endl;
+				// 	// cout << "iy = " << DOF2 << endl;
+				// 	outliers->Fill(DOF1,DOF2,1);
+
+				// }
+
+				//  else{
+				//  	outliers->Fill(DOF1,DOF2,-1);
+				//  }
+
+
 
 				//cout << "XTAL count = " << XTAL_count << endl;
 
@@ -195,6 +227,13 @@ tuple<double, double, double> EC_bias(int max_rows, double ts, double EB_w[], do
 //				}
 				
 			} // if in range 
+
+
+
+
+			// if(!in_range && (ID >= 872415401) && DOF3 == -1 ) outliers->Fill(DOF1,DOF2,-1);
+
+
 
 
 //			if ( (!in_range) && ( (abs(eta_min) == 1.479) || (abs(eta_min) == 85) || (abs(eta_max) == 85) || (abs(eta_max) == 1.479) ) ){
@@ -228,22 +267,62 @@ tuple<double, double, double> EC_bias(int max_rows, double ts, double EB_w[], do
 	//cout << "min eta value in range = " << min << endl;
 	//cout << "max eta value in range = " << max << endl;
 
-
 	double stddev = bias_dist->GetRMS();
 
-	ostringstream bias_dist_title;
-	bias_dist_title << "bin/dist/Bias_Dist_" << eta_min << "_" << eta_max << "_ts" << ts << "ns_";
-	if (ideal_weights) bias_dist_title << weights_type << "_" << PY;
-	if (!ideal_weights) bias_dist_title << "Online_" << PY;
+	ostringstream bias_dist_path, bias_dist_title, pdf_title, png_title;
+	bias_dist_title << "Bias " << eta_min << " to " << eta_max << " ts = " << ts << "ns ";
+	bias_dist_path << "bin/tmp/Bias_Dist_" << eta_min << "_" << eta_max << "_ts" << ts << "ns_";
+	pdf_title << "bin/tmp/Bias_Dist_" << eta_min << "_" << eta_max << "_ts" << ts << "ns_";
+	png_title << "bin/tmp/Bias_Dist_" << eta_min << "_" << eta_max << "_ts" << ts << "ns_";
 
-	if (note_exists) bias_dist_title << "_" << note;
+	if (ideal_weights) bias_dist_path << weights_type << "_" << PD;
+	if (!ideal_weights) bias_dist_path << "Online_" << PD;
+	if (ideal_weights) pdf_title << weights_type << "_" << PD;
+	if (!ideal_weights) pdf_title << "Online_" << PD;
+	if (ideal_weights) png_title << weights_type << "_" << PD;
+	if (!ideal_weights) png_title << "Online_" << PD;
+	if (ideal_weights) bias_dist_title << weights_type << " " << PD;
+	if (!ideal_weights) bias_dist_title << "Online " << PD;
 
-	bias_dist_title << ".root";
+	if (note_exists) bias_dist_path << "_" << note;
+	if (note_exists) pdf_title << "_" << note;
+	if (note_exists) png_title << "_" << note;
+	//if (note_exists) bias_dist_title << " ";
 
+	bias_dist_path << ".root";
+	pdf_title << ".pdf";
+	png_title << ".png";
+
+	// Make separate option for plotting distributions? 
+	TString bias_dist_path_string = bias_dist_path.str();
+	TString pdf_title_string = pdf_title.str();
+	TString png_title_string = png_title.str();
 	TString bias_dist_title_string = bias_dist_title.str();
 	//if ( (ts > -1*pow(10,-13)) && ( ts < pow(10,-13) ) ){
- 		bias_dist->SaveAs(bias_dist_title_string); // only save 0ts distributions 
-	//}	
+	if (plot_BH){
+ 		
+		TCanvas *cc = new TCanvas("cc","cc",800,600);
+		bias_dist->Draw();
+		bias_dist->SetTitle(bias_dist_title_string);
+		bias_dist->SaveAs(bias_dist_path_string); 
+		cc->SaveAs(pdf_title_string);
+		cc->SaveAs(png_title_string);
+		cc->~TCanvas();
+	}	
+
+	TCanvas *cc = new TCanvas("cc","cc",800,600);
+	Int_t palette[5];
+    palette[0] = 41;
+    palette[1] = 2;
+    gStyle->SetPalette(2,palette);
+	//gStyle->SetOptStat(0);
+	//outliers->Draw("colz1");
+	//cc->SaveAs("outliers.png");
+	//cc->SaveAs("outliers.pdf");
+	//gStyle->SetOptStat(1);
+	cc->~TCanvas();
+
+	//outliers->~TH2F();
 	bias_dist->~TH1F();
 
 	return make_tuple(total_bias, XTAL_count, stddev);

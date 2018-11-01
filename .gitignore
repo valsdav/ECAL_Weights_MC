@@ -4,5 +4,9 @@ extra/*
 *.__afs*
 *.pdf
 *.png
+*.vscode
 *.pyc
+*.root
+Plot/bin/
+ParamReco/bin/
 ParamReco/extra/*

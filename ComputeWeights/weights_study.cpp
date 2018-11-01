@@ -1,6 +1,6 @@
 // Abraham Tishelman-Charny
 
-// A version of main.cpp used for activities other than outputting a merged data file. 
+// A version of main.cpp used for activities other than outputting a Full XTAL Info file. 
 
 using namespace std;
 

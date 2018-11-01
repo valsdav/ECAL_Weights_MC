@@ -4,7 +4,7 @@
 // The purpose of this main function is to handle reconstructed amplitude 
 // for EB and EE with desired time shift and weights.
 
-// Lxplus Compile command:
+// Lxplus Compilation command:
 // g++ -std=c++11 -o run.x main.cpp `root-config --ldflags --glibs --cflags`
 
 using namespace std;
@@ -49,12 +49,12 @@ int main(int argc, char** argv)
 	// 	}
 
 	// argv[0] = ./run.x
-	// argv[1] = (EC) or (BD)
+	// argv[1] = (EC) or (BD) or (BH) or (ECBH)
 	// argv[2] = (ts_min,ts_max,dts) or (ts)
-	// argv[3] = if (BD){ (EB) or (EE+) or (EE-) }  *** if (EC) {leave empty} ------- leave this argument empty if plotting EC.
+	// argv[3] = if (BD) { (EB) or (EE+) or (EE-) }  *** if (EC or BH or ECBH) {leave empty}
 	// argv[4] = (online) or (PedSubM+N) // Weights Type
-	// argv[5] = (2017) or (2018) // parameter year 
-	// argv[6] = max_rows
+	// argv[5] = (MMMYY) // parameter date. Ex: Oct17, Jun18, Sep18 
+	// aBH_rm_outliersrgv[6] = max_rows
 	// argv[7] = note
 
 	string note = "";
@@ -67,6 +67,8 @@ int main(int argc, char** argv)
 
 	bool plot_EC = false; // Plot Eta Curves
 	bool plot_BD = false; // Plot Bias Distribution
+	bool plot_BH = false; // Plot Bias Histograms 
+	bool ER_Loop = false; // loop eta regions 
 
 	// If Bias Distribution, choose ECAL Section 
 	bool plot_EB = false; 
@@ -77,13 +79,27 @@ int main(int argc, char** argv)
 	
 	bool ideal_weights = false; // True: Compute ideal weights during runtime or read from text file. False: Use single sets defined below 
 	bool online_weights = false;
-	string weights_type = "PedSub0+5"; // Default weight type
+	string weights_type = "Online"; // Default weight type. Might Change this.. 
 
 	// Read plot type 
 
 	if(string(argv[1]) == "EC"){
 		
 		plot_EC = true;
+
+		}
+
+	else if(string(argv[1]) == "BH"){
+
+		  plot_BH = true;
+
+		}
+
+	else if(string(argv[1]) == "ECBH"){
+
+		  plot_EC = true;
+		  plot_BH = true;
+
 		}
 
 	else if(string(argv[1]) == "BD"){
@@ -93,13 +109,16 @@ int main(int argc, char** argv)
 
 		}
 	else {
-		cout << "Please set 1st argument after executable to either 'EC' or 'BD'\n";
+		cout << "Please set 1st argument after executable to either 'EC', 'ECBH', 'BH' or 'BD'\n";
 		cout << "Terminating\n";
 
 		exit(0);
 		}
 
-	if(plot_EC){
+	if(plot_EC || plot_BH)
+		ER_Loop = true; 
+
+	if(ER_Loop){
 
 	  	// extract ts_min, ts_max, dts
 
@@ -117,7 +136,7 @@ int main(int argc, char** argv)
 		  }
 			
 		for (int i = 0; i < BC_tsr_vec.size(); i++)
-     			cout << BC_tsr_vec.at(i) << endl;
+     			//cout << BC_tsr_vec.at(i) << endl;
 
 		ts_min = BC_tsr_vec.at(0);
 		ts_max = BC_tsr_vec.at(1);
@@ -126,7 +145,7 @@ int main(int argc, char** argv)
 	}	
 
 	// If not plotting eta curve
-	if(!plot_EC){
+	if(!plot_EC && !plot_BH){
 
 		if(string(argv[3]) == "EB"){
 			plot_EB = true;
@@ -147,14 +166,14 @@ int main(int argc, char** argv)
 
 	}
 
-	// Skip one argument if plotting eta curve, since this doesn't require 3rd argument of EB/EB+-
-	if ( ( string(argv[4 - (plot_EC)]) == "online" ) || ( string(argv[4 - (plot_EC)]) == "Online" ) ){
+	// Skip one argument if plotting eta curve or BH, since this doesn't require 3rd argument of EB/EB+-
+	if ( ( string(argv[4 - (ER_Loop)]) == "online" ) || ( string(argv[4 - (ER_Loop)]) == "Online" ) ){
 	    online_weights = true;	    
 	  }
 
 	else {
 		ideal_weights = true;
-	        weights_type = string(argv[4 - (plot_EC)]);
+	        weights_type = string(argv[4 - (ER_Loop)]);
 	      }
 
 	bool note_exists = false;
@@ -163,12 +182,12 @@ int main(int argc, char** argv)
 	  note_exists = true; 
 	  note = string(argv[7]); // note is optional
 	  }
-	if ( (plot_EC) && (argc == 7) ){
+	if ( (ER_Loop) && (argc == 7) ){
 	  note_exists = true;
 	  note = string(argv[6]);
 	  }
-	string PY = string(argv[5 - (plot_EC)]); // Parameter year
-	max_rows = stoi(string(argv[6 - (plot_EC)]));
+	string PD = string(argv[5 - (ER_Loop)]); // Parameter date
+	max_rows = stoi(string(argv[6 - (ER_Loop)]));
 
 	// For now these are not command line arguments
 	bool normalized_A = false;
@@ -179,9 +198,9 @@ int main(int argc, char** argv)
 
 	int tsr_bins = 0;
 
-	if (plot_EC){
+	if (ER_Loop){
 		tsr_bins = ( (ts_max - ts_min) / (dts) ) + 1 ;
-		cout << "tsr_bins = " << tsr_bins << endl;
+		//cout << "tsr_bins = " << tsr_bins << endl;
 	}
 
 	// Weights
@@ -221,7 +240,7 @@ int main(int argc, char** argv)
   	ts_range_title << "Bias vs. Time Shift, ";
 	single_ts_title << "Bias, ts = " << ts << "ns, ";
 
-	if (plot_EC){
+	if (ER_Loop){
 		ts_range_title << "By Eta Range, ";
 	
 	}
@@ -246,8 +265,8 @@ int main(int argc, char** argv)
 		single_ts_title << max_rows << " XTALS";	
 		}	
 
-	ts_range_title << PY << " Parameters";	
-	single_ts_title << PY << " Parameters";
+	ts_range_title << PD << " Parameters";	
+	single_ts_title << PD << " Parameters";
 
 	// Make tree to store info such as XTAL count and total error 
 
@@ -263,12 +282,12 @@ int main(int argc, char** argv)
 	
 	// Call Functions
 
-	if (plot_EC){
+	if (ER_Loop){
 	
 		cout << "Plotting Eta Curve\n";
 
 		vector<double> eta_boundaries = {-3.0, -2.9, -2.8, -2.7, -2.6, -2.5, -1.485, -1.16, -0.81, -0.46, 0, 0.44, 0.80, 1.14, 1.482, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0};
-		vector<double> uncertainties = {0.0, 0.0, 0.0}; // 68%, 90%, 100% bands. (1 sigma = 68%)
+		//vector<double> eta_boundaries = {-3.0, -2.9, -2.8};
 
 		// Define first abs_eta_max
 		double eta_min = eta_boundaries[0], eta_max = eta_boundaries[1]; // initial values for eta being iterated over 
@@ -293,13 +312,13 @@ int main(int argc, char** argv)
 
 			cout << "*****************************************\n";
 			cout << "Computing Average Bias for:\n";
-			cout << "Eta: [" << eta_min << ", " << eta_max << ")" << endl; // ieta means iterative here. 
+			cout << "Eta: [" << eta_min << ", " << eta_max << ")" << endl; 
 			cout << "*****************************************\n";
 
 			// in EC_bias, max_rows is max number of eta rows to read. Does not include eta_skip.
 			for (ts = ts_min; ts < ts_max + dts; ts += dts){
 				
-				tie(total, XTAL_count, stddev) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PY, eta_min, eta_max, skip, note_exists, note);
+				tie(total, XTAL_count, stddev) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PD, eta_min, eta_max, skip, note_exists, note, plot_BH);
 				if (XTAL_count != 0){ 
 					EC->Fill(ts,total/XTAL_count); // Set histo point 
 					cout << "eta_min = " << eta_min << ", eta_max = " << eta_max << ", ts = " << ts << "\n";
@@ -320,11 +339,11 @@ int main(int argc, char** argv)
 				}
 			  } 
 
-		// Save 2d histo, later to be plotted by plot.py 
+		// Save 2d histo, later to be plotted by plot.PD 
 		ostringstream eta_title;
-		eta_title << "bin/EC_" << eta_min << "_" << eta_max << "_" << ts_min << "_" << ts_max << "_";
-		if (ideal_weights) eta_title << weights_type << "_" << PY;
-		if (!ideal_weights) eta_title << "Online_" << PY;
+		eta_title << "bin/tmp/EC_" << eta_min << "_" << eta_max << "_" << ts_min << "_" << ts_max << "_";
+		if (ideal_weights) eta_title << weights_type << "_" << PD;
+		if (!ideal_weights) eta_title << "Online_" << PD;
 
 		if (note_exists) eta_title << "_" << note;
 
@@ -332,9 +351,10 @@ int main(int argc, char** argv)
 
 		TString eta_title_string = eta_title.str();
 
-		EC->SaveAs(eta_title_string);
+		if (plot_EC){
+			EC->SaveAs(eta_title_string);
+			}
 		EC->~TH1F();
-
 		eta_min = eta_max;	
 	
 		}
@@ -346,7 +366,7 @@ int main(int argc, char** argv)
 	if (plot_BD){ // plot_BD
 
 		// Call function 
-		DOF_bias(single_ts_title_string, plot_EB, plot_EE_minus, plot_EE_plus, EB_w, EE_w, max_rows, ts, normalized_A, normalized_t0, ideal_weights, weights_type, PY);
+		DOF_bias(single_ts_title_string, plot_EB, plot_EE_minus, plot_EE_plus, EB_w, EE_w, max_rows, ts, normalized_A, normalized_t0, ideal_weights, weights_type, PD);
 
 	} // plot_BD
 

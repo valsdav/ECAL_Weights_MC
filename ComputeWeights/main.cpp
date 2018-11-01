@@ -37,10 +37,10 @@ using namespace std;
 int main(int argc, char** argv){
 
 	// Print command line arguments 
-	cout << "argc = " << argc << endl;
-	for (int i = 0; i < argc; i++){
-		cout << "argv[" << i << "] = " << argv[i] << endl;
-		}
+	// cout << "argc = " << argc << endl;
+	// for (int i = 0; i < argc; i++){
+	// 	cout << "argv[" << i << "] = " << argv[i] << endl;
+	// 	}
 	
 	// Grab command line arguments 
 	int verbosity = stoi(argv[1]); // 1 for lots of comments 
@@ -50,13 +50,20 @@ int main(int argc, char** argv){
   	static int nPulseSamples = stoi(argv[5]); // 0 to 10
   	int prepulsesamples = stoi(argv[6]); // 0 to 10 (need to understand correlation to npulsesamples)
   	double P = stod(argv[7]); // Simulated pedestal value 
-	string PY = string(argv[8]); // Parameter year. Currently 2017 or 2018. Might change to month/year
+	string PD = string(argv[8]); // Parameter Date Mon/Yr. Ex: Oct17, Jun18, Sep18
 	int max_lines = stoi(argv[9]); // Max lines to read from XTAL Params (A, t0, alpha, beta)
 	string note = string(argv[10]);  // Note to add to output file name 
 
+	cout << "\n";
+	cout << "---------------------------------------------\n";
+	cout << "Producing Full XTAL Info File with:\n";
+	cout << "\t-" << PD << " Alpha Beta Function Parameters\n";
+	cout << "---------------------------------------------\n";
+	cout << "\n";
+
 	// Create output File 
 	stringstream a;
-	a << "bin/XTAL_Info_Full_" << PY << "_PedSub" << to_string(prepulsesamples) << "+" << to_string(nPulseSamples) << "_" << note << ".txt";
+	a << "bin/Full_XTAL_Info_" << PD << "_PedSub" << to_string(prepulsesamples) << "+" << to_string(nPulseSamples) << "_" << note << ".txt";
 	string output_file = a.str();
 
 	cout << "output file path = " << output_file << endl;
@@ -67,18 +74,20 @@ int main(int argc, char** argv){
 
 	// Open XTAL Params file (A, t0, alpha, beta)
 	stringstream aa;
-	aa << "data/XTAL_Params_" << PY << ".txt";
+	aa << "data/XTAL_Params_" << PD << ".txt";
 	string params_path = aa.str();
   	ifstream inParamsFile; //, inweightsFile; // Input File stream objects 
   	inParamsFile.open(params_path); // XTAL_Params: inParamsFile stream
 
   	if (!inParamsFile) {
   	  cout << "Unable to open Param file\n";
+	  cout << "Make sure " << params_path << " exists\n";
+	  cout << "Exiting\n";
   	  exit(1); // terminate with error
  	 }
 
 	// Create histogram for studying weights (or anything you want)
-	TH1F *h1 = new TH1F("h1","h1",100,-1,1); // plot weights 
+	//TH1F *h1 = new TH1F("h1","h1",100,-1,1); // plot weights 
 
 	// Loop Parameters
 	int current_line = 0;
@@ -155,8 +164,8 @@ int main(int argc, char** argv){
 	   skip = false;
 
 	   if (current_line == max_lines){
-		cout << "Maximum desired lines reached.\n"; 
-		cout << "Exiting.\n";
+		cout << "---Maximum desired lines reached---\n"; 
+		cout << "---Exiting---\n";
 
 		break;
 		}
@@ -170,7 +179,7 @@ int main(int argc, char** argv){
 		// If params are zero, skip param line. 
 
 		if (d2 == 0){
-			cout << "Param file Amplitude is zero\n";
+			cout << "\t On Line " << current_line << "\t Param file amplitude is zero\n";
 			leave = true;
 		}
 	
@@ -239,7 +248,7 @@ int main(int argc, char** argv){
 
 					//--------------------------------------------------------------------------------------------------------------------------
 			
-					// As long as ID has computable weights for PY, compute weights 
+					// As long as ID has computable weights for PD, compute weights 
 					if (!skip){
 
 						cw.precision(17);
@@ -309,40 +318,43 @@ int main(int argc, char** argv){
 						//cout << "weights sum = " << weights_sum << endl;
 						//cout << "Ped_val = " << Ped_val << endl;
 
-						for (int i = firstsample; i < lastsample; i++){
 
-							HC_weight = 0.0;
-							f_i = pulseShape[i];
-							f_j_s = 0.0;
-							f_j_s_s = 0.0;
+						// uncomment below to view formula calculated weights 
 
-							for (int j = firstsample; j < lastsample; j++){
+						// for (int i = firstsample; i < lastsample; i++){
+
+						// 	HC_weight = 0.0;
+						// 	f_i = pulseShape[i];
+						// 	f_j_s = 0.0;
+						// 	f_j_s_s = 0.0;
+
+						// 	for (int j = firstsample; j < lastsample; j++){
 								
-									f_j_s += pulseShape[j];
-									f_j_s_s += pulseShape[j]*pulseShape[j];
+						// 			f_j_s += pulseShape[j];
+						// 			f_j_s_s += pulseShape[j]*pulseShape[j];
 								
-							} 
+						// 	} 
 
-							// cout << "f_i = " << f_i << endl;
-							// cout << "f_j_s = " << f_j_s << endl;
-							// cout << "f_j_s_s = " << f_j_s_s << endl;
-							HC_weight = ( (f_i - (f_j_s/5)) / (f_j_s_s - ( (f_j_s*f_j_s) / 5) ) ); // A weights 
-							//HC_weight = (f_j_s_s - (f_j_s)*f_i ) / (5*f_j_s_s - f_j_s*f_j_s); // This gives P weights. 
+						// 	// cout << "f_i = " << f_i << endl;
+						// 	// cout << "f_j_s = " << f_j_s << endl;
+						// 	// cout << "f_j_s_s = " << f_j_s_s << endl;
+						// 	HC_weight = ( (f_i - (f_j_s/5)) / (f_j_s_s - ( (f_j_s*f_j_s) / 5) ) ); // A weights 
+						// 	//HC_weight = (f_j_s_s - (f_j_s)*f_i ) / (5*f_j_s_s - f_j_s*f_j_s); // This gives P weights. 
 
 
-							HC_weights[i] = HC_weight;
-							//w_sum += HC_weight*pulseShape[i];
-							//cout << "Hand Calc. Weight = " << HC_weight << endl;
+						// 	HC_weights[i] = HC_weight;
+						// 	//w_sum += HC_weight*pulseShape[i];
+						// 	cout << "Hand Calc. Weight = " << HC_weight << endl;
 
-						}
+						// }
 
-						//cout << "w sum = " << w_sum << endl;
+						// //cout << "w sum = " << w_sum << endl;
 
-						for (int i = 0; i < 10; i++){
+						// for (int i = 0; i < 10; i++){
 
-							//cout << "HC_weights[" << i << "] = " << HC_weights[i] << endl;
+						// 	//cout << "HC_weights[" << i << "] = " << HC_weights[i] << endl;
 
-						}
+						// }
 
 						//cout << "cw = " << cw.str() << endl;
 

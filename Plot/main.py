@@ -28,6 +28,7 @@ def main():
 	# Legend_Location: BR: Bottom Right, MR: Middle Right
 	# y_min: -2
 	# y_max: 2
+	# time_shift: 
 	#
 	# python plot.py -p same,bin,-10_10,BR,-2,2
 
@@ -45,6 +46,7 @@ def main():
 	# file_string = params[2]
 	# ymin = float(params[4])
 	# ymax = float(params[5])
+	# time shift is 6th param, used in samecan. 
 
 	# Find all files in working directory containing ""
 	# for data_folder path in  directory

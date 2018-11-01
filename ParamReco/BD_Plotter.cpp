@@ -72,4 +72,3 @@ int BD_Plotter(TH2F *DOF_h, TH1F *bias_dist, bool plot_EB, bool plot_EE_minus, b
 }
 
 #endif
-
