@@ -1,11 +1,13 @@
 from FindFiles import FindFiles
 from SetLegend import SetLegend
-from Sigma_Calc import Sigma_Calc
+#from Sigma_Calc import Sigma_Calc
+from Fill_mg import Fill_mg
 
 from ROOT import *
 from array import array 
 
 def SepCan(params):
+    
     print'In SepCan'
     paths = FindFiles(params[1],params[2])
 
@@ -42,6 +44,7 @@ def SepCan(params):
     gROOT.SetBatch(kTRUE)
 
     for path in paths:
+        print'Plotting ',path
         l1 = SetLegend(params[3]) # Reset legend 
 
         #can = eval('c' + str(i))
@@ -54,7 +57,7 @@ def SepCan(params):
 
         #mg = TMultiGraph('mg','mg') # For plotting error bands on same plot 
 
-        mga = TMultiGraph() # If you want to access root file later, need to give this a name 
+        mg = TMultiGraph() # If you want to access root file later, need to give this a name 
 
         #mga = eval(mg_tsr)
 
@@ -100,58 +103,20 @@ def SepCan(params):
         gne.SetName("gne")
         gne.SetMarkerStyle(7)
 
-        #EE_range = True
-        g.SetMarkerStyle(kFullDotMedium)
-        #g.SetLineStyle(line_style)
-        g.SetMarkerColor(kBlack)
-        g.SetLineColor(kBlack)
-        g.SetFillColor(kBlue)
-        g.SetFillStyle(1001)
-
-        min_eta = float(path.split('_')[-7]) # min is -7 when there's a note. With no note, one less '_'
-        max_eta = float(path.split('_')[-6])
-  
-        label = "Average"
-        l1.AddEntry(gne, label, "lp") 
-            
-        g.SetName("g" + str(68))
-        label = "68 percent statistics"
-        l1.AddEntry(g, label, "f")
-
-        atmp = array('d',[])
-        atemp = array('d',[])
-
-        for el in ye:
-            atmp.append(el)
-            atemp.append(el)
-
-        g2 = Sigma_Calc(g,counter,x,y,xe,atmp,90) # using this not knowing how to copy graph and only changing y errors. 
-        g2.SetName("g" + str(90))
-        label = "90 percent statistics"
-        l1.AddEntry(g2, label, "f")
-
-        g3 = Sigma_Calc(g,counter,x,y,xe,atemp,99.5)
-        g3.SetName("g" + str(99.5))
-        label = "99.5 percent statistics"
-        l1.AddEntry(g3, label, "f") # options: lpfe 
-
-        # mg.Add(g3, "L3") # 99.5% error band
-        # mg.Add(g2, "L3") # 90% error band
-        # mg.Add(g, "L3") # 68% error band 
-        # mg.Add(gne, "PL") # Avg
-
-        mga.Add(g3, "L3") # 99.5% error band
-        mga.Add(g2, "L3") # 90% error band
-        mga.Add(g, "L3") # 68% error band 
-        mga.Add(gne, "PL") # Avg
-
         WT = paths[0].split('_')[-3] # Weights Type
         if WT == 'online': WT = 'Online'
         PD = path.split('_')[-2]
 
+        min_eta = float(path.split('_')[-7]) # min is -7 when there's a note. With no note, one less '_'
+        max_eta = float(path.split('_')[-6])
+
+        #print'1sig errors = ',ye 
+
+        # Fill multigraph 
+        mg = Fill_mg(mg,l1,counter,x,y,xe,ye,gne,g)
+
         #if plot_type == 'EC': 
-        mga.SetTitle(WT + ' Weights, ' + PD + ' Parameters, [#eta_{min},#eta_{max}] = [' + str(min_eta) + ', ' + str(max_eta) + ']')
-        #mg.SetTitle(WT + ' Weights, ' + PD + ' Parameters, [etamin,etamax] = [' + str(min_eta) + ', ' + str(max_eta) + ']')
+        mg.SetTitle(WT + ' Weights, ' + PD + ' Parameters, [#eta_{min},#eta_{max}) = [' + str(min_eta) + ', ' + str(max_eta) + ')')
 
         #gROOT.SetBatch(kTRUE)
         can = TCanvas('can','can',800,600)
@@ -173,14 +138,14 @@ def SepCan(params):
         ymin = float(params[4])
         ymax = float(params[5])
 
-        mga.Draw("A")
+        mg.Draw("A")
 
         #mg.SetTitleSize(0.04)
-        mga.GetYaxis().SetTitle("#bar{b}") # rotate this. Maybe with ttext or tlatex. Don't set title just place latex or text at correct position. 
+        mg.GetYaxis().SetTitle("#bar{b}") # rotate this. Maybe with ttext or tlatex. Don't set title just place latex or text at correct position. 
         #mg.GetYaxis().SetTitleFont(61)
-        mga.GetYaxis().SetTitleSize(0.04)
-        mga.GetYaxis().SetTitleOffset(1.2) # This doesn't work when ymin=ymax=0
-        mga.GetXaxis().SetTitle("ts (ns)")
+        mg.GetYaxis().SetTitleSize(0.04)
+        mg.GetYaxis().SetTitleOffset(1.2) # This doesn't work when ymin=ymax=0
+        mg.GetXaxis().SetTitle("ts (ns)")
         #mg.GetXaxis().SetTitleSize(0.04)
 
         if (ymin == ymax):   
@@ -188,7 +153,7 @@ def SepCan(params):
             lymax = can.GetUymax()
 
         else:
-            mga.GetYaxis().SetRangeUser(ymin,ymax) 
+            mg.GetYaxis().SetRangeUser(ymin,ymax) 
             lymin = ymin
             lymax = ymax
 
@@ -213,7 +178,7 @@ def SepCan(params):
         #print'save title = ',save_title
         #print'Save_Title_pdf = ',Save_Title_pdf
 
-        mga.SaveAs(Save_Title_root)
+        mg.SaveAs(Save_Title_root)
         can.SaveAs(Save_Title_pdf)
         can.SaveAs(Save_Title_png)
 

@@ -9,7 +9,7 @@ def SetLegend(pos):
     if pos == 'BR': l1 = TLegend(0.7, 0.1, 0.9, 0.3) # Bottom right
     if pos == 'BM': l1 = TLegend(0.4, 0.1, 0.6, 0.3) # Bottom middle 
     if pos == 'UM': l1 = TLegend(0.4, 0.6, 0.6, 0.8) # Upper middle 
-    if pos == 'TL': l1 = TLegend(0.1, 0.7, 0.3, 0.9) # Top Left 
+    if pos == 'UL': l1 = TLegend(0.1, 0.7, 0.3, 0.9) # Upper Left 
 
     #l1 = TLegend(0.65, 0.3, 0.9, 0.7) # Middle right
 

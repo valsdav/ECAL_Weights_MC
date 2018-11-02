@@ -5,7 +5,8 @@ from array import array
 
 from FindFiles import FindFiles
 from SetLegend import SetLegend
-from Sigma_Calc import Sigma_Calc
+from Fill_mg import Fill_mg
+#from Sigma_Calc import Sigma_Calc
 
 def SameCan(params):
     print('In SameCan')
@@ -97,48 +98,15 @@ def SameCan(params):
     gne.SetName("gne")
     gne.SetMarkerStyle(7)
 
-    #EE_range = True
-    g.SetMarkerStyle(kFullDotMedium)
-    #g.SetLineStyle(line_style)
-    g.SetMarkerColor(kBlack)
-    g.SetLineColor(kBlack)
-    g.SetFillColor(kBlue)
-    g.SetFillStyle(1001)
-		
-    label = "Average"
-    l1.AddEntry(gne, label, "lp") 
-        
-    g.SetName("g" + str(68))
-    label = "68 percent statistics"
-    l1.AddEntry(g, label, "f")
-
-    atmp = array('d')
-    atemp = array('d')
-
-    for el in ye:
-       atmp.append(el)
-       atemp.append(el)
-
-    g2 = Sigma_Calc(g,i,x,y,xe,atmp,90) # using this not knowing how to coPD graph and only changing y errors. 
-    g2.SetName("g" + str(90))
-    label = "90 percent statistics"
-    l1.AddEntry(g2, label, "f")
-
-    g3 = Sigma_Calc(g,i,x,y,xe,atemp,99.5)
-    g3.SetName("g" + str(99.5))
-    label = "99.5 percent statistics"
-    l1.AddEntry(g3, label, "f") # options: lpfe 
-
-    mg.Add(g3, "L3") # 99.5% error band
-    mg.Add(g2, "L3") # 90% error band
-    mg.Add(g, "L3") # 68% error band 
-    mg.Add(gne, "PL") # Avg
-
     WT = paths[0].split('_')[-3] # Weights Type
     if WT == 'online': WT = 'Online'
     PD = path.split('_')[-2]
 
+    # Fill multigraph
+    mg = Fill_mg(mg,l1,i,x,y,xe,ye,gne,g)
+ 
     if plot_type == 'EC': mg.SetTitle(WT + ' Weights, ' + PD + ' Parameters, Time Shift = ' + str(ts) + 'ns')
+
     gROOT.SetBatch(kTRUE)
     c0 = TCanvas('c0', 'c0', 800, 600)
     #gROOT.SetBatch(kTRUE)
@@ -243,4 +211,5 @@ def SameCan(params):
     c0.SaveAs(Save_Title_pdf)
     c0.SaveAs(Save_Title_png)
     os.system('evince ' + Save_Title_pdf)
+    mg.Delete()
     #os.system('scp ' + Save_Title + ' ${ssh%% *}/home/abe/Documents/Papers/Weights/Images')

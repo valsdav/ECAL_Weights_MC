@@ -15,6 +15,8 @@ from SepCan import *
 def main():
 	print('In main function')
 
+	gROOT.ProcessLine("gErrorIgnoreLevel = kError;") # Run this command in ROOT. This method could prove very useful for other things. 
+
 	# Get command line arguments 
 	parser = argparse.ArgumentParser(description='Process some files')
 	parser.add_argument('-p', '--params', type = str, nargs='+', help='CanOption,Directory,Range,Legend_Location,y_range')
@@ -51,11 +53,6 @@ def main():
 	# ymin = float(params[4])
 	# ymax = float(params[5])
 	# time shift is 6th param, used in samecan. 
-
-	# Find all files in working directory containing ""
-	# for data_folder path in  directory
-
-	# Have function for taking data_folder and file_string and returning paths. 
 
 	if (params[0] == 'same'):
 		print('Plotting on same canvas')
