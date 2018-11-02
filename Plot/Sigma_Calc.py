@@ -10,7 +10,7 @@ def Sigma_Calc(g,i_,x,y,xe,ye,percentage):
     # sigma factor. What to multiply uncertainties by, assuming current uncertainties are 1 sigma. 
     #print'percentage/100. = ',percentage/100.
     sf = TMath.ErfInverse(percentage/100.)*TMath.Sqrt(2) # sigma value for desired percentage events contained in distribution 
-    print"sf = ",sf
+    #print"sf = ",sf
 
     for i in range(i_ - 1):
         ye[i] = ye[i]*sf # multiply 1 sigma uncertainties by new sigma value. 

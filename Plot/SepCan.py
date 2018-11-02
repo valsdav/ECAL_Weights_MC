@@ -1,243 +1,230 @@
 from FindFiles import FindFiles
 from SetLegend import SetLegend
+from Sigma_Calc import Sigma_Calc
+
+from ROOT import *
+from array import array 
 
 def SepCan(params):
     print'In SepCan'
     paths = FindFiles(params[1],params[2])
 
+    # Want to plot avg. b vs. ts for each #\eta_{R} and save as separate canvases.  
 
+    plot_type = str(paths[0].split('/')[-1].split('_')[-8])
+    #gStyle.SetOptStat(0); # no stats box
+    #l1 = SetLegend(params[3])
 
+    # Order by eta range
+    # Need this for plotting avg bias vs. #\eta_{R} for given timeshift, so that x entries are in order. 
 
-        ## Saving extra code: 
-    # for plotting all eta ranges on single bias vs ts plot:
+    temp_list = []
 
+    for i in range(len(paths)):
+        current_min = 1000
+        for path in paths:
+            emi = float(path.split('/')[-1].split('_')[-6])
+            if (emi < current_min): 
+                current_min = emi
 
-    #     h = TH1F()
-    #     f = TFile().Open(path)
+        for path in paths:
+            emi = float(path.split('/')[-1].split('_')[-6])
+            if emi == current_min:
+                temp_list.append(path)	
+                paths.remove(path)
 
-    #     if plot_type == 'EC':
-    #         h = f.Get("EC")
-    #     else:
-    #         print'Plot Type not recognized. Should be EC'
+    paths = temp_list
+
+    # for plotting all eta ranges on separate bias vs ts plots:
+
+    i = 0
+
+    gROOT.SetBatch(kTRUE)
+
+    for path in paths:
+        l1 = SetLegend(params[3]) # Reset legend 
+
+        #can = eval('c' + str(i))
+
+        #can = TCanvas('can','can',800,600)
+        #mg_str = 'mg' + str(i)
+        #mg = eval('TMultiGraph(' + mg_str + ', ' + mg_str + ', 800, 600)')
+
+        #eval('' + mg_str + ' = TMultiGraph' + mg_str + ', ' + mg_str + ', 800, 600)')
+
+        #mg = TMultiGraph('mg','mg') # For plotting error bands on same plot 
+
+        mga = TMultiGraph() # If you want to access root file later, need to give this a name 
+
+        #mga = eval(mg_tsr)
+
+        x = array('d',[])
+        y = array('d',[])
+        xe = array('d',[])
+        ye = array('d',[])
+
+        h = TH1F()
+        f = TFile().Open(path)
+
+        if plot_type == 'EC':
+            h = f.Get("EC")
+        else:
+            print'Plot Type not recognized. Should be EC'
     
-    #     counter = 1
-    #     value = 0
-    #     hts = 0
-    #     dt = h.GetXaxis().GetBinLowEdge(3) - h.GetXaxis().GetBinLowEdge(2)
+        counter = 1
+        value = 0
+        ts = 0
+        dt = h.GetXaxis().GetBinLowEdge(3) - h.GetXaxis().GetBinLowEdge(2)
 
-    #     found = False
+        found = False
 
-    #     while( (h.GetBinContent(counter) != 0) and (found == False)):
-    #         #print ("hist.GetXaxis().GetBinContent(" + str(counter) + ") = " + str(hist.GetXaxis().GetBinLowEdge(counter)))
-    #         hts = h.GetXaxis().GetBinLowEdge(counter)
-    #         if hts == ts:
-    #             found = True
-    #             x.append()
-    #         #print ("hist.GetBinContent(" + str(counter) + ") = " + str(hist.GetBinContent(counter)))
-    #         value = h.GetBinContent(counter)
+        while( (h.GetBinContent(counter) != 0) and (found == False)):
+            ts = h.GetXaxis().GetBinLowEdge(counter)
+            # if hts == ts:
+            #     found = True
+            #     x.append()
+            value = h.GetBinContent(counter)
+            #print'value = ',value
+            x.append(ts)
+            xe.append(0)
+            ye.append(h.GetBinError(counter))
+            y.append(value)
+            ts += dt
+            counter += 1
 
-    #         #cout << "abs(" << value << ") = " << abs(value) << endl;
-    #         #h2->Fill(ts,fabs(value));
-    #         x.append(ts)
-    #         xe.append(0)
-    #         ye.append(h.GetBinError(counter))
-    #         #print'x = ',ts
-    #         #print'y error = ',h.GetBinError(counter)
-    #         #if (abs_val): y.append(fabs(value))
-    #         #else: y.append(value)
-    #         y.append(value)
-    #         #print("ts = " + str(ts) )
-    #         #print("value = " + str(value) )
-    #         #print("counter = " + str(counter) )
-    #         ts += dt
-    #         counter += 1
-
-    #     #g = TGraph(counter - 1, x, y)
-    #     g = TGraphErrors(counter - 1, x, y, xe, ye) # x, y, x errors, y errors 
-
-    #     if plot_type == 'BC':
-    #         g.SetMarkerStyle(8)
-
-    #         if path.split('_')[-4] == "online": 
-    #             if path.split('_')[-3] == "2017":
-    #                 g.SetMarkerColor(kRed + 2) 
-    #                 g.SetLineColor(kRed + 2)
-    #             elif path.split('_')[-3] == "2018":
-    #                 g.SetMarkerColor(kRed) 
-    #                 g.SetLineColor(kRed)
-
-    #         if path.split('_')[-4] == "PedSub1+4": 
-    #             if path.split('_')[-3] == "2017":
-    #                 #print 'year = 2017'
-    #                 g.SetMarkerColor(kGreen + 4) 
-    #                 g.SetLineColor(kGreen + 4)
-    #             elif path.split('_')[-3] == "2018":
-    #                 #print 'year = 2018'
-    #                 g.SetMarkerColor(kGreen) 
-    #                 g.SetLineColor(kGreen)
+        g = TGraphErrors(counter - 1, x, y, xe, ye) # x, y, x errors, y errors 
             
-    #     elif plot_type == 'EC':
+        # Have tgrapherrors for plot path_{i}
 
-    #         #gStyle.SetPalette(55) # kRainbow
+        gne = TGraph(counter - 1, x, y) # Graph with no errors 
+        gne.SetName("gne")
+        gne.SetMarkerStyle(7)
 
-    #         min_eta = float(path.split('_')[-7]) #min is -7 when there's a note. With no note, one less '_'
-    #         max_eta = float(path.split('_')[-6])
+        #EE_range = True
+        g.SetMarkerStyle(kFullDotMedium)
+        #g.SetLineStyle(line_style)
+        g.SetMarkerColor(kBlack)
+        g.SetLineColor(kBlack)
+        g.SetFillColor(kBlue)
+        g.SetFillStyle(1001)
 
-    #         #print'min eta = ',min_eta
-    #         #print'max eta = ',max_eta
-
-    #         EE_range = True
-
-    #         if ( (min_eta >= -1.485) and (1.482 > min_eta) ): EE_range = False
-
-    #         color = colors[i]
-    #         line_style = line_styles[i]
-
-    #         #print"color = ",color 
-
-    #         g.SetMarkerStyle(kFullDotMedium)
-    # #		g.SetMarkerColor(color)
-    #         g.SetLineStyle(line_style)
-    # #		g.SetLineColor(color)
-
-    #         #g.SetMarkerColor(kRed - EE_ranges)
-    #         #g.SetMarkerColorAlpha(kRed, (1 - (0.1)*(EE_ranges) ) )
-    #         #g.SetLineColorAlpha(kRed,(1 - (0.1)*(EE_ranges) ) )
-        
-
-    #         if(EE_range):
-    #             #print'i = ',i
-    #             #print'EE'
-    #             #g.SetMarkerColor(kRed - EE_ranges)
-    #             #g.SetMarkerColorAlpha(kRed, (1 - (0.1)*(EE_ranges) ) )
-    #             #g.SetLineColorAlpha(kRed,(1 - (0.1)*(EE_ranges) ) )
-    #             g.SetMarkerColor(kRed)
-    #             g.SetLineColor(kRed)
-    #             g.SetLineStyle(static_line_styles[EE_ranges])
-    #             g.SetFillColor(kRed) # make this optional?
-    #             g.SetFillStyle(1001)
+        min_eta = float(path.split('_')[-7]) # min is -7 when there's a note. With no note, one less '_'
+        max_eta = float(path.split('_')[-6])
+  
+        label = "Average"
+        l1.AddEntry(gne, label, "lp") 
             
-    #             EE_ranges += 1	
+        g.SetName("g" + str(68))
+        label = "68 percent statistics"
+        l1.AddEntry(g, label, "f")
 
-    #         if(not EE_range):
-    #             #print'i = ',i
-    #             #print'EB'
-    #             #g.SetMarkerColor(kRed - EE_ranges)
-    #             #g.SetMarkerColorAlpha(kGreen, (1 - (0.1)*(EB_ranges) ) )
-    #             #g.SetLineColorAlpha(kGreen,(1 - (0.1)*(EB_ranges) ) )
-    #             g.SetMarkerColor(kGreen)
-    #             g.SetLineColor(kGreen)
-    #             g.SetLineStyle(static_line_styles[EB_ranges])
-    #             g.SetFillColor(kGreen)
-    #             g.SetFillStyle(1001)
+        atmp = array('d',[])
+        atemp = array('d',[])
 
-    #             EB_ranges += 1			
+        for el in ye:
+            atmp.append(el)
+            atemp.append(el)
 
-    #         # Greater abs(eta), less transparent 
+        g2 = Sigma_Calc(g,counter,x,y,xe,atmp,90) # using this not knowing how to copy graph and only changing y errors. 
+        g2.SetName("g" + str(90))
+        label = "90 percent statistics"
+        l1.AddEntry(g2, label, "f")
 
-    # #		# EE
-    # #		if ( (min_eta < -1.479) or (min_eta >= 1.479) ): 
-    # #			#print'i = ',i
-    # #			#print'EE'
-    # #			#g.SetMarkerColor(kRed - EE_ranges)
-    # #			g.SetMarkerColorAlpha(kRed, (1 - (0.1)*(EE_ranges) ) )
-    # #			g.SetLineColorAlpha(kRed,(1 - (0.1)*(EE_ranges) ) )
-    # #			EE_ranges += 1
+        g3 = Sigma_Calc(g,counter,x,y,xe,atemp,99.5)
+        g3.SetName("g" + str(99.5))
+        label = "99.5 percent statistics"
+        l1.AddEntry(g3, label, "f") # options: lpfe 
 
-    # #		# EB
-    # #		elif ( (min_eta >= -1.479) and (min_eta < 1.479) ): 
-    # #			#print'i = ',i
-    # #			#print'EB'
-    # #			g.SetMarkerColorAlpha(kGreen, 0 + 0.1*EB_ranges)
-    # #			g.SetLineColorAlpha(kGreen, 0 + 0.1*EB_ranges)
-    # #			EB_ranges += 1
-    # #		#i += 1
+        # mg.Add(g3, "L3") # 99.5% error band
+        # mg.Add(g2, "L3") # 90% error band
+        # mg.Add(g, "L3") # 68% error band 
+        # mg.Add(gne, "PL") # Avg
 
-    #     #l1 = TLegend(0.7, 0.3, 0.9, 0.5)
-    #     #l1 = TLegend(0.1, 0.7, 0.3, 0.9) # Upper left
+        mga.Add(g3, "L3") # 99.5% error band
+        mga.Add(g2, "L3") # 90% error band
+        mga.Add(g, "L3") # 68% error band 
+        mga.Add(gne, "PL") # Avg
 
-    #     g.SetName("g" + str(i))
+        WT = paths[0].split('_')[-3] # Weights Type
+        if WT == 'online': WT = 'Online'
+        PD = path.split('_')[-2]
 
-    #     if plot_type == 'BC':
-    #         label = path.split('_')[-4] + '_' + path.split('_')[-3]
-    #         l1.AddEntry(g, label, "lp")
+        #if plot_type == 'EC': 
+        mga.SetTitle(WT + ' Weights, ' + PD + ' Parameters, [#eta_{min},#eta_{max}] = [' + str(min_eta) + ', ' + str(max_eta) + ']')
+        #mg.SetTitle(WT + ' Weights, ' + PD + ' Parameters, [etamin,etamax] = [' + str(min_eta) + ', ' + str(max_eta) + ']')
 
-    #     if plot_type == 'EC':
-    #         label = path.split('_')[-7] + ' #leq #eta < ' + path.split('_')[-6]
-    #         l1.AddEntry(g, label, "lp")
-
-    #     if plot_type == 'BC':
-    #         section = path.split('_')[-5] #.split('/')[-1]
-    #         minimum = path.split('_')[-2] + 'ns'
-    #         maximum = path.split('.')[-2].split('_')[-1] + 'ns'
-    #         #print 'section = ',section
-
-    #     if plot_type == 'EC':
-    #         weights_type = paths[0].split('_')[-3]
-    #         #print 'weights type:',weights_type
-    #         if weights_type == 'online': weights_type = 'Online'
-    #         #print 'weights type = ',weights_type
-    #         PY = path.split('_')[-2]
-
-    #         minimum = path.split('_')[-5]   
-    #         maximum = path.split('_')[-4] 
-
-    #     #g.SetFillColor(kRed)
-    #     #g.SetFillStyle(1001) # solid 
-    #     #g.SetFillStyle(1001)
-
-    #     g2 = Sigma_Calc(g,counter,x,y,xe,ye,90) # using this not knowing how to copy graph and only change y errors. 
-    #     g3 = Sigma_Calc(g,counter,x,y,xe,ye,99.5)
-
-    #     #mg.Add(g, "LP2") # 1 sigma error band
-    #     mg.Add(g3, "L3") # 99.5% error band
-    #     mg.Add(g2, "L3") # 90% error band
-    #     mg.Add(g, "L3")
-    #     #mg.Add(g, "3")
-    #     # Add function that inputs TGraph with 1 sigma error, returns TGraph with x sigma error. Or pass desired percentage into TGraph. 
+        #gROOT.SetBatch(kTRUE)
+        can = TCanvas('can','can',800,600)
         
-    #     #g2 = Sigma_Calc(g,90)
-    #     #mg.Add(g2, "LP2") # 90% error band
-    #     #mg.Add(g, "LP3") error bar range 
-    #     i += 1
+        #print'i = ',i
 
-    # if plot_type == 'BC': mg.SetTitle(section + " Average Bias vs. Time Shift")
-    # if plot_type == 'EC': mg.SetTitle(weights_type + ' Weights, ' + PY + ' Parameters')
+        #can_str = ''
+        #can_str = 'c' + str(i)
+        #eval('c' + str(i) + ' = TCanvas(' + can_str + ', ' + can_str + ', 800, 600)')
 
-    # c0 = TCanvas('c0', 'c0', 800, 600)
-    # c0.SetBatch(kTRUE)
+        #can = eval('c' + str(i))
 
+        #can = TCanvas('can','can',800,600)
+        #can = eval('TCanvas(' + can_str + ', ' + can_str + ', 800, 600)')
 
-    # mg.Draw("A")
-    # mg.GetYaxis().SetRangeUser(ymin,ymax) 
-    # mg.GetXaxis().SetTitle("Time Shift (ns)")
-    # #mg.GetXaxis().SetRangeUser(-3,3)
-    # #mg.GetYaxis().SetRangeUser(-0.04,0.02)
-    # mg.GetYaxis().SetTitle("Average Bias")
-    # mg.GetYaxis().SetTitleOffset(1.3)
+        #gROOT.SetBatch(kTRUE)
 
-    # xline = TLine(c0.GetUxmin(),0,c0.GetUxmax(),0)
-    # #xline = TLine(-3,0,3,0)
-    # xline.SetLineColor(kBlack)
-    # xline.SetLineStyle(1)
+        # Set equal for automatic range 
+        ymin = float(params[4])
+        ymax = float(params[5])
 
-    # #yline = TLine(0,c0.GetUymin(),0,c0.GetUymax())
-    # yline = TLine(0,ymin,0,ymax)
-    # #yline = TLine(0,-0.04,0,0.02)
-    # yline.SetLineColor(kBlack)
-    # yline.SetLineStyle(1)
+        mga.Draw("A")
 
-    # l1.Draw("SAME")
-    # xline.Draw("SAME")
-    # yline.Draw("SAME")
+        #mg.SetTitleSize(0.04)
+        mga.GetYaxis().SetTitle("#bar{b}") # rotate this. Maybe with ttext or tlatex. Don't set title just place latex or text at correct position. 
+        #mg.GetYaxis().SetTitleFont(61)
+        mga.GetYaxis().SetTitleSize(0.04)
+        mga.GetYaxis().SetTitleOffset(1.2) # This doesn't work when ymin=ymax=0
+        mga.GetXaxis().SetTitle("ts (ns)")
+        #mg.GetXaxis().SetTitleSize(0.04)
 
-    # print'y range min = ',c0.GetUymin()
-    # print'y range max = ',c0.GetUymax()
+        if (ymin == ymax):   
+            lymin = can.GetUymin()
+            lymax = can.GetUymax()
 
-    # #Save_Title = "plots/plot" + section + str(int(histos[0].GetXaxis().GetBinLowEdge(1))) + ".pdf"
-    # #Save_Title = "bin/pyplot" + section + "_" + str(int(histos[0].GetXaxis().GetBinLowEdge(1))) + ".pdf"
-    # if plot_type == 'BC': Save_Title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/pyplot" + section + "_" + minimum + '_' + maximum + ".pdf"
-    # if plot_type == 'EC': Save_Title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/pyplot_EC_" + weights_type + "_" + PY + "_" + minimum + '_' + maximum + "__.pdf"
+        else:
+            mga.GetYaxis().SetRangeUser(ymin,ymax) 
+            lymin = ymin
+            lymax = ymax
 
-    # c0.SaveAs(Save_Title)
-    # os.system('evince ' + Save_Title)
+        xline = TLine(can.GetUxmin(),0,can.GetUxmax(),0)
+        xline.SetLineColor(kBlack)
+        xline.SetLineStyle(1)
+
+        yline = TLine(0,lymin,0,lymax)
+        yline.SetLineColor(kBlack)
+        yline.SetLineStyle(1)
+
+        l1.Draw("SAME")
+        xline.Draw("SAME")
+        yline.Draw("SAME")
+
+        save_title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/tmp/ABvsts_" + str(min_eta) + "_" + str(max_eta) + "_" + WT + "_" + PD 
+
+        Save_Title_root = save_title + ".root"
+        Save_Title_pdf = save_title + ".pdf"
+        Save_Title_png = save_title + ".png"
+
+        #print'save title = ',save_title
+        #print'Save_Title_pdf = ',Save_Title_pdf
+
+        mga.SaveAs(Save_Title_root)
+        can.SaveAs(Save_Title_pdf)
+        can.SaveAs(Save_Title_png)
+
+        #mg.Delete()
+        #gPad.Clear()
+
+        i += 1
+
+        #os.system('evince ' + Save_Title_pdf)
+        #os.system('scp ' + Save_Title + ' ${ssh%% *}/home/abe/Documents/Papers/Weights/Images')
+
+        # Should create function for all of this code that's also in SameCan.py
+
+    print'I must have been in a coma, because I\'m out of the loop'

@@ -6,7 +6,7 @@
 #from array import array
 import argparse
 
-from Sigma_Calc import *
+#from Sigma_Calc import *
 from SameCan import *
 from SepCan import *
 
@@ -23,14 +23,18 @@ def main():
 	# Examples and Formats
 	#
 	# CanOption: same or sep. One to plot all on one canvas, sep to plot on separate canvases. 
-	# Directory: bin
+	# Directory: bin/tmp
 	# Range: -10_10
 	# Legend_Location: BR: Bottom Right, MR: Middle Right
-	# y_min: -2
-	# y_max: 2
-	# time_shift: 
+	# y_min: -0.2
+	# y_max: 0.2
+	# time_shift: 0  
 	#
-	# python plot.py -p same,bin,-10_10,BR,-2,2
+	# python main.py -p same,bin/tmp,-10_10,BR,-0.2,0.2,0
+
+	# For Separate Canvases:
+	#
+	# python main.py -p sep,bin/tmp,-10_10,UM,-0.2,0.2,a <- a for all time shifts  
 
 	args = parser.parse_args()
 	argument = args.params[0].split(',')

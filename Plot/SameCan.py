@@ -1,14 +1,11 @@
 # This should output average bias vs. eta range for desired time shift 
 from ROOT import *
 import os 
-#cimport numpy as cnp 
 from array import array
 
 from FindFiles import FindFiles
 from SetLegend import SetLegend
 from Sigma_Calc import Sigma_Calc
-
-#import numpy as np 
 
 def SameCan(params):
     print('In SameCan')
@@ -19,29 +16,6 @@ def SameCan(params):
     l1 = SetLegend(params[3])
     #EB_ranges = 0
     #EE_ranges = 0 
-
-    # Create colors, styles for plot with many series
-
-    #colors = [kRed, kOrange, kGreen, kCyan, kAzure + 4, kBlue, kViolet, kMagenta, kGray]
-    #line_styles = []
-
-    #static_line_styles = []
-
-    # for i in range(10):
-    #     static_line_styles.append(i+1)
-
-    # num_paths = len(paths) 
-    # num_colors = len(colors)
-
-    # for i in range(num_colors):
-    #     line_styles.append(1)
-
-    # if ( num_paths > num_colors ):
-    #     for i in range(num_paths - num_colors):
-    #         #for j in range(num_paths - num_colors): 
-    #         colors.append(colors[i])   #+ 4)
-    #         line_styles.append(2)	
-
 
     # Order by eta range
     # Need this for legend entries to be in proper order, when plotting many eta ranges on single plot. 
@@ -70,17 +44,15 @@ def SameCan(params):
 
     paths = temp_list
 
-    i = 0
+    ts = float(params[6]) # user selected time shift
 
     # Add info from each path to multigraph
 
-    ts = float(params[6]) # Start with ts 0. Later make optional 
-
-    x = array('d')
-    y = array('d')
-    xe = array('d')
-    ye = array('d')
-
+    x = array('d',[]) 
+    y = array('d',[])
+    xe = array('d',[])
+    ye = array('d',[])
+    
     i = 1
 
     for path in paths:
@@ -147,7 +119,7 @@ def SameCan(params):
        atmp.append(el)
        atemp.append(el)
 
-    g2 = Sigma_Calc(g,i,x,y,xe,atmp,90) # using this not knowing how to copy graph and only changing y errors. 
+    g2 = Sigma_Calc(g,i,x,y,xe,atmp,90) # using this not knowing how to coPD graph and only changing y errors. 
     g2.SetName("g" + str(90))
     label = "90 percent statistics"
     l1.AddEntry(g2, label, "f")
@@ -164,9 +136,9 @@ def SameCan(params):
 
     WT = paths[0].split('_')[-3] # Weights Type
     if WT == 'online': WT = 'Online'
-    PY = path.split('_')[-2]
+    PD = path.split('_')[-2]
 
-    if plot_type == 'EC': mg.SetTitle(WT + ' Weights, ' + PY + ' Parameters, Time Shift = ' + str(ts) + 'ns')
+    if plot_type == 'EC': mg.SetTitle(WT + ' Weights, ' + PD + ' Parameters, Time Shift = ' + str(ts) + 'ns')
     gROOT.SetBatch(kTRUE)
     c0 = TCanvas('c0', 'c0', 800, 600)
     #gROOT.SetBatch(kTRUE)
@@ -261,7 +233,7 @@ def SameCan(params):
     EEpL.DrawLatex(0.1+(5*(third)/2) - (width/2),0.8625,"EE+")
     EEpL.SetTextFont(53)
 
-    save_title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/ABvsER_ts" + str(ts) + "_" + WT + "_" + PY 
+    save_title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/ABvsER_ts" + str(ts) + "_" + WT + "_" + PD 
 
     Save_Title_pdf = save_title + ".pdf"
     Save_Title_png = save_title + ".png"
