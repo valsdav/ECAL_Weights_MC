@@ -15,6 +15,8 @@ from SepCan import *
 def main():
 	print('In main function')
 
+	# Clear bin/tmp 
+
 	gROOT.ProcessLine("gErrorIgnoreLevel = kError;") # Run this command in ROOT. This method could prove very useful for other things. 
 
 	# Get command line arguments 

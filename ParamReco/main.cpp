@@ -287,7 +287,7 @@ int main(int argc, char** argv)
 		cout << "Plotting Eta Curve\n";
 
 		vector<double> eta_boundaries = {-3.0, -2.9, -2.8, -2.7, -2.6, -2.5, -1.485, -1.16, -0.81, -0.46, 0, 0.44, 0.80, 1.14, 1.482, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0};
-		//vector<double> eta_boundaries = {-3.0, -2.9, -2.8};
+		//vector<double> eta_boundaries = {-2.5,-1.485,1.482,2.5};
 
 		// Define first abs_eta_max
 		double eta_min = eta_boundaries[0], eta_max = eta_boundaries[1]; // initial values for eta being iterated over 

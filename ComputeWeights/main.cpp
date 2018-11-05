@@ -34,6 +34,13 @@ using namespace std;
 
 #include "ComputeWeights.cpp"
 
+// 5 Nov 2018
+//
+// Want to add two features:
+// 1) Weights per Strip, TT, ring 
+// 2) Compute in two ways: Average weights from xtals in Strip, TT, ring. Average parameters, compute weights. 
+
+
 int main(int argc, char** argv){
 
 	// Print command line arguments 
@@ -186,7 +193,7 @@ int main(int argc, char** argv){
 		else leave = false;
 
 		stringstream ssDOF;
-		ssDOF << "data/DOF.txt";
+		ssDOF << "data/Eta_DOF.txt";
 		string DOF_path = ssDOF.str();
 
 		ifstream inDOFFile; 

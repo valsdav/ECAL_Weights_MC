@@ -1,13 +1,14 @@
 from FindFiles import FindFiles
 from SetLegend import SetLegend
-#from Sigma_Calc import Sigma_Calc
 from Fill_mg import Fill_mg
+#from ERDict import ERDict 
 
 from ROOT import *
 from array import array 
 
 def SepCan(params):
-    
+    from ER_Dict import ER_Dict # I'm not sure why this needs to be in definition and doesn't work in header. 
+
     print'In SepCan'
     paths = FindFiles(params[1],params[2])
 
@@ -114,7 +115,10 @@ def SepCan(params):
 
         # Fill multigraph 
         mg = Fill_mg(mg,l1,counter,x,y,xe,ye,gne,g)
-
+  
+        if WT == 'PedSub0+5':
+            WT = 'Ideal' # Eventually Have Ideal1, Ideal2, .. for diff. weights configurations. Online1, Online2, .. 
+            
         #if plot_type == 'EC': 
         mg.SetTitle(WT + ' Weights, ' + PD + ' Parameters, [#eta_{min},#eta_{max}) = [' + str(min_eta) + ', ' + str(max_eta) + ')')
 
@@ -141,7 +145,7 @@ def SepCan(params):
         mg.Draw("A")
 
         #mg.SetTitleSize(0.04)
-        mg.GetYaxis().SetTitle("#bar{b}") # rotate this. Maybe with ttext or tlatex. Don't set title just place latex or text at correct position. 
+        #mg.GetYaxis().SetTitle("#bar{b}") # rotate this. Maybe with ttext or tlatex. Don't set title just place latex or text at correct position. 
         #mg.GetYaxis().SetTitleFont(61)
         mg.GetYaxis().SetTitleSize(0.04)
         mg.GetYaxis().SetTitleOffset(1.2) # This doesn't work when ymin=ymax=0
@@ -169,7 +173,19 @@ def SepCan(params):
         xline.Draw("SAME")
         yline.Draw("SAME")
 
-        save_title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/tmp/ABvsts_" + str(min_eta) + "_" + str(max_eta) + "_" + WT + "_" + PD 
+        yTitle = TLatex()
+        yTitle.SetNDC()
+        yTitle.SetTextAngle(0)
+        yTitle.SetTextColor(kBlack)
+        yTitle.SetTextFont(53) #63 
+        yTitle.SetTextAlign(11)
+        yTitle.SetTextSize(26) #22
+        yTitle.DrawLatex(0.02,0.87,"#bar{b}") #0.8625
+        #yTitle.SetTextFont(53)
+
+        ER = ER_Dict(min_eta)
+
+        save_title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/tmp/ABvsts_" + ER + "_" + WT + "_" + PD 
 
         Save_Title_root = save_title + ".root"
         Save_Title_pdf = save_title + ".pdf"

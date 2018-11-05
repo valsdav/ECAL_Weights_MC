@@ -5,7 +5,7 @@ from array import array
 
 gROOT.SetBatch(True)
 
-path = 'data/Merged_data_2018_PedSub1+4.txt'
+path = '/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/ParamReco/data/XTAL_Info_Full_Jun18_PedSub0+5.txt'
 
 params = []
 
@@ -27,10 +27,10 @@ with open(path,'r') as f:
 		params.append(float(t0))
 		params.append(float(alpha))
 		params.append(float(beta))
-#		print A
-#		print t0
-#		print alpha
-#		print beta
+		print A
+		print t0
+		print alpha
+		print beta
 
 		i+=1
 		if(i>0): break
@@ -39,15 +39,11 @@ name = 'function_alphabeta'
 #TString *name = new TString("function_alphabeta");
 formula = "( (1 + (x-[1]) / ([2]*[3]) ) > 0.0)*([0] * pow( 1 + (x-[1]) / ([2]*[3]) , [2] ) * exp ( - (x-[1]) / [3])) + ((1 + (x-[1]) / ([2]*[3]) <= 0.0 ))*(0)"
 
-#formula = '([0] * pow( 1 + (x-[1]) / ([2]*[3]) , [2] ) * exp ( - (x-[1]) / [3]))'
-##formula = '[0]* pow( 1 + (x-[1]) / ([2]*[3]) , [2] )'
-#formula = '([0] * pow( 1 + (x-[1]) / ([2]*[3]) , [2] ) * exp ( - (x-[1]) / [3]))'
-
 xmin = -1*params[2]*params[3] + params[1]
 xmax = 250
 dt = 25
 
-print 'xmin = ',xmin
+#print 'xmin = ',xmin
 
 function_alphabeta = TF1(name,formula,xmin,xmax)
 
@@ -79,16 +75,17 @@ graph.SetMarkerStyle(kFullDotLarge)
 graph.SetMarkerColor(kRed)
 
 function_alphabeta.SetLineColor(kBlack)
+#function_alphabeta.SetTitle('Sampled, Time Shifted Alpha Beta Function')
 function_alphabeta.SetTitle('Sampled, Time Shifted Alpha Beta Function')
 function_alphabeta.GetXaxis().SetTitle('time (ns)')
-function_alphabeta.GetYaxis().SetTitle('ADC Counts')
+function_alphabeta.GetYaxis().SetTitle('Detector Response (ADC Counts)')
 function_alphabeta.GetYaxis().SetTitleOffset(1.2)
 
 
 # t_{0} line and label
 line = TLine(params[1],0,params[1],params[0])
 line.SetLineStyle(3)
-line.SetLineColor(kBlack)
+line.SetLineColor(kRed)
 
 # 'A' line and label
 
@@ -100,7 +97,7 @@ Aline.SetLineColor(kBlack)
 
 constline = TLine(params[1] - ts,0,params[1] - ts,function_alphabeta.Eval(params[1] - ts))
 constline.SetLineStyle(3)
-constline.SetLineColor(kRed)
+constline.SetLineColor(kBlack)
 
 #tlatex.Draw("SAME")
 
@@ -125,7 +122,7 @@ Atlatex.SetTextFont(53)
 alatex = TLatex()
 alatex.SetNDC()
 alatex.SetTextAngle(0)
-alatex.SetTextColor(kRed)
+alatex.SetTextColor(kBlack)
 alatex.SetTextFont(63)
 alatex.SetTextAlign(11)
 alatex.SetTextSize(25)
@@ -135,7 +132,7 @@ alatex.SetTextFont(53)
 tlatex = TLatex()
 tlatex.SetNDC()
 tlatex.SetTextAngle(0)
-tlatex.SetTextColor(kBlack)
+tlatex.SetTextColor(kRed)
 tlatex.SetTextFont(63)
 tlatex.SetTextAlign(11)
 tlatex.SetTextSize(25)

@@ -9,7 +9,7 @@ from Fill_mg import Fill_mg
 #from Sigma_Calc import Sigma_Calc
 
 def SameCan(params):
-    print('In SameCan')
+    print'In SameCan'
     paths = FindFiles(params[1],params[2])
     plot_type = str(paths[0].split('/')[-1].split('_')[-8])
     #gStyle.SetOptStat(0); # no stats box
@@ -118,7 +118,7 @@ def SameCan(params):
     mg.Draw("A")
 
     #mg.SetTitleSize(0.04)
-    mg.GetYaxis().SetTitle("#bar{b}") # rotate this. Maybe with ttext or tlatex. Don't set title just place latex or text at correct position. 
+    #mg.GetYaxis().SetTitle("#bar{b}") # rotate this. Maybe with ttext or tlatex. Don't set title just place latex or text at correct position. 
     #mg.GetYaxis().SetTitleFont(61)
     mg.GetYaxis().SetTitleSize(0.04)
     mg.GetYaxis().SetTitleOffset(1.2) # This doesn't work when ymin=ymax=0
@@ -201,7 +201,17 @@ def SameCan(params):
     EEpL.DrawLatex(0.1+(5*(third)/2) - (width/2),0.8625,"EE+")
     EEpL.SetTextFont(53)
 
-    save_title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/ABvsER_ts" + str(ts) + "_" + WT + "_" + PD 
+    yTitle = TLatex()
+    yTitle.SetNDC()
+    yTitle.SetTextAngle(0)
+    yTitle.SetTextColor(kBlack)
+    yTitle.SetTextFont(53) #63 
+    yTitle.SetTextAlign(11)
+    yTitle.SetTextSize(26) #22
+    yTitle.DrawLatex(0.02,0.87,"#bar{b}") #0.8625
+    #yTitle.SetTextFont(53)
+
+    save_title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/tmp/ABvsER_ts" + str(ts) + "_" + WT + "_" + PD 
 
     Save_Title_pdf = save_title + ".pdf"
     Save_Title_png = save_title + ".png"
