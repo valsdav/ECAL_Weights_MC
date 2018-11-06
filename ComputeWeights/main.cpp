@@ -205,7 +205,6 @@ int main(int argc, char** argv){
 		}
 
 		string DOF_line; 
-
 		
 		DOF_skip_count = 0;
 
@@ -243,6 +242,7 @@ int main(int argc, char** argv){
 				cout.precision(17);
 
 				if ((d1_ == d1)){ // All ID's match
+					// For this XTAL, can compute weights. 
 
 
 					ID = d1_, DOF1 = d2_, DOF2 = d3_, DOF3 = d4_, eta = d5_;
