@@ -113,6 +113,9 @@ int main(int argc, char** argv){
 
 	}	
 
+	vector <double> avg_params = {0, 0, 0, 0}; 
+	int avg_params_count = 0;
+
 //	double sum = std::accumulate(v.begin(), v.end(), 0.0);
 //	double mean = sum / v.size();
 
@@ -207,7 +210,7 @@ int main(int argc, char** argv){
 		else leave = false;
 
 		stringstream ssDOF;
-		ssDOF << "data/Compact_DOF.txt";
+		ssDOF << "data/Eta_DOF.txt";
 		string DOF_path = ssDOF.str();
 
 		ifstream inDOFFile; 
@@ -263,7 +266,14 @@ int main(int argc, char** argv){
 					A = d2;
 					t_0 = d3;
 					alpha = d4;
-					beta = d5;			
+					beta = d5;	
+
+					avg_params[0] += A;
+					avg_params[1] += t_0;
+					avg_params[2] += alpha;
+					avg_params[3] += beta;
+					avg_params_count += 1;
+
 
 					// Compute Weights
 
@@ -462,6 +472,83 @@ int main(int argc, char** argv){
 	if (current_line%5000 == 0) cout << "current_line = " << current_line << endl;
 	} // get line of XTAL_Params.txt 
 	
+
+
+	// check weights from avg params 
+
+	for (int i = 0; i < 4; i++){
+
+		avg_params[i] /= avg_params_count; 
+
+	}
+
+	// avg_params now contains avg params. 
+//////////////////////////////////////////////////////////
+
+	A = avg_params[0];
+	t_0 = avg_params[1];
+	alpha = avg_params[2];
+	beta = avg_params[3];
+
+	if (normalize_t0) t_0 = 125;
+	if (normalize_A) A = 1;
+
+	function_alphabeta->SetParameter (0, A);    
+	function_alphabeta->SetParameter (1, t_0 + ts); // time shift     
+	function_alphabeta->SetParameter (2, alpha);  
+	function_alphabeta->SetParameter (3, beta);  
+
+	ComputeWeights A_(verbosity, dofitbaseline, dofittime, nPulseSamples, prepulsesamples);
+
+	count_ = 0;
+
+	for(double i = xmin + ts; i < xmax + ts; i += dt){						
+		if ( i <= (t_0 + ts - alpha*beta) ) pulseShape.at(count_) = 0;	
+		//else pulseShape.push_back( ( function_alphabeta->Eval(i) + P ) / (A) );/// (A + P) ); // divide by A to get weights for S*W = A 
+		//else pulseShape.push_back( ( function_alphabeta->Eval(i) + P ) );/// (A + P) ); // divide by A to get weights for S*W = A 
+		else pulseShape[count_] = function_alphabeta->Eval(i) ;
+		// if (d1 >= 838861947) cout << "pulseShape[" << count_ << "] = " << pulseShape[count_] << endl;
+		//cout << "pulseShape[" << count_ << "] = " << pulseShape.at(count_) << endl;
+		count_ += 1;
+	}
+
+	A_.compute(pulseShape,pulseShapeDerivative,tMax); // Run member function
+
+	//cout << "Right after compute\n";
+
+	firstsample = tMax - 1; // make variable?
+	A_hat = 0.0;
+	weights_sum = 0.0;
+	Ped_val = 0.0;
+	bias = 0.0;
+
+	w_count = 0;
+	for (int i = 0; i < 2; i++){ 
+		weights[w_count];
+	}
+
+	for ( int i = firstsample; i < firstsample + nPulseSamples + prepulsesamples; i++) {
+
+		weights[i] = A_.getAmpWeight(i - firstsample);
+		weights_h->Fill(weights[i]);					
+
+		}
+
+	cout << "With Average Params:\n";
+
+	for (int i = 0; i < 10; i++){
+		//if(verbosity){
+			//cout << "-----------------------------------------\n";
+			cout << "weights[" << i << "] = " << weights[i] << endl;
+			//cout << "pulseShape[" << i << "] = " << pulseShape[i] << endl;
+			//cout << "-----------------------------------------\n";
+		//}
+	}	
+
+
+
+////////////////////////////////////////////////////////////////
+
 	Double_t xvals[10];	
 
 	Int_t n = 10;
@@ -471,6 +558,8 @@ int main(int argc, char** argv){
 		if (weights_total[i] != 0){
 			weights_total[i] /= num_weights[i];
 		}		
+
+		cout << "pure average weight " << i << " = " << weights_total[i] << endl;
 
 	}
 
@@ -495,24 +584,24 @@ int main(int argc, char** argv){
 	ab << PY << "_PedSub" << to_string(prepulsesamples) << "+" << to_string(nPulseSamples) << " Weights " << note << ".txt";
 	TString htitle = ab.str();
 
-	TString file_title = "weights.pdf";
+	TString file_title = "weights.png";
 
 	TCanvas *c1 = new TCanvas("c1","c1",800,600);
 	weights_h->SetTitle(htitle);
 	weights_h->Draw();
 	c1->SaveAs(file_title);
 
-	TString file_title_ = "amps.pdf";
+	// TString file_title_ = "amps.pdf";
 
-	TCanvas *c2 = new TCanvas("c2","c2",800,600);
-	amps->SetTitle(htitle);
-	amps->Draw();
-	c2->SaveAs(file_title_);
+	// TCanvas *c2 = new TCanvas("c2","c2",800,600);
+	// amps->SetTitle(htitle);
+	// amps->Draw();
+	// c2->SaveAs(file_title_);
 
-	TCanvas *c3 = new TCanvas("c3","c3",800,600);
-	peak_amp->SetTitle("peak amp");
-	peak_amp->Draw();	
-	c3->SaveAs("peak_amps.pdf");
+	// TCanvas *c3 = new TCanvas("c3","c3",800,600);
+	// peak_amp->SetTitle("peak amp");
+	// peak_amp->Draw();	
+	// c3->SaveAs("peak_amps.pdf");
 
 	TCanvas *c4 = new TCanvas("c4","c4",800,600);
 
@@ -546,6 +635,6 @@ int main(int argc, char** argv){
 
 	//c4->BuildLegend();
 
-	c4->SaveAs("Avg_Plot.pdf");
+	c4->SaveAs("Avg_Plot.png");
 
 } // End of main function 

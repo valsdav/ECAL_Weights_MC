@@ -105,7 +105,8 @@ tuple<double, double, double> EC_bias(int max_rows, double ts, double EB_w[], do
 
 			//}
 
-			if ( (eta >= eta_min ) && ( eta < eta_max) ) in_range = true;  // eta in range 
+			//if ( (eta >= eta_min ) && ( eta < eta_max) ) in_range = true;  // eta in range 
+			if ( (eta >= eta_min ) && ( eta < eta_max) && (eta != 0) ) in_range = true;  // eta in range. If eta = 0, no available eta value for that crystal. 
 
 			
 

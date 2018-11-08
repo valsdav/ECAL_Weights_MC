@@ -26,7 +26,7 @@ using namespace std;
 #include <cmath>
 #include <vector>
 
-#include "ComputeWeights.cpp"
+//#include "ComputeWeights.cpp"
 
 //int main(int argc, char** argv){
 int main(){
@@ -42,8 +42,23 @@ int main(){
 	// TH1F *TT_CCUH = new TH1F("TT_CCUH","TT_CCUH",100,0,100);
 	// TH1F *StripH = new TH1F("StripH","StripH",100,0,100);
 
+	// Create output File 
+	stringstream a;
+	//a << "bin/Full_XTAL_Info_" << PD << "_PedSub" << to_string(prepulsesamples) << "+" << to_string(nPulseSamples) << "_" << note << ".txt";
+	a << "outputfile.txt";
+	string output_file = a.str();
+
+	cout << "output file path = " << output_file << endl;
+
+	ofstream combined_DOF;
+	combined_DOF.open(output_file);
+	//combined_DOF << "cmsswid\tdbID\thashedId\tiphi\tieta\tabs(ieta)\tpos\tFED\tSM\tTT(25)\tiTT\tstrip(5)\tXtal\tphiSM\tetaSM\teta\n"; // EB 
+	//combined_DOF << "cmsswID\tietaix\tiphiiy\t0iz\teta\tSM\tTT\tStrip\tXTAL\n"; 
+	//combined_DOF << "cmsswID\tietaix\tiphiiy\teta\tSM\tTT\tStrip\tXTAL\n"; 
+	combined_DOF << "CMSSWID\tieta/ix\tiphi/iy\teta\tSM/iz\tTT/SC\tStrip\tXTAL\n";
+
 	stringstream ssDOF;
-	ssDOF << "data/EE_DOF.txt";
+	ssDOF << "data/EB_DOF.txt";
 	string DOF_path = ssDOF.str();
 
 	ifstream inDOFFile; 
@@ -56,32 +71,62 @@ int main(){
 
 	string DOF_line; 
 
-	//double Strip;// Shared
-	double SM, TT_tf, iTT, Strip_f, XTAL; // EB Only  
-	double SC, iSC, TT_CCU, Strip; // EE only 
-	bool leave = false; 
+	// Variables 
 
-	int side = 0;
+	// Shared
+	double CMSSWID, eta;
+	int Strip, XTAL;
 
-	int current_line = 0;
+	// EB 
+	int ieta, iphi, SM, TT;
 
-	while((getline(inDOFFile, DOF_line)) && (leave == false)) { // read DOF line 
+	// EE 
+	int ix, iy, iz, SC;
 
-	stringstream ss(DOF_line);
+	// double SM, TT_tf, iTT, Strip_f, XTAL; // EB Only  
+	// double SC, iSC, TT_CCU, Strip; // EE only 
+
+	// Eta file
+	//double eta, CMSSWID_;
+	double CMSSWID_;
+
+	//bool leave = false; 
+
+	stringstream cw;
+	cw.precision(17);
+
+	int current_line = 0, Eta_skip_count = 0;
 
 	double d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15;
 	string s7, s10;
+	double d1_, d2_, d3_, d4_, d5_;
 
-	//cout << bool((ss >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> s7 >> d8 >> d9 >> d10 >> d11 >> d12 >> d13 >> d14 >> d15)) << endl;
-	//cout << bool((ss >> d1 >> d2 >> d3 >> d4)) << endl; //>> d5 >> d6 >> d7 >> d8 >> d9 >> s10 >> d11 >> d12 >> d13 >> d14)) << endl;
+	//while((getline(inDOFFile, DOF_line)) && (leave == false)) { // read DOF line 
+	while(getline(inDOFFile, DOF_line)) { // read DOF line 
 
-		//if(ss >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> s7 >> d8 >> d9 >> d10 >> d11 >> d12 >> d13 >> d14 >> d15){ // If DOF line contains 14 doubles, 1 string 
+	stringstream ss(DOF_line);
 
-		if (ss >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7 >> d8 >> d9 >> s10 >> d11 >> d12 >> d13 >> d14){ // EE 
+	//double d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15;
+	//string s7, s10;
+	//double d1_, d2_, d3_, d4_, d5_;
+
+	if(ss >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> s7 >> d8 >> d9 >> d10 >> d11 >> d12 >> d13 >> d14 >> d15){ // EB
+
+	//if (ss >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7 >> d8 >> d9 >> s10 >> d11 >> d12 >> d13 >> d14){ // EE 
 
 			if (string(DOF_path) == "data/EB_DOF.txt") { 
-				//cout << "EB" << endl;
-				SM = d9, TT_tf = d10, iTT = d11, Strip_f = d12, XTAL = d13;	 
+
+				CMSSWID = d1, iphi = d4, ieta = d5, SM = d9, TT = d10, Strip = d12, XTAL = d13;   
+
+				cw.precision(9);
+				cw << CMSSWID << "\t";
+				cw.precision(5);
+				cw << ieta << "\t" << iphi << "\t" << SM << "\t" << TT << "\t" << Strip << "\t" << XTAL << "\t";
+				
+				//SM = d9, TT_tf = d10, iTT = d11, Strip_f = d12, XTAL = d13;	 
+				
+				// d9_d10_d12_d13
+
 				// SMH->Fill(SM);
 				// TT_tfH->Fill(TT_tf);
 				// iTTH->Fill(iTT);
@@ -91,7 +136,7 @@ int main(){
 
 			if (string(DOF_path) == "data/EE_DOF.txt") {
 
-				side = d4, SC = d7, iSC = d8, TT_CCU = d11, Strip = d12, XTAL = d13;
+				//iz = d4, SC = d7, iSC = d8, TT_CCU = d11, Strip = d12, XTAL = d13;
 
 				// if ( (side + 1 == 0) && (SC - 247 == 0) && (Strip - 3 == 0) && (XTAL - 2 == 0)){
 
@@ -112,11 +157,73 @@ int main(){
 				// XTALH->Fill(XTAL);
 			}
 
-		} /// If DOF line contains 14 doubles, 1 string 
+		stringstream ssEta;
+		ssEta << "data/EB_DOF.txt";
+		string Eta_path = ssEta.str();
+
+		ifstream inEtaFile; 
+		inEtaFile.open(Eta_path); 
+
+		if (!inEtaFile) {
+		cout << "Unable to open Eta file\n";
+		exit(1); // terminate with error 
+		}
+
+
+		Eta_skip_count = 0;
+		Eta_skip_count += current_line; 
+
+		while(Eta_skip_count !=0){
+				//cout << "skipping " << DOF_skip_count << "lines\n";
+				inEtaFile.ignore(1000,'\n'); // count is number of rows read before this one
+				Eta_skip_count -= 1;
+				}
+
+		string Eta_line; 
+
+
+		while((getline(inEtaFile, Eta_line)){
+
+			stringstream ss_(Eta_line);
+
+			if(ss_ >> d1_ >> d2_ >> d3_ >> d4_ >> d5_){ // Eta file contains 5 doubles 
+ 
+				CMSSWID_ = d1_;
+				eta = d5_;				
+
+				if (CMSSWID == CMSSWID_){ // ID's match
+
+					cw << eta "\n";
+
+				}
+
+				else{ // ID's don't match 
+
+					cout << "ID's Don't Match\n";
+					cout << "Exiting\n";
+					exit(1); // terminate with error 
+						
+				}
+				
+			}
+
+			else{ // Eta files doesn't contain 5 doubles 
+
+				cw << 0 << "\n"; // If no eta value available, give it zero. Need to be careful with this in reconstruction code because need to tell it not to include eta = 0. 
+
+
+			}
+
+		}
+
+		output_file << cw.str();
+		cw.str("");	
+
+		} // If EB/EE DOF line contains doubles/strings 
 
 	current_line += 1;
 	//cout << "current_line = " << current_line << endl;
-	if (current_line%5000 == 0) cout << "current_line = " << current_line << endl;
+	if (current_line%500 == 0) cout << "current_line = " << current_line << endl;
 	} // Read DOF line 
 
 	// if (DOF_path == "data/EB_DOF.txt") { 
