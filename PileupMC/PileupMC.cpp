@@ -2,10 +2,11 @@
 #include "PileupMC.h"
 #include <TRandom3.h>
 #include <TMath.h>
+#include <time.h>
 
 #include <iostream>
 
-PileupMC::PileupMC(int nBX, int BX0, int eta, char* puFile, int NSamples):
+PileupMC::PileupMC(int nBX, int BX0, int eta, std::string puFile, int NSamples):
     nBX(nBX), BX0(BX0), eta(eta), NSamples(NSamples){
         // Check if BX0 is in a position when we can save
         // at least NSamples from the pulse 
@@ -16,7 +17,7 @@ PileupMC::PileupMC(int nBX, int BX0, int eta, char* puFile, int NSamples):
         }
 
         // Get PUpdf from file
-        TFile* file = new TFile(puFile);
+        TFile* file = new TFile(puFile.c_str());
         int indx = 10 * fabs(eta) / 0.1;
         if( indx < 0 )  indx = 0;
         if( indx > 13 ) indx = 13;
@@ -30,8 +31,8 @@ PileupMC::PileupMC(int nBX, int BX0, int eta, char* puFile, int NSamples):
 
 // This functions returns a tree containing the simulated samples
 TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvents, int nPU, bool debug=false){
-
-    TRandom3 rnd;
+    
+    gRandom->SetSeed(0);
 
     // fixed value for noise
     float sigmaNoise = 0.044;
@@ -60,7 +61,7 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
     double amplitudeTruth;
     
     // Making the tree
-    TTree *treeOut = new TTree("Samples", "");
+    TTree * treeOut = new TTree("samples", "");
     // treeOut->Branch("pulse_shift",    &real_pulse_shift,"pulse_shift/F");
     // treeOut->Branch("pileup_shift",   &pileup_shift,    "pileup_shift/F");
     // treeOut->Branch("nSmpl",          &nSmpl,           "nSmpl/I");
@@ -98,13 +99,15 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
         // for the requested eta interval.
         for (int ibx = 0; ibx < nBX; ibx ++){
             // number of min-bias interactions in each bunch crossing
-            nMinBias.push_back(rnd.Poisson(nPU));
-
+            nMinBias.push_back(gRandom->Poisson(nPU));
             // total energy per BX
             energyPU.push_back(0.);
             for (int imb = 0; imb < nMinBias.at(ibx); imb++) {
                 energyPU.at(ibx) += pow(10., PU_pdf->GetRandom());
             }
+
+            // std::cout << "ibx:" << ibx << " minBias: "<< nMinBias.at(ibx) 
+            //         << " energy:" << energyPU.at(ibx) << std::endl;
         }
         
         // Initialize samples
@@ -154,7 +157,7 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
         // Random gaussian noise in each sample
         std::vector<double> noise;
         for (int i=0; i < NSamples; ++i) {
-            noise.push_back(sigmaNoise * rnd.Gaus(0,1));
+            noise.push_back(sigmaNoise * gRandom->Gaus(0,1));
         }
 
         // Calculate digis noise using correlation matrix

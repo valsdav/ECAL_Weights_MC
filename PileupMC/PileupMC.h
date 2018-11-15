@@ -8,6 +8,7 @@
 #include <TGraph.h>
 #include <TH1D.h>
 #include <TString.h>
+#include <string>
 
 #include <iostream>
 
@@ -26,7 +27,7 @@ class PileupMC {
     int NSamples;
     
 public:
-    PileupMC(int nBX, int BX0, int eta, char* puFile, int NSamples);
+    PileupMC(int nBX, int BX0, int eta, std::string puFile, int NSamples);
     ~PileupMC();
 
     TTree* simulatePileup(Pulse* pulse, double signalAmplitude, int nEvents, int nPU, bool debug);
