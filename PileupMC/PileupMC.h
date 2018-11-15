@@ -29,7 +29,7 @@ public:
     PileupMC(int nBX, int BX0, int eta, char* puFile, int NSamples);
     ~PileupMC();
 
-    TTree* simulatePileup(Pulse* pulse, double signalAmplitude, int nevents, int nPU);
+    TTree* simulatePileup(Pulse* pulse, double signalAmplitude, int nEvents, int nPU, bool debug);
 
 };
 

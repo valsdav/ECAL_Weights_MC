@@ -21,29 +21,34 @@ class Pulse{
     double _beta;
     double _dt = 25.;
     double _xmin= 0.; 
-    double _xmax = 500.;
+    double _xmax = 750.;
+    int _NSamples;
     TF1* _pulseShape;
     void calculateSamples();
+    void InitNoise();
+    // noise vectors
+    std::vector <double> _mC;
+    std::vector < std::vector< double > > _mL;
 
 public:
     Pulse(double A, double t_0, double alpha, double beta);
     ~Pulse();
-
     
-    double sample(double t);
+    double sample(int i);
+    std::vector<double> GetSamples(){ return _samples; };
 
-    void setSamplingInterval(double dt)
-    {
-        _dt = dt;
-        calculateSamples();
-    }
-    
-    void setAmplitude(double A)
-    {
-        _A = A;
-        _pulseShape->SetParameter(0, _A);
-        calculateSamples();
-    }
+    void setSamplingInterval(double dt);
+    void setRange(double xmin, double xmax);
+
+    void setAmplitude(double A);
+
+    int GetNSamples(){ return _NSamples; }
+
+    // Noise Correlation matrix
+    void SetNoiseCorrelationZero();
+    void SetNoiseCorrelationMax();
+    double noise_corr_matrix(int i, int j);
+
 
 };
 

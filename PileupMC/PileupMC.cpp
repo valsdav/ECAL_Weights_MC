@@ -7,6 +7,14 @@
 
 PileupMC::PileupMC(int nBX, int BX0, int eta, char* puFile, int NSamples):
     nBX(nBX), BX0(BX0), eta(eta), NSamples(NSamples){
+        // Check if BX0 is in a position when we can save
+        // at least NSamples from the pulse 
+        if ((BX0 + NSamples) > nBX ){
+            std::cout << "Wrong BX0 position";
+            BX0 = (nBX - NSamples);
+            std::cout << "BX0 placed at BX:"<<BX0;
+        }
+
         // Get PUpdf from file
         TFile* file = new TFile(puFile);
         int indx = 10 * fabs(eta) / 0.1;
@@ -21,22 +29,35 @@ PileupMC::PileupMC(int nBX, int BX0, int eta, char* puFile, int NSamples):
 }
 
 // This functions returns a tree containing the simulated samples
-TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nevents, int nPU){
+TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvents, int nPU, bool debug=false){
 
     TRandom3 rnd;
 
+    // fixed value for noise
+    float sigmaNoise = 0.044;
+    // pedestal shift in GeV
+    float pedestal = 0.0;
+
     // Get standard pulse of amplitude 1
     pulse->setAmplitude(1);
+    int pulse_length = pulse->GetNSamples();
 
+    
     // Variables for filling the tree
-    double amplitudeTruth;
+    // Samples for all BXs
     std::vector<double> samples;
-    std::vector<double> samples_noise;
+    std::vector<double> signal_samples;
+    std::vector<double> pileup_samples;
+    // Saved samples (window of NSamples after BX0) called digis
+    std::vector<double> digis;
+    std::vector<double> digis_noise;
+    std::vector<double> signal_digis;
+    std::vector<double> pileup_digis;
     std::vector<int> nMinBias;
     std::vector<double> energyPU; 
-    std::vector<double> pulse_signal;
-    std::vector<double> pileup_signal;
     double signalTruth = signalAmplitude;
+    // given by signal + in-time pileup
+    double amplitudeTruth;
     
     // Making the tree
     TTree *treeOut = new TTree("Samples", "");
@@ -44,18 +65,23 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nevent
     // treeOut->Branch("pileup_shift",   &pileup_shift,    "pileup_shift/F");
     // treeOut->Branch("nSmpl",          &nSmpl,           "nSmpl/I");
     // treeOut->Branch("nFreq",          &nFreq,           "nFreq/F");
+    treeOut->Branch("signalTruth",    &signalTruth,     "signalTruth/D");
     treeOut->Branch("amplitudeTruth", &amplitudeTruth,  "amplitudeTruth/D");
-    treeOut->Branch("samples",        &samples);
-    treeOut->Branch("samples_noise",        &samples_noise);
     treeOut->Branch("nPU",            &nPU,             "nPU/F");
     treeOut->Branch("BX0",            &BX0,             "BX0/I");
     treeOut->Branch("nBX",            &nBX,             "nBX/I");
     // treeOut->Branch("nWF",            &nWF,             "nWF/I");
     treeOut->Branch("nMinBias",       &nMinBias);
     treeOut->Branch("energyPU",       &energyPU);
-    treeOut->Branch("pulse_signal",   &pulse_signal);
-    treeOut->Branch("pileup_signal",  &pileup_signal);
-    treeOut->Branch("signalTruth",    &signalTruth,     "signalTruth/D");
+    if (debug){
+        treeOut->Branch("samples",        &samples);
+        treeOut->Branch("signal_samples", &signal_samples);
+        treeOut->Branch("pileup_samples", &pileup_samples);
+    }
+    treeOut->Branch("digis",        &digis);
+    treeOut->Branch("digis_noise",  &digis_noise);
+    treeOut->Branch("signal_digis", &signal_digis);
+    treeOut->Branch("pileup_digis", &pileup_digis);
     // treeOut->Branch("sigmaNoise",     &sigmaNoise,      "sigmaNoise/F");
     // treeOut->Branch("puFactor",       &puFactor,        "puFactor/F");
     // treeOut->Branch("pulse_tau",      &pulse_tau,       "pulse_tau/F");
@@ -63,5 +89,93 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nevent
     // treeOut->Branch("input_pedestal",            &pedestal,             "input_pedestal/F");
     // treeOut->Branch("distortion_sample_4",            &distortion_sample_4,             "distortion_sample_4/F");
     
+    for (int ievt = 0; ievt < nEvents; ievt ++ ){
+        nMinBias.clear();
+        energyPU.clear();
+
+        // Get number of minBias interactions and their energy 
+        // using a Poisson distribution and the energy pdf of pileup
+        // for the requested eta interval.
+        for (int ibx = 0; ibx < nBX; ibx ++){
+            // number of min-bias interactions in each bunch crossing
+            nMinBias.push_back(rnd.Poisson(nPU));
+
+            // total energy per BX
+            energyPU.push_back(0.);
+            for (int imb = 0; imb < nMinBias.at(ibx); imb++) {
+                energyPU.at(ibx) += pow(10., PU_pdf->GetRandom());
+            }
+        }
+        
+        // Initialize samples
+        samples.clear();
+        signal_samples.clear();
+        pileup_samples.clear();
+        for (int ibx = 0; ibx < nBX; ibx ++) {
+            samples.push_back(0.);
+            signal_samples.push_back(0.);
+            pileup_samples.push_back(0.);
+        }
+
+        // Signal samples
+        for (int ipul = 0; ipul < pulse_length; ipul++){
+            if ((BX0 + ipul) < nBX){
+                signal_samples.at(BX0 + ipul) = signalAmplitude * pulse->sample(ipul);
+            }
+            
+        }
+
+        // Add PU pulse for each BX
+        for (int ibx = 0; ibx < nBX; ibx ++){
+            // Add the pulse amplitude on pulse_length following BXs
+            for (int ipul = 0; ipul < pulse_length; ipul++){
+                if ((ipul + ibx) < nBX){
+                    pileup_samples.at(ibx + ipul) += energyPU.at(ibx)*pulse->sample(ipul);
+                }
+            }
+        }
+         
+        // Sum signal and pileup samples
+        for (int ibx = 0; ibx < nBX; ibx ++){
+            // Save total amplitude signal + pu in all samples
+            samples.at(ibx) = pileup_samples.at(ibx) + signal_samples.at(ibx);
+        }
     
+        // Extract digis
+        digis.clear();
+        signal_digis.clear();
+        pileup_digis.clear();
+        for (int j = 0; j< NSamples; j++){
+            digis.push_back(samples.at(BX0 + j));
+            signal_digis.push_back(signal_samples.at(BX0 + j));
+            pileup_digis.push_back(pileup_samples.at(BX0 + j));
+        }   
+
+        // Random gaussian noise in each sample
+        std::vector<double> noise;
+        for (int i=0; i < NSamples; ++i) {
+            noise.push_back(sigmaNoise * rnd.Gaus(0,1));
+        }
+
+        // Calculate digis noise using correlation matrix
+        digis_noise.clear();
+        for (int i=0; i < NSamples; ++i) {
+            digis_noise.push_back(0.);
+            for(int j=0; j < NSamples; ++j){
+                digis_noise.at(i) += pulse->noise_corr_matrix(i,j) * noise.at(j);
+            }
+        }   
+
+        // Adding noise and pedestal to digis
+        for (int i=0; i < NSamples; ++i) {
+            digis.at(i) += digis_noise.at(i) + pedestal;
+        }
+        
+        // Adding energyPU to the true amplitude
+        amplitudeTruth = signalTruth + energyPU.at(BX0);
+    
+        treeOut->Fill();   
+    }
+
+    return treeOut;
 }
