@@ -43,10 +43,12 @@ public:
     void setAmplitude(double A);
 
     int GetNSamples(){ return _NSamples; }
+    double GetAlpha(){ return _alpha; }
+    double GetBeta(){ return _beta; }
+    double GetT0(){ return _t0; }
 
     // Noise Correlation matrix
     void SetNoiseCorrelationZero();
-    void SetNoiseCorrelationMax();
     double noise_corr_matrix(int i, int j);
 
 

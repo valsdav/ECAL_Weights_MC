@@ -135,25 +135,6 @@ void Pulse::SetNoiseCorrelationZero() {
   }
 }
 
-void Pulse::SetNoiseCorrelationMax() {
-  _mC.clear();
-  for(int i=0; i<_NSamples; i++){
-    _mC.push_back(1.0);
-  }
-  
-  _mL.clear();
-  // initialize
-  for(int i=0; i<_NSamples; ++i){
-    std::vector<double> temp_mL;
-    for(int j=0; j<_NSamples; ++j){
-      temp_mL.push_back(0);
-    }
-    _mL.push_back(temp_mL);
-  }
-  for(int i=0; i<_NSamples; i++){
-    _mL.at(i).at(0) = 1;
-  }
-}
 
 double Pulse::noise_corr_matrix( int i, int j ) {
   return _mL.at(i).at(j);

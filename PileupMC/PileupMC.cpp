@@ -41,7 +41,7 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
 
     // Get standard pulse of amplitude 1
     pulse->setAmplitude(1);
-    int pulse_length = pulse->GetNSamples();
+    int pulseLength = pulse->GetNSamples();
 
     
     // Variables for filling the tree
@@ -59,19 +59,19 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
     double signalTruth = signalAmplitude;
     // given by signal + in-time pileup
     double amplitudeTruth;
+    // pulse parameters
+    double pulseAlpha = pulse->GetAlpha();
+    double pulseBeta = pulse->GetBeta();
+    double pulseT0 = pulse->GetT0();
     
     // Making the tree
     TTree * treeOut = new TTree("samples", "");
     // treeOut->Branch("pulse_shift",    &real_pulse_shift,"pulse_shift/F");
     // treeOut->Branch("pileup_shift",   &pileup_shift,    "pileup_shift/F");
-    // treeOut->Branch("nSmpl",          &nSmpl,           "nSmpl/I");
-    // treeOut->Branch("nFreq",          &nFreq,           "nFreq/F");
     treeOut->Branch("signalTruth",    &signalTruth,     "signalTruth/D");
     treeOut->Branch("amplitudeTruth", &amplitudeTruth,  "amplitudeTruth/D");
-    treeOut->Branch("nPU",            &nPU,             "nPU/F");
-    treeOut->Branch("BX0",            &BX0,             "BX0/I");
-    treeOut->Branch("nBX",            &nBX,             "nBX/I");
-    // treeOut->Branch("nWF",            &nWF,             "nWF/I");
+    treeOut->Branch("nPU",            &nPU,         "nPU/F");
+    treeOut->Branch("pulseLength",    &pulseLength, "pulseLength/I");
     treeOut->Branch("nMinBias",       &nMinBias);
     treeOut->Branch("energyPU",       &energyPU);
     if (debug){
@@ -83,7 +83,13 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
     treeOut->Branch("digis_noise",  &digis_noise);
     treeOut->Branch("signal_digis", &signal_digis);
     treeOut->Branch("pileup_digis", &pileup_digis);
-    // treeOut->Branch("sigmaNoise",     &sigmaNoise,      "sigmaNoise/F");
+    treeOut->Branch("pedestal",     &pedestal, "pedestal/D");
+    treeOut->Branch("sigmaNoise",   &sigmaNoise,      "sigmaNoise/F");
+    // Pulse parameters
+    treeOut->Branch("pulseAlpha",   &pulseAlpha, "pulseAlpha/D");
+    treeOut->Branch("pulseBeta",   &pulseBeta, "pulseBeta/D");
+    treeOut->Branch("pulseT0",   &pulseT0, "pulseT0/D");
+    treeOut->Branch("eta", &eta, "eta/D");
     // treeOut->Branch("puFactor",       &puFactor,        "puFactor/F");
     // treeOut->Branch("pulse_tau",      &pulse_tau,       "pulse_tau/F");
     // treeOut->Branch("wf_name",        wf_name,         "wf_name/C");
@@ -121,7 +127,7 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
         }
 
         // Signal samples
-        for (int ipul = 0; ipul < pulse_length; ipul++){
+        for (int ipul = 0; ipul < pulseLength; ipul++){
             if ((BX0 + ipul) < nBX){
                 signal_samples.at(BX0 + ipul) = signalAmplitude * pulse->sample(ipul);
             }
@@ -130,8 +136,8 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
 
         // Add PU pulse for each BX
         for (int ibx = 0; ibx < nBX; ibx ++){
-            // Add the pulse amplitude on pulse_length following BXs
-            for (int ipul = 0; ipul < pulse_length; ipul++){
+            // Add the pulse amplitude on pulseLength following BXs
+            for (int ipul = 0; ipul < pulseLength; ipul++){
                 if ((ipul + ibx) < nBX){
                     pileup_samples.at(ibx + ipul) += energyPU.at(ibx)*pulse->sample(ipul);
                 }
