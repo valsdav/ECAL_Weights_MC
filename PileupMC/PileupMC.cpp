@@ -74,11 +74,6 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
     treeOut->Branch("pulseLength",    &pulseLength, "pulseLength/I");
     treeOut->Branch("nMinBias",       &nMinBias);
     treeOut->Branch("energyPU",       &energyPU);
-    if (debug){
-        treeOut->Branch("samples",        &samples);
-        treeOut->Branch("signal_samples", &signal_samples);
-        treeOut->Branch("pileup_samples", &pileup_samples);
-    }
     treeOut->Branch("digis",        &digis);
     treeOut->Branch("digis_noise",  &digis_noise);
     treeOut->Branch("signal_digis", &signal_digis);
@@ -90,12 +85,13 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
     treeOut->Branch("pulseBeta",   &pulseBeta, "pulseBeta/D");
     treeOut->Branch("pulseT0",   &pulseT0, "pulseT0/D");
     treeOut->Branch("eta", &eta, "eta/D");
-    // treeOut->Branch("puFactor",       &puFactor,        "puFactor/F");
-    // treeOut->Branch("pulse_tau",      &pulse_tau,       "pulse_tau/F");
-    // treeOut->Branch("wf_name",        wf_name,         "wf_name/C");
-    // treeOut->Branch("input_pedestal",            &pedestal,             "input_pedestal/F");
-    // treeOut->Branch("distortion_sample_4",            &distortion_sample_4,             "distortion_sample_4/F");
-    
+    // If debug save the entire BX train
+    if (debug){
+        treeOut->Branch("samples",        &samples);
+        treeOut->Branch("signal_samples", &signal_samples);
+        treeOut->Branch("pileup_samples", &pileup_samples);
+    }
+     
     for (int ievt = 0; ievt < nEvents; ievt ++ ){
         nMinBias.clear();
         energyPU.clear();
@@ -111,9 +107,6 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
             for (int imb = 0; imb < nMinBias.at(ibx); imb++) {
                 energyPU.at(ibx) += pow(10., PU_pdf->GetRandom());
             }
-
-            // std::cout << "ibx:" << ibx << " minBias: "<< nMinBias.at(ibx) 
-            //         << " energy:" << energyPU.at(ibx) << std::endl;
         }
         
         // Initialize samples
