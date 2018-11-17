@@ -10,6 +10,11 @@
 using namespace std;
 
 int main(int argc, char** argv){
+
+    if (argc <2){
+        std::cout << "Please insert file..." <<std::endl;
+        return 1;
+    }
     
     int verbosity = 0;
     int firstSample = 3; // 3 for current weights configuration. 
@@ -22,7 +27,7 @@ int main(int argc, char** argv){
     // ComputerWeight instance
     ComputeWeights cw (verbosity, dofitbaseline, dofittime, nPulseSamples, prepulsesamples);
 
-    TFile* file = new TFile("output.root", "update");
+    TFile* file = new TFile(argv[1], "update");
     TTree* tree_samples = (TTree*) file->Get("samples");
 
     // Digis from tree

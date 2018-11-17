@@ -11,10 +11,17 @@
 using namespace std;
 
 int main(int argc, char** argv){
-    TApplication app("app", &argc, argv);
 
-    TFile* file = new TFile("output.root", "READ");
+    if (argc <2){
+        std::cout << "Please insert file..." <<std::endl;
+        return 1;
+    }
+
+    TFile* file = new TFile(argv[1], "READ");
     TTree* tree = (TTree*) file->Get("samples");
+
+
+    TApplication app("app", &argc, argv);
     
     std::vector<double> * samples = new std::vector<double>();
     std::vector<double> * signal_digis = new std::vector<double>();
@@ -26,7 +33,7 @@ int main(int argc, char** argv){
     tree->SetBranchAddress("pileup_digis", &pileup_digis);
     tree->SetBranchAddress("digis", &digis);
     tree->SetBranchAddress("digis_noise", &digis_noise);
-    tree->GetEntry(0);
+    tree->GetEntry(1);
     
     TCanvas c;
     TGraph g; 

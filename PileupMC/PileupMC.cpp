@@ -39,10 +39,7 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
     // pedestal shift in GeV
     float pedestal = 0.0;
 
-    // Get standard pulse of amplitude 1
-    pulse->setAmplitude(1);
     int pulseLength = pulse->GetNSamples();
-
     
     // Variables for filling the tree
     // Samples for all BXs
