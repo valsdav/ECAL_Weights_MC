@@ -3,10 +3,11 @@
 #include <TRandom3.h>
 #include <TMath.h>
 #include <time.h>
+#include <string.h>
 
 #include <iostream>
 
-PileupMC::PileupMC(int nBX, int BX0, int eta, std::string puFile, int NSamples):
+PileupMC::PileupMC(int nBX, int BX0, float eta, std::string puFile, int NSamples):
     nBX(nBX), BX0(BX0), eta(eta), NSamples(NSamples){
         // Check if BX0 is in a position when we can save
         // at least NSamples from the pulse 
@@ -15,15 +16,12 @@ PileupMC::PileupMC(int nBX, int BX0, int eta, std::string puFile, int NSamples):
             BX0 = (nBX - NSamples);
             std::cout << "BX0 placed at BX:"<<BX0;
         }
-
         // Get PUpdf from file
         TFile* file = new TFile(puFile.c_str());
-        int indx = 10 * fabs(eta) / 0.1;
-        if( indx < 0 )  indx = 0;
-        if( indx > 13 ) indx = 13;
-        char hname[120];
-        sprintf(hname,"PileupPDFs/pupdf_%d",indx);
-        PU_pdf = (TH1D*)file->Get(hname);
+        int indx =  ceil(10* fabs(eta));
+        if( indx > 29 ) indx = 29;
+        std::string hname =  "h" + std::to_string(100+ indx);
+        PU_pdf = (TH1D*)file->Get(hname.c_str());
         PU_pdf->SetDirectory(0);
         file->Close();
         delete file;
@@ -39,6 +37,8 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
     // pedestal shift in GeV
     float pedestal = 0.0;
 
+    // Standardize pulse shape for all calculation
+    pulse->setAmplitude(1.);
     int pulseLength = pulse->GetNSamples();
     
     // Variables for filling the tree

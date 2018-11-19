@@ -33,7 +33,7 @@ int main(int argc, char** argv){
     tree->SetBranchAddress("pileup_digis", &pileup_digis);
     tree->SetBranchAddress("digis", &digis);
     tree->SetBranchAddress("digis_noise", &digis_noise);
-    tree->GetEntry(1);
+    tree->GetEntry(0);
     
     TCanvas c;
     TGraph g; 
