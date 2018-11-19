@@ -25,10 +25,14 @@ using namespace std;
 
 vector<double> Calc_Weights(double A, double t_0, double alpha, double beta){
 
-	// Loop Parameters
-	//int current_line = 0;
-	//bool manual_exit = false; // Can be used for debugging/testing 
-	//bool skip = false;	
+	if (A == 0){
+		cout << "A = 0\n";
+		//cout << "Exiting\n";
+		//exit(0);
+	}
+
+	// Loop Parameters 
+
 
 	int count_ = 0;
 	int verbosity = 0;
@@ -47,20 +51,26 @@ vector<double> Calc_Weights(double A, double t_0, double alpha, double beta){
 	vector<double> weights;
 
 	// Used for timing jitter weights. Setting to dummy values for now since we are not using them but may use in future. 
-	pulseShapeDerivative.push_back(0.0);
-	pulseShapeDerivative.push_back(0.0);
-	pulseShapeDerivative.push_back(0.05);
-	pulseShapeDerivative.push_back(0.1);
-	pulseShapeDerivative.push_back(0.35);
-	pulseShapeDerivative.push_back(0.25);
-	pulseShapeDerivative.push_back(-0.25);
-	pulseShapeDerivative.push_back(-0.25);
-	pulseShapeDerivative.push_back(-0.25);
-	pulseShapeDerivative.push_back(0.0);
+	// pulseShapeDerivative.push_back(0.0);
+	// pulseShapeDerivative.push_back(0.0);
+	// pulseShapeDerivative.push_back(0.05);
+	// pulseShapeDerivative.push_back(0.1);
+	// pulseShapeDerivative.push_back(0.35);
+	// pulseShapeDerivative.push_back(0.25);
+	// pulseShapeDerivative.push_back(-0.25);
+	// pulseShapeDerivative.push_back(-0.25);
+	// pulseShapeDerivative.push_back(-0.25);
+	// pulseShapeDerivative.push_back(0.0);
+
+	
+
+	
 
 	// Initialize 
 	for (int i = 0; i < 10; i++){
-		pulseShape.push_back(0.0);
+		pulseShape[i] = 0.0;
+		pulseShapeDerivative[i] = 0.0;
+		//pulseShape.push_back(0.0);
 		//weights.push_back(0.0);
 		//HC_weights.push_back(0.0);
 	}
@@ -84,104 +94,96 @@ vector<double> Calc_Weights(double A, double t_0, double alpha, double beta){
 	int firstsample = 2; // Not sure where else to define this. 
 	int lastsample = firstsample + nPulseSamples + prepulsesamples;
 
-	// When averaging weights
-	double weight = 0.0;
-	int nw = 0; // number of weights 
-
-	double A_hat = 0.0;
-	double weights_sum = 0.0;
-	double Ped_val = 0.0;
-
 	int samp_number = 0;
 
 
-		if (normalize_t0) t_0 = 125;
-		if (normalize_A) A = 1;
+	if (normalize_t0) t_0 = 125;
+	if (normalize_A) A = 1;
 
-		// Can average A, t_0, alpha, eta before setting parameters. Then obtain set of weights and add to line.
-		function_alphabeta->SetParameter (0, A);    
-		function_alphabeta->SetParameter (1, t_0 + ts); // time shift. Should be zero here unless you want ideal weights for shifted waveform    
-		function_alphabeta->SetParameter (2, alpha);  
-		function_alphabeta->SetParameter (3, beta);  
+	// Can average A, t_0, alpha, eta before setting parameters. Then obtain set of weights and add to line.
+	function_alphabeta->SetParameter (0, A);    
+	function_alphabeta->SetParameter (1, t_0 + ts); // time shift. Should be zero here unless you want ideal weights for shifted waveform    
+	function_alphabeta->SetParameter (2, alpha);  
+	function_alphabeta->SetParameter (3, beta);  
 
-		ComputeWeights A_(verbosity, dofitbaseline, dofittime, nPulseSamples, prepulsesamples);
+	ComputeWeights A_(verbosity, dofitbaseline, dofittime, nPulseSamples, prepulsesamples);
 
-		// pulse is moved to right by time_shift, so move sampling to right by time_shift.
-		count_ = 0;
+	// pulse is moved to right by time_shift, so move sampling to right by time_shift.
+	count_ = 0;
 
-		// Want samples from non-timeshifted wave to see how time shift affects recon amp 
-		// time_shift moves pulse to right by N, so move sampling beginning to right by N 
+	// Want samples from non-timeshifted wave to see how time shift affects recon amp 
+	// time_shift moves pulse to right by N, so move sampling beginning to right by N 
 
-		for(double i = xmin + ts; i < xmax + ts; i += dt){
-			//cout << "in pulse shape value " << i << endl;
-	
-			//if ( i <= (t_0 + ts - alpha*beta) ) pulseShape.push_back(0 + P) ; // if waveform undefined, set value to zero + pedestal 
-			//cout << "value = " << t_0 + ts - alpha*beta << endl;
-			if ( i <= (t_0 + ts - alpha*beta) ) pulseShape.at(count_) = (0 + P) ;	
-			
-			//else pulseShape.push_back( ( function_alphabeta->Eval(i) + P ) / (A) );/// (A + P) ); // divide by A to get weights for S*W = A 
-			//else pulseShape.push_back( ( function_alphabeta->Eval(i) + P ) );/// (A + P) ); // divide by A to get weights for S*W = A 
-			else pulseShape[count_] = ( ( function_alphabeta->Eval(i) + P ) );
-			// if (d1 >= 838861947) cout << "pulseShape[" << count_ << "] = " << pulseShape[count_] << endl;
-			//cout << "pulseShape[" << count_ << "] = " << pulseShape.at(count_) << endl;
-			count_ += 1;
-		} 
+	for(double i = xmin + ts; i < xmax + ts; i += dt){
+		//cout << "in pulse shape value " << i << endl;
 
-		A_.compute(pulseShape,pulseShapeDerivative,tMax); // Run member function
+		//if ( i <= (t_0 + ts - alpha*beta) ) pulseShape.push_back(0 + P) ; // if waveform undefined, set value to zero + pedestal 
+		//cout << "value = " << t_0 + ts - alpha*beta << endl;
+		if ( i <= (t_0 + ts - alpha*beta) ) pulseShape.at(count_) = (0 + P) ;	
+		
+		//else pulseShape.push_back( ( function_alphabeta->Eval(i) + P ) / (A) );/// (A + P) ); // divide by A to get weights for S*W = A 
+		//else pulseShape.push_back( ( function_alphabeta->Eval(i) + P ) );/// (A + P) ); // divide by A to get weights for S*W = A 
+		else pulseShape[count_] = ( ( function_alphabeta->Eval(i) + P ) );
+		// if (d1 >= 838861947) cout << "pulseShape[" << count_ << "] = " << pulseShape[count_] << endl;
+		//cout << "pulseShape[" << count_ << "] = " << pulseShape.at(count_) << endl;
+		count_ += 1;
+	} 
 
-		//firstsample = 2;
-		A_hat = 0.0;
-		weights_sum = 0.0;
-		Ped_val = 0.0;
+	A_.compute(pulseShape,pulseShapeDerivative,tMax); // Run member function
 
-		// Add two zeros to line 
-		for (int i = 0; i < 2; i++){ 
-			//cw << "0\t";
-			weights.push_back(0);
+	//firstsample = 2;
+	A_hat = 0.0;
+	weights_sum = 0.0;
+	Ped_val = 0.0;
+
+	// Add two zeros to line 
+	for (int i = 0; i < 2; i++){ 
+		//cw << "0\t";
+		weights.push_back(0);
+	}
+
+	// If not averaging parameters, need to average weights here and then add average for each sample to line. 
+	for ( int i = firstsample; i < lastsample; i++) {
+
+		weight = A_.getAmpWeight(i - firstsample); //<< "\t";
+
+		//weights[i- firstsample] += weight;
+		//nw += 1;
+
+		//cw << A_.getAmpWeight(i - firstsample) << "\t"; // add weight to line 
+		weights.push_back(weight);
+
+		//cout << "weight(" << i - firstsample << ") = " << A_.getAmpWeight(i-firstsample) << endl;
+		//h1->Fill(A_.getAmpWeight(i - firstsample)); // fill histogram 
+		weights_sum += A_.getAmpWeight(i - firstsample);
+		//cout << A_.getPedWeight(i - firstsample) << endl;
+
+
+		Ped_val += A_.getPedWeight(i - firstsample)*pulseShape[i];
+		//cout << "ped weight = " << A_.getPedWeight(i - firstsample) << endl;
+		//cout << "pulseshape[i] = " << pulseShape[i] << endl;
+
 		}
 
-		// If not averaging parameters, need to average weights here and then add average for each sample to line. 
-		for ( int i = firstsample; i < lastsample; i++) {
+	// average 
+	// How do you know when you've checked all lines in a section? Could search entire file each time but this may take a really long time. 
 
-			weight = A_.getAmpWeight(i - firstsample); //<< "\t";
+	for (int i = 0; i < 3; i++){
+		//cw << "0\t";
+		weights.push_back(0);
+	}			
 
-			//weights[i- firstsample] += weight;
-			//nw += 1;
+	// Destroy Objects 
+	name->~TString();
+	formula->~TString();
+	function_alphabeta->~TF1();
 
-			//cw << A_.getAmpWeight(i - firstsample) << "\t"; // add weight to line 
-			weights.push_back(weight);
+	return weights;
 
-			//cout << "weight(" << i - firstsample << ") = " << A_.getAmpWeight(i-firstsample) << endl;
-			//h1->Fill(A_.getAmpWeight(i - firstsample)); // fill histogram 
-			weights_sum += A_.getAmpWeight(i - firstsample);
-			//cout << A_.getPedWeight(i - firstsample) << endl;
+//} // if(!skip)
 
-
-			Ped_val += A_.getPedWeight(i - firstsample)*pulseShape[i];
-			//cout << "ped weight = " << A_.getPedWeight(i - firstsample) << endl;
-			//cout << "pulseshape[i] = " << pulseShape[i] << endl;
-
-			}
-
-		// average 
-		// How do you know when you've checked all lines in a section? Could search entire file each time but this may take a really long time. 
-
-		for (int i = 0; i < 3; i++){
-			//cw << "0\t";
-			weights.push_back(0);
-		}
-
-		//cw << "\n";
-		//Params_DOF_file << cw.str();
-		//cw.str("");				
-
-
-		return weights;
-
-	//} // if(!skip)
-
-	//--------------------------------------------------------------------------------------------------------------------------
-	// weights computed 
+//--------------------------------------------------------------------------------------------------------------------------
+// weights computed 
 
 
 

@@ -13,7 +13,10 @@
 
  */
 
-bool Correlation_Sim = false; // Set to false if don't want to simulate Correlation matrix
+#ifndef CW_CPP
+#define CW_CPP
+
+//bool Correlation_Sim = false; // Set to false if don't want to simulate Correlation matrix
 
 #include "ComputeWeights.h" 
 
@@ -190,26 +193,26 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   // Want to simulate different expoential fall offs of noise correlation, and plot different average amplitudes
   // This corresponds to expected noise.
 
-  if (Correlation_Sim)
-  	{
+  // if (Correlation_Sim)
+  // 	{
 
-	if(verbosity_)
-	  std::cout << "ComputeWeights::compute: Simulating Correlation Matrix. " << std::endl;
+	// if(verbosity_)
+	//   std::cout << "ComputeWeights::compute: Simulating Correlation Matrix. " << std::endl;
 	
-	for (int iColumn = 0; iColumn < size; iColumn++) {
-          for (int iRow = 0; iRow < size; iRow++) {
-	    //if((iRow == iColumn + 1) || ( iRow == iColumn - 1)) {
-	    if(iRow == (iColumn + 1 )) {
-		for ( int j = 0; j < (size - iColumn - 1); j++){ // extra -1 because iColumn starts at 0
-        	invCov[iRow + j][iColumn] = ((invCov[iColumn + j][iColumn]) / 2.0 );
+	// for (int iColumn = 0; iColumn < size; iColumn++) {
+  //         for (int iRow = 0; iRow < size; iRow++) {
+	//     //if((iRow == iColumn + 1) || ( iRow == iColumn - 1)) {
+	//     if(iRow == (iColumn + 1 )) {
+	// 	for ( int j = 0; j < (size - iColumn - 1); j++){ // extra -1 because iColumn starts at 0
+  //       	invCov[iRow + j][iColumn] = ((invCov[iColumn + j][iColumn]) / 2.0 );
 
-		}
+	// 	}
 			
-	      }
-	    }
- 	  }
+	//       }
+	//     }
+ 	//   }
 
-	}
+	// }
 
 
   if (verbosity_)
@@ -273,8 +276,9 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   }
 
   // Copy matrices into class members
-  chi2[3][3]=0.;
-  chi2[9][9]=0.;
+  // Comment this out? Davide said an error came from this. (overflow?)
+  // chi2[3][3]=0.;
+  // chi2[9][9]=0.;
 
   int iColumn = 0;
   int iRow = 0;
@@ -383,3 +387,5 @@ double ComputeWeights::getChi2Matrix(int iSample1, int iSample2) const
   }
   return chi2_[iSample1][iSample2];
 } // Get chi2
+
+#endif //CW_CPP 
