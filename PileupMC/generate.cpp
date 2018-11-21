@@ -10,27 +10,30 @@ using namespace std;
 
 int main(int argc, char** argv){
 
-    if (argc< 2) {
-        std::cout << "Missing number of events" << std::endl;
+    if (argc< 4) {
+        std::cout << "Missing number of events | output_file | nPU" << std::endl;
         return 1;
     }
 
     bool debug = true;
     int nevents = atoi(argv[1]);
-    Pulse * p = new Pulse(1., 125., 1.17, 40.);
+
+    // Mean parameters for eta ring 28
+    Pulse * p = new Pulse(1., 124.087766, 1.4236491, 37.7066702);
     p->SetNoiseCorrelationZero();
 
     double signalAmplitude = 5.;
+    int PU = atoi(argv[3]);
+    int nBX = 30;
+    int BX0 = 20;
+    float eta = 2.8;
+    std::string puFile = "PileupPDF.root";
+    int NSamples = 10;
 
-    PileupMC * mc = new PileupMC(40, 30, 2.9, "PileupPDF.root", 10);
+    PileupMC * mc = new PileupMC(nBX, BX0, eta, puFile, NSamples);
 
-    TFile* file = new TFile("output_nopileup.root", "RECREATE");
-    TTree* tree = mc->simulatePileup(p,signalAmplitude, nevents, 0, debug);
-    file->Write();
-    file->Close();
-
-    TFile* file_nopu = new TFile("output_pileup.root", "RECREATE");
-    TTree* tree_nopu = mc->simulatePileup(p, signalAmplitude, nevents, 35, debug);
+    TFile* file_nopu = new TFile(argv[2], "RECREATE");
+    TTree* tree_nopu = mc->simulatePileup(p, signalAmplitude, nevents, PU, debug);
     file_nopu->Write();
     file_nopu->Close();
 }

@@ -18,7 +18,7 @@ PileupMC::PileupMC(int nBX, int BX0, float eta, std::string puFile, int NSamples
         }
         // Get PUpdf from file
         TFile* file = new TFile(puFile.c_str());
-        int indx =  ceil(10* fabs(eta));
+        int indx =  floor(10* fabs(eta)) +1;
         if( indx > 29 ) indx = 29;
         std::string hname =  "h" + std::to_string(100+ indx);
         PU_pdf = (TH1D*)file->Get(hname.c_str());

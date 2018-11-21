@@ -32,7 +32,9 @@ int main(int argc, char** argv){
 
     // Digis from tree
     std::vector<double> * digis = new std::vector<double>();
+    double amplitudeTruth;
     tree_samples->SetBranchAddress("digis", &digis);
+    tree_samples->SetBranchAddress("amplitudeTruth", &amplitudeTruth);
 
     // vector for weights to be added to the tree
     double weights [nPulseSamples];
@@ -45,9 +47,8 @@ int main(int argc, char** argv){
         tree_samples->GetEntry(i);
 
         cw.compute(*digis, pulse_deriv, firstSample); 
-        
         for (int iw = 0; iw< nPulseSamples; iw++){
-            weights[iw] = cw.getAmpWeight(iw + firstSample -1);
+            weights[iw] = amplitudeTruth * cw.getAmpWeight(iw + firstSample -1);
         }
 
         wbranch->Fill();
