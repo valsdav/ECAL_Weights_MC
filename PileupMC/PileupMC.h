@@ -19,18 +19,17 @@ class PileupMC {
     int nBX;
     // BX0 for the signal pulse
     int BX0;
-    // eta
-    float eta;
     // Pileup energy pdf
-    TH1D * PU_pdf;
+    TFile * PUfile;
     // Number of samples to be saved from BX0
     int NSamples;
     
 public:
-    PileupMC(int nBX, int BX0, float eta, std::string puFile, int NSamples);
+    PileupMC(int nBX, int BX0, std::string puFile, int NSamples);
     ~PileupMC();
 
-    TTree* simulatePileup(Pulse* pulse, double signalAmplitude, int nEvents, int nPU, bool debug);
+    TTree* simulatePileup(int id, Pulse* pulse, double signalAmplitude, int nEvents, 
+            float eta, int nPU, bool debug);
 
 };
 

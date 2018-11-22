@@ -9,13 +9,7 @@
 
 using namespace std;
 
-int main(int argc, char** argv){
-
-    if (argc <2){
-        std::cout << "Please insert file..." <<std::endl;
-        return 1;
-    }
-    
+void calculateWeights(TTree* tree){
     int verbosity = 0;
     int firstSample = 3; // 3 for current weights configuration. 
   	bool dofitbaseline = 1; // 1 to use negative weights for baseline subtraction, 0 for positive weights. 
@@ -27,24 +21,21 @@ int main(int argc, char** argv){
     // ComputerWeight instance
     ComputeWeights cw (verbosity, dofitbaseline, dofittime, nPulseSamples, prepulsesamples);
 
-    TFile* file = new TFile(argv[1], "update");
-    TTree* tree_samples = (TTree*) file->Get("samples");
-
     // Digis from tree
     std::vector<double> * digis = new std::vector<double>();
     double amplitudeTruth;
-    tree_samples->SetBranchAddress("digis", &digis);
-    tree_samples->SetBranchAddress("amplitudeTruth", &amplitudeTruth);
+    tree->SetBranchAddress("digis", &digis);
+    tree->SetBranchAddress("amplitudeTruth", &amplitudeTruth);
 
     // vector for weights to be added to the tree
     double weights [nPulseSamples];
-    TBranch* wbranch = tree_samples->Branch("weights", &weights,
+    TBranch* wbranch = tree->Branch("weights", &weights,
             ("weights["+ std::to_string(nPulseSamples)+"]/D").c_str());
 
     std::vector<double> pulse_deriv; // not used for amplitude weights
 
-    for (int i = 0; i< tree_samples->GetEntries(); i++){
-        tree_samples->GetEntry(i);
+    for (int i = 0; i< tree->GetEntries(); i++){
+        tree->GetEntry(i);
 
         cw.compute(*digis, pulse_deriv, firstSample); 
         for (int iw = 0; iw< nPulseSamples; iw++){
@@ -52,10 +43,25 @@ int main(int argc, char** argv){
         }
 
         wbranch->Fill();
-        
+    }
+
+}
+
+int main(int argc, char** argv){
+
+    if (argc <2){
+        std::cout << "Please insert file..." <<std::endl;
+        return 1;
     }
     
+    std::cout << "Calculating weights for: "<< argv[1] << std::endl;
+
+    TFile* file = new TFile(argv[1], "update");
+    TTree* tree = (TTree*) file->Get("samples");
+
+    calculateWeights(tree);
+
     std::cout << "ok" << std::endl;
-    tree_samples->Write("", TObject::kOverwrite);
+    tree->Write("", TObject::kOverwrite);
     file->Close();
 }

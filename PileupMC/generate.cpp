@@ -8,32 +8,48 @@
 
 using namespace std;
 
+
+/* The script generate a TTree with the simulated pulses. 
+The parameters are: 
+ID | alpha| beta| t0| signalAmpl | eta | nPU | number of events | output_file
+The ID is saved in the TTree to distinguish the generated events
+*/
 int main(int argc, char** argv){
 
-    if (argc< 4) {
-        std::cout << "Missing number of events | output_file | nPU" << std::endl;
+    if (argc< 11) {
+        std::cout << "Missing args: ID | alpha| beta| t0| signalAmpl | eta | nPU | number of events | output_file |debug" << std::endl;
         return 1;
     }
 
-    bool debug = true;
-    int nevents = atoi(argv[1]);
+    int ID = atoi(argv[1]);
+    double alpha = atof(argv[2]);
+    double beta = atof(argv[3]);
+    double t0 = atof(argv[4]);
+    double signalAmplitude = atof(argv[5]);
+    float eta = atof(argv[6]);
+    int PU = atoi(argv[7]);
+    int nevents = atoi(argv[8]);
+    char* outputFile = argv[9];
+    bool debug = argv[10];
+
+    std::cout << "ID = "<< ID << std::endl 
+     << "alpha = " << alpha << ", beta = " << beta << ", t0 = " << t0 <<std::endl 
+     << "signal Amplitude = " << signalAmplitude << ", eta = "<< eta << ", PU = " << PU <<std::endl
+     << "Generating "<< nevents << " events" <<std::endl;
 
     // Mean parameters for eta ring 28
-    Pulse * p = new Pulse(1., 124.087766, 1.4236491, 37.7066702);
-    p->SetNoiseCorrelationZero();
+    Pulse * pulse = new Pulse(1., t0, alpha, beta);
+    pulse->SetNoiseCorrelationZero();
 
-    double signalAmplitude = 5.;
-    int PU = atoi(argv[3]);
     int nBX = 30;
     int BX0 = 20;
-    float eta = 2.8;
     std::string puFile = "PileupPDF.root";
     int NSamples = 10;
 
-    PileupMC * mc = new PileupMC(nBX, BX0, eta, puFile, NSamples);
+    PileupMC * mc = new PileupMC(nBX, BX0, puFile, NSamples);
 
-    TFile* file_nopu = new TFile(argv[2], "RECREATE");
-    TTree* tree_nopu = mc->simulatePileup(p, signalAmplitude, nevents, PU, debug);
+    TFile* file_nopu = new TFile(outputFile, "RECREATE");
+    TTree* tree_nopu = mc->simulatePileup(ID, pulse, signalAmplitude, nevents, eta, PU, debug);
     file_nopu->Write();
     file_nopu->Close();
 }

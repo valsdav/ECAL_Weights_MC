@@ -7,30 +7,35 @@
 
 #include <iostream>
 
-PileupMC::PileupMC(int nBX, int BX0, float eta, std::string puFile, int NSamples):
-    nBX(nBX), BX0(BX0), eta(eta), NSamples(NSamples){
-        // Check if BX0 is in a position when we can save
-        // at least NSamples from the pulse 
-        if ((BX0 + NSamples) > nBX ){
-            std::cout << "Wrong BX0 position";
-            BX0 = (nBX - NSamples);
-            std::cout << "BX0 placed at BX:"<<BX0;
-        }
-        // Get PUpdf from file
-        TFile* file = new TFile(puFile.c_str());
-        int indx =  floor(10* fabs(eta)) +1;
-        if( indx > 29 ) indx = 29;
-        std::string hname =  "h" + std::to_string(100+ indx);
-        PU_pdf = (TH1D*)file->Get(hname.c_str());
-        PU_pdf->SetDirectory(0);
-        file->Close();
-        delete file;
+PileupMC::PileupMC(int nBX, int BX0, std::string puFile, int NSamples):
+                     nBX(nBX), BX0(BX0), NSamples(NSamples){
+    // Check if BX0 is in a position when we can save
+    // at least NSamples from the pulse 
+    if ((BX0 + NSamples) > nBX ){
+        std::cout << "Wrong BX0 position";
+        BX0 = (nBX - NSamples);
+        std::cout << "BX0 placed at BX:"<<BX0;
+    }       
+    
+    PUfile = new TFile(puFile.c_str());
+}
+
+PileupMC::~PileupMC(){
+    PUfile->Close();
 }
 
 // This functions returns a tree containing the simulated samples
-TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvents, int nPU, bool debug=false){
-    
+TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double signalAmplitude, int nEvents, 
+                                float eta, int nPU, bool debug=false){
+
     gRandom->SetSeed(0);
+
+    // Get PDF for pileup
+    int eta_ring =  floor(10* fabs(eta)) +1;
+    if( eta_ring > 29 ) eta_ring = 29;
+    std::string hname =  "h" + std::to_string(100+ eta_ring);
+    TH1D* PU_pdf = (TH1D*) PUfile->Get(hname.c_str());
+    PU_pdf->SetDirectory(0);
 
     // fixed value for noise
     float sigmaNoise = 0.044;
@@ -43,6 +48,7 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
     
     // Variables for filling the tree
     // Samples for all BXs
+    int ID = id;
     std::vector<double> samples;
     std::vector<double> signal_samples;
     std::vector<double> pileup_samples;
@@ -65,6 +71,7 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
     TTree * treeOut = new TTree("samples", "");
     // treeOut->Branch("pulse_shift",    &real_pulse_shift,"pulse_shift/F");
     // treeOut->Branch("pileup_shift",   &pileup_shift,    "pileup_shift/F");
+    treeOut->Branch("ID", &ID);
     treeOut->Branch("signalTruth",    &signalTruth,     "signalTruth/D");
     treeOut->Branch("amplitudeTruth", &amplitudeTruth,  "amplitudeTruth/D");
     treeOut->Branch("nPU",            &nPU,         "nPU/F");
@@ -81,7 +88,7 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
     treeOut->Branch("pulseAlpha",   &pulseAlpha, "pulseAlpha/D");
     treeOut->Branch("pulseBeta",   &pulseBeta, "pulseBeta/D");
     treeOut->Branch("pulseT0",   &pulseT0, "pulseT0/D");
-    treeOut->Branch("eta", &eta, "eta/D");
+    treeOut->Branch("eta_ring", &eta_ring, "eta_ring/I");
     // If debug save the entire BX train
     if (debug){
         treeOut->Branch("samples",        &samples);
@@ -128,7 +135,7 @@ TTree* PileupMC::simulatePileup(Pulse* pulse, double signalAmplitude, int nEvent
         for (int ibx = 0; ibx < nBX; ibx ++){
             // Add the pulse amplitude on pulseLength following BXs
             for (int ipul = 0; ipul < pulseLength; ipul++){
-                if ((ipul + ibx) < nBX){
+                if ((ibx + ipul) < nBX){
                     pileup_samples.at(ibx + ipul) += energyPU.at(ibx)*pulse->sample(ipul);
                 }
             }
