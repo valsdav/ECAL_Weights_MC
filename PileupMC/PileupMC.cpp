@@ -48,7 +48,6 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double signalAmplitude, in
     
     // Variables for filling the tree
     // Samples for all BXs
-    int ID = id;
     std::vector<double> samples;
     std::vector<double> signal_samples;
     std::vector<double> pileup_samples;
@@ -71,10 +70,10 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double signalAmplitude, in
     TTree * treeOut = new TTree("samples", "");
     // treeOut->Branch("pulse_shift",    &real_pulse_shift,"pulse_shift/F");
     // treeOut->Branch("pileup_shift",   &pileup_shift,    "pileup_shift/F");
-    treeOut->Branch("ID", &ID);
+    treeOut->Branch("ID", &id, "ID/I");
     treeOut->Branch("signalTruth",    &signalTruth,     "signalTruth/D");
     treeOut->Branch("amplitudeTruth", &amplitudeTruth,  "amplitudeTruth/D");
-    treeOut->Branch("nPU",            &nPU,         "nPU/F");
+    treeOut->Branch("nPU",            &nPU,         "nPU/I");
     treeOut->Branch("pulseLength",    &pulseLength, "pulseLength/I");
     treeOut->Branch("nMinBias",       &nMinBias);
     treeOut->Branch("energyPU",       &energyPU);
