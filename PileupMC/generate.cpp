@@ -1,6 +1,7 @@
 #include "PileupMC.h"
 #include "Pulse.h"
 #include <TGraph.h>
+#include <TObject.h>
 #include <TCanvas.h>
 #include <TTreeReader.h>
 
@@ -50,6 +51,6 @@ int main(int argc, char** argv){
 
     TFile* file_nopu = new TFile(outputFile, "RECREATE");
     TTree* tree_nopu = mc->simulatePileup(ID, pulse, signalAmplitude, nevents, eta, PU, debug);
-    file_nopu->Write();
+    file_nopu->Write("", TObject::kOverwrite);
     file_nopu->Close();
 }
