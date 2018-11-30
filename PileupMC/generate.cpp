@@ -38,7 +38,6 @@ int main(int argc, char** argv){
      << "signal Amplitude = " << signalAmplitude << ", eta = "<< eta << ", PU = " << PU <<std::endl
      << "Generating "<< nevents << " events" <<std::endl;
 
-    // Mean parameters for eta ring 28
     Pulse * pulse = new Pulse(1., t0, alpha, beta);
     pulse->SetNoiseCorrelationZero();
 

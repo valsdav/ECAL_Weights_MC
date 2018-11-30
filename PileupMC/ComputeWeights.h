@@ -15,8 +15,8 @@
 #include <vector>
 
 // Include Class Libraries for High Energy Physics
-#include <CLHEP/Matrix/Matrix.h>
-#include <CLHEP/Matrix/SymMatrix.h>
+#include "CLHEP/Matrix/Matrix.h"
+#include "CLHEP/Matrix/SymMatrix.h"
 
 class ComputeWeights
 {

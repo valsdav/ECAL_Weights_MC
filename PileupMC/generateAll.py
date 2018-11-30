@@ -12,8 +12,8 @@ if len(sys.argv)<2:
     print("Missing args: DOF file")
     exit(1)
 
-signalAmplitudes = [1,10,100]
-PUs = [0, 20, 40, 60]
+signalAmplitudes = [10]
+PUs = [0, 20, 40, 50, 60,  80, 100, 150 ]
 nevents = 100000
 debug = 0
 
@@ -37,15 +37,14 @@ def generate(row):
             output_files.append(output_file)
     return output_files
 
-
-# calculate the chunk size as an integer
-worker = Pool()
-
+# Pool of workers based automatically on the cpu number
+worker = Pool(5)
+# map the generate function on every row of the DOF file
 outputs = worker.map(generate, df.iterrows())
 
 print(outputs)
 
 # Join all the files
 outputs_files = [" ".join(l) for l in outputs]
-os.system("hadd  -f outputs/total.root {}".format(" ".join(outputs_files)))
+#os.system("hadd  -f outputs/total.root {}".format(" ".join(outputs_files)))
 

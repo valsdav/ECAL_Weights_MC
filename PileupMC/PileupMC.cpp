@@ -74,15 +74,14 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double signalAmplitude, in
     treeOut->Branch("signalTruth",    &signalTruth,     "signalTruth/D");
     treeOut->Branch("amplitudeTruth", &amplitudeTruth,  "amplitudeTruth/D");
     treeOut->Branch("nPU",            &nPU,         "nPU/I");
-    treeOut->Branch("pulseLength",    &pulseLength, "pulseLength/I");
     treeOut->Branch("nMinBias",       &nMinBias);
     treeOut->Branch("energyPU",       &energyPU);
     treeOut->Branch("digis",        &digis);
     treeOut->Branch("digis_noise",  &digis_noise);
     treeOut->Branch("signal_digis", &signal_digis);
     treeOut->Branch("pileup_digis", &pileup_digis);
-    treeOut->Branch("pedestal",     &pedestal, "pedestal/D");
-    treeOut->Branch("sigmaNoise",   &sigmaNoise,      "sigmaNoise/F");
+    // treeOut->Branch("pedestal",     &pedestal, "pedestal/D");
+    // treeOut->Branch("sigmaNoise",   &sigmaNoise,      "sigmaNoise/F");
     // Pulse parameters
     treeOut->Branch("pulseAlpha",   &pulseAlpha, "pulseAlpha/D");
     treeOut->Branch("pulseBeta",   &pulseBeta, "pulseBeta/D");
