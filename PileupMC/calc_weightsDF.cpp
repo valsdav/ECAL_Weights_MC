@@ -47,8 +47,9 @@ int main(int argc, char** argv){
     
     std::cout << "Calculating weights for: "<< argv[1] << std::endl;
 
-    ROOT::EnableImplicitMT();
+    ROOT::EnableImplicitMT(6);
     int poolsize = ROOT::GetImplicitMTPoolSize();
+    std::cout << "Multi-threading pool: "<< poolsize << std::endl;
 
     // We need one ComputeWeights object per thread
     for (int i = 0; i< poolsize; i++){
@@ -68,7 +69,7 @@ int main(int argc, char** argv){
        // Save only useful branches
        .Snapshot("weights", outputfile, 
                 {"ID", "nPU", "E_pu", "signalTruth", "amplitudeTruth",
-                "w1","w2","w3","w4","w5"});
+                "digis", "w1","w2","w3","w4","w5"});
 
     
     std::cout << "ok" << std::endl;

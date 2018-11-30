@@ -12,7 +12,7 @@ if len(sys.argv)<3:
     print("Missing args: DOF file | outputdir_for_rootfiles")
     exit(1)
 
-signalAmplitudes = [1, 5, 10, 20, 30, 50]
+signalAmplitudes = [1, 5, 10, 20, 30, 50, 100]
 PUs = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150 ]
 nevents = 50000
 debug = 0

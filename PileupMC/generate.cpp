@@ -31,7 +31,7 @@ int main(int argc, char** argv){
     int PU = atoi(argv[7]);
     int nevents = atoi(argv[8]);
     char* outputFile = argv[9];
-    bool debug = argv[10];
+    bool debug = atoi(argv[10]);
 
     std::cout << "ID = "<< ID << std::endl 
      << "alpha = " << alpha << ", beta = " << beta << ", t0 = " << t0 <<std::endl 
