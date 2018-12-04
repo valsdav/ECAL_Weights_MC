@@ -221,17 +221,18 @@ void Merge_DOF_P(int max_lines, string PD, string WC, string note){
     ifstream ce(DOFPWC_s);
     copy_exists = ce.good();
 
-    if ((WC == "1") && (!copy_exists)){
-        cout << "Creating copy of DOF_P for DOF_P_1 file\n";
+	// Removing this for now because there are no weights here 
+    // if ((WC == "1") && (!copy_exists)){
+    //     cout << "Creating copy of DOF_P for DOF_P_1 file\n";
 
-        string DOFP_s_copy = DOFP_s;
+    //     string DOFP_s_copy = DOFP_s;
 
-        //cout << DOFP_s_copy << endl;
-        //cout << DOFPWC_s << endl;
+    //     //cout << DOFP_s_copy << endl;
+    //     //cout << DOFPWC_s << endl;
 
-        fs::copy_file(DOFP_s_copy,DOFPWC_s);
+    //     fs::copy_file(DOFP_s_copy,DOFPWC_s);
 
-    }
+    // }
 
 }
 

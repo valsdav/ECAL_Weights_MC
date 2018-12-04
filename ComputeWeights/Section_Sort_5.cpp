@@ -33,6 +33,11 @@ void Section_Sort_5(int max_sections, int max_lines, string PD, string WC, strin
 
 	cout << "In Section_Sort.cpp\n";
 
+	// if weights configuration contains 'P', compute weights using average parameters
+	bool ap = false; 
+	if (WC == "5P") ap = true;
+
+
 	// copy DOF_P file
 	// Open copy
 	// Order by user chosen sections
@@ -351,98 +356,108 @@ void Section_Sort_5(int max_sections, int max_lines, string PD, string WC, strin
 					// Trying calc weights without extra function:
 
 					//////////////////////////////////////////////////////////////////////
+					
+					// If WC you want average weights among section, need to calculate weights every line here.
 
-					if (A == 0){
-							cout << "A = 0\n";
-							//cout << "Exiting\n";
-							//exit(0);
-						}
-						
+					if (!ap){
 
-						// Initialize 
-						for (int i = 0; i < 10; i++){
-							pulseShape[i] = (0.0);
-							//weights.push_back(0.0);
-							//HC_weights.push_back(0.0);
-						}
+						if (A == 0){
+								cout << "A = 0\n";
+								//cout << "Exiting\n";
+								//exit(0);
+							}
+							
 
-						if (normalize_t0) t0 = 125;
-						if (normalize_A) A = 1;
-
-						// Can average A, t0, alpha, eta before setting parameters. Then obtain set of weights and add to line.
-						function_alphabeta->SetParameter (0, A);    
-						function_alphabeta->SetParameter (1, t0 + ts); // time shift. Should be zero here unless you want ideal weights for shifted waveform    
-						function_alphabeta->SetParameter (2, alpha);  
-						function_alphabeta->SetParameter (3, beta);  
-
-						ComputeWeights A_(verbosity, dofitbaseline, dofittime, nPulseSamples, prepulsesamples);
-
-						// pulse is moved to right by time_shift, so move sampling to right by time_shift.
-						count_ = 0;
-
-						// Want samples from non-timeshifted wave to see how time shift affects recon amp 
-						// time_shift moves pulse to right by N, so move sampling beginning to right by N 
-
-						for(double i = xmin + ts; i < xmax + ts; i += dt){
-
-							if ( i <= (t0 + ts - alpha*beta) ) pulseShape.at(count_) = (0 + P) ;								
-							else pulseShape[count_] = ( ( function_alphabeta->Eval(i) + P ) );
-							count_ += 1;
-						} 
-
-						A_.compute(pulseShape,pulseShapeDerivative,tMax); // Run member function
-
-						weight_number = 0;
-
-						// Add two zeros to line 
-						for (int i = 0; i < 2; i++){ 
-							//cw << "0\t";
-							//weights.push_back(0);
-							weights[weight_number] = 0;
-							weight_number += 1;
-						}
-
-						// If not averaging parameters, need to average weights here and then add average for each sample to line. 
-						for (int i = firstsample; i < lastsample; i++) {
-
-							weight = A_.getAmpWeight(i - firstsample);
-							weights[weight_number] = weight;
-							weight_number += 1;
-							//weights.push_back(weight);
-							//weights_sum += A_.getAmpWeight(i - firstsample);
-							//Ped_val += A_.getPedWeight(i - firstsample)*pulseShape[i];
-
+							// Initialize 
+							for (int i = 0; i < 10; i++){
+								pulseShape[i] = (0.0);
+								//weights.push_back(0.0);
+								//HC_weights.push_back(0.0);
 							}
 
-						// average 
-						// How do you know when you've checked all lines in a section? Could search entire file each time but this may take a really long time. 
+							if (normalize_t0) t0 = 125;
+							if (normalize_A) A = 1;
 
-						for (int i = 0; i < 3; i++){
-							//cw << "0\t";
-							weights[weight_number] = 0;
-							weight_number += 1;
-							//weights.push_back(0);
-						}			
+							// Can average A, t0, alpha, eta before setting parameters. Then obtain set of weights and add to line.
+							function_alphabeta->SetParameter (0, A);    
+							function_alphabeta->SetParameter (1, t0 + ts); // time shift. Should be zero here unless you want ideal weights for shifted waveform    
+							function_alphabeta->SetParameter (2, alpha);  
+							function_alphabeta->SetParameter (3, beta);  
 
-						// Destroy Objects 
-						//name->~TString();
-						//formula->~TString();
-						//function_alphabeta->~TF1();
+							ComputeWeights A_(verbosity, dofitbaseline, dofittime, nPulseSamples, prepulsesamples);
+
+							// pulse is moved to right by time_shift, so move sampling to right by time_shift.
+							count_ = 0;
+
+							// Want samples from non-timeshifted wave to see how time shift affects recon amp 
+							// time_shift moves pulse to right by N, so move sampling beginning to right by N 
+
+							for(double i = xmin + ts; i < xmax + ts; i += dt){
+
+								if ( i <= (t0 + ts - alpha*beta) ) pulseShape.at(count_) = (0 + P) ;								
+								else pulseShape[count_] = ( ( function_alphabeta->Eval(i) + P ) );
+								//cout << "pulseShape[" << count_ << "] = " << pulseShape[count_] << endl;
+								count_ += 1;
+							} 
+
+							A_.compute(pulseShape,pulseShapeDerivative,tMax); // Run member function
+
+							weight_number = 0;
+
+							// Add two zeros to line 
+							for (int i = 0; i < 2; i++){ 
+								//cw << "0\t";
+								//weights.push_back(0);
+								weights[weight_number] = 0;
+								weight_number += 1;
+							}
+
+							// If not averaging parameters, need to average weights here and then add average for each sample to line. 
+							for (int i = firstsample; i < lastsample; i++) {
+
+								weight = A_.getAmpWeight(i - firstsample);
+								weights[weight_number] = weight;
+								//cout << "weights[" << weight_number << "] = " << weights[weight_number] << endl;
+								weight_number += 1;
+								//weights.push_back(weight);
+								//weights_sum += A_.getAmpWeight(i - firstsample);
+								//Ped_val += A_.getPedWeight(i - firstsample)*pulseShape[i];
+
+								}
+
+							// average 
+							// How do you know when you've checked all lines in a section? Could search entire file each time but this may take a really long time. 
+
+							for (int i = 0; i < 3; i++){
+								//cw << "0\t";
+								weights[weight_number] = 0;
+								weight_number += 1;
+								//weights.push_back(0);
+							}			
+
+							// Destroy Objects 
+							//name->~TString();
+							//formula->~TString();
+							//function_alphabeta->~TF1();
 
 
-					//////////////////////////////////////////////////////////////////////
+						//////////////////////////////////////////////////////////////////////
 
-					for (int i = 0; i < 10; i++)
-						weights_sum[i] += weights[i];
-					num_weights += 1;
+					
 
-					for (int i = 0; i < 10; i++){
-						if (i != 9)
-							DOFPWC_1_ofs << weights[i] << "\t";
-							//weights[i] = 0;
-						else 
-							DOFPWC_1_ofs << weights[i] << "\n";
-							//weights[i] = 0;
+						for (int i = 0; i < 10; i++)
+							weights_sum[i] += weights[i];
+						num_weights += 1;
+
+						for (int i = 0; i < 10; i++){
+							if (i != 9)
+								DOFPWC_1_ofs << weights[i] << "\t";
+								//weights[i] = 0;
+							else 
+								DOFPWC_1_ofs << weights[i] << "\n";
+								//weights[i] = 0;
+
+						}
 
 					}
 
@@ -490,9 +505,96 @@ void Section_Sort_5(int max_sections, int max_lines, string PD, string WC, strin
 								DOFPWC_ofs << parameters[i] << "\t";
 						}
 
-						// Add avg Weights 
+						// If WC contains 'P', compute weights from average parameters
+
+						if (ap == true){
+
+							A = parameters[0], t0 = parameters[1], alpha = parameters[2], beta = parameters[3]; 
+
+							// A = 0 lines should be filtered out by Merge_DOF_P. Keeping in here for now anyway as double check 
+							if (A == 0){
+								cout << "A = 0\n";
+								//cout << "Exiting\n";
+								//exit(0);
+							}
+							
+
+							// Initialize 
+							for (int i = 0; i < 10; i++){
+								pulseShape[i] = (0.0);
+								//weights.push_back(0.0);
+								//HC_weights.push_back(0.0);
+							}
+
+							if (normalize_t0) t0 = 125;
+							if (normalize_A) A = 1;
+
+							// Can average A, t0, alpha, eta before setting parameters. Then obtain set of weights and add to line.
+							function_alphabeta->SetParameter (0, A);    
+							function_alphabeta->SetParameter (1, t0 + ts); // time shift. Should be zero here unless you want ideal weights for shifted waveform    
+							function_alphabeta->SetParameter (2, alpha);  
+							function_alphabeta->SetParameter (3, beta);  
+
+							ComputeWeights A_(verbosity, dofitbaseline, dofittime, nPulseSamples, prepulsesamples);
+
+							// pulse is moved to right by time_shift, so move sampling to right by time_shift.
+							count_ = 0;
+
+							// This loop is crucial. If you want ideal weights for a shifted waveform, need to remove ts below. 
+							// Want samples from non-timeshifted wave to see how time shift affects recon amp 
+							// time_shift moves pulse to right by N, so move sampling beginning to right by N 
+
+							for(double i = xmin + ts; i < xmax + ts; i += dt){
+
+								if ( i <= (t0 + ts - alpha*beta) ) pulseShape.at(count_) = (0 + P) ;								
+								else pulseShape[count_] = ( ( function_alphabeta->Eval(i) + P ) );
+								//cout << "pulseShape[" << count_ << "] = " << pulseShape[count_] << endl;
+								count_ += 1;
+							} 
+
+							A_.compute(pulseShape,pulseShapeDerivative,tMax); // Run member function
+
+							weight_number = 0;
+
+							// Add two zeros to line 
+							for (int i = 0; i < 2; i++){ 
+								//cw << "0\t";
+								//weights.push_back(0);
+								weights[weight_number] = 0;
+								weight_number += 1;
+							}
+
+							// Add 5 ideal weights 
+							for (int i = firstsample; i < lastsample; i++) {
+
+								weight = A_.getAmpWeight(i - firstsample);
+								weights[weight_number] = weight;
+								weight_number += 1;
+								//weights.push_back(weight);
+								//weights_sum += A_.getAmpWeight(i - firstsample);
+								//Ped_val += A_.getPedWeight(i - firstsample)*pulseShape[i];
+
+								}
+
+							// Add 3 more zeros 
+							for (int i = 0; i < 3; i++){
+								//cw << "0\t";
+								weights[weight_number] = 0;
+								weight_number += 1;
+								//weights.push_back(0);
+							}			
+
+						}
+
+						// Add weights. If WC does not contain 'P', these will be average weights among xtals in given section.
+						// If WC contains 'P', these will have just been computed above using the average parameters from the xtals in the given section. 
 						for (int i = 0; i < 10; i++){
-							weights[i] = weights_sum[i] / num_weights;
+
+							// compute average weights here. 
+							if (!ap) weights[i] = weights_sum[i] / num_weights;
+
+							// if ap, weights from avg parameters already stored in weights vector 
+
 							if (i != 9)
 								DOFPWC_ofs << weights[i] << "\t";
 							else 
@@ -557,9 +659,97 @@ void Section_Sort_5(int max_sections, int max_lines, string PD, string WC, strin
 								DOFPWC_ofs << parameters[i] << "\t";
 						}
 
-						// Add avg Weights 
+						// If WC contains 'P', compute weights from average parameters
+
+						if (ap == true){
+
+							A = parameters[0], t0 = parameters[1], alpha = parameters[2], beta = parameters[3]; 
+			
+							// A = 0 lines should be filtered out by Merge_DOF_P. Keeping in here for now anyway as double check 
+							if (A == 0){
+								cout << "A = 0\n";
+								//cout << "Exiting\n";
+								//exit(0);
+							}
+							
+
+							// Initialize 
+							for (int i = 0; i < 10; i++){
+								pulseShape[i] = (0.0);
+								//weights.push_back(0.0);
+								//HC_weights.push_back(0.0);
+							}
+
+							if (normalize_t0) t0 = 125;
+							if (normalize_A) A = 1;
+
+							// Can average A, t0, alpha, eta before setting parameters. Then obtain set of weights and add to line.
+							function_alphabeta->SetParameter (0, A);    
+							function_alphabeta->SetParameter (1, t0 + ts); // time shift. Should be zero here unless you want ideal weights for shifted waveform    
+							function_alphabeta->SetParameter (2, alpha);  
+							function_alphabeta->SetParameter (3, beta);  
+
+							ComputeWeights A_(verbosity, dofitbaseline, dofittime, nPulseSamples, prepulsesamples);
+
+							// pulse is moved to right by time_shift, so move sampling to right by time_shift.
+							count_ = 0;
+
+							// This loop is crucial. If you want ideal weights for a shifted waveform, need to remove ts below. 
+							// Want samples from non-timeshifted wave to see how time shift affects recon amp 
+							// time_shift moves pulse to right by N, so move sampling beginning to right by N 
+
+							for(double i = xmin + ts; i < xmax + ts; i += dt){
+
+								if ( i <= (t0 + ts - alpha*beta) ) pulseShape.at(count_) = (0 + P) ;								
+								else pulseShape[count_] = ( ( function_alphabeta->Eval(i) + P ) );
+								//cout << "pulseShape[" << count_ << "] = " << pulseShape[count_] << endl;
+								count_ += 1;
+							} 
+
+							A_.compute(pulseShape,pulseShapeDerivative,tMax); // Run member function
+
+							weight_number = 0;
+
+							// Add two zeros to line 
+							for (int i = 0; i < 2; i++){ 
+								//cw << "0\t";
+								//weights.push_back(0);
+								weights[weight_number] = 0;
+								weight_number += 1;
+							}
+
+							// Add 5 ideal weights 
+							for (int i = firstsample; i < lastsample; i++) {
+
+								weight = A_.getAmpWeight(i - firstsample);
+								weights[weight_number] = weight;
+								//cout << "weights[" << weight_number << "] = " << weights[weight_number] << endl;
+								weight_number += 1;
+								//weights.push_back(weight);
+								//weights_sum += A_.getAmpWeight(i - firstsample);
+								//Ped_val += A_.getPedWeight(i - firstsample)*pulseShape[i];
+
+								}
+
+							// Add 3 more zeros 
+							for (int i = 0; i < 3; i++){
+								//cw << "0\t";
+								weights[weight_number] = 0;
+								weight_number += 1;
+								//weights.push_back(0);
+							}			
+
+						}
+
+						// Add weights. If WC does not contain 'P', these will be average weights among xtals in given section.
+						// If WC contains 'P', these will have just been computed above using the average parameters from the xtals in the given section. 
 						for (int i = 0; i < 10; i++){
-							weights[i] = weights_sum[i] / num_weights;
+
+							// compute average weights here. 
+							if (!ap) weights[i] = weights_sum[i] / num_weights;
+
+							// if ap, weights from avg parameters already stored in weights vector 
+
 							if (i != 9)
 								DOFPWC_ofs << weights[i] << "\t";
 							else 

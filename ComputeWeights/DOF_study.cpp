@@ -97,7 +97,7 @@ int main(){
 
 	int current_line = 0, Eta_skip_count = 0;
 
-	double d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15;
+	double d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23;
 	string s7, s10;
 	double d1_, d2_, d3_, d4_, d5_;
 
@@ -110,9 +110,7 @@ int main(){
 	//string s7, s10;
 	//double d1_, d2_, d3_, d4_, d5_;
 
-	if(ss >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> s7 >> d8 >> d9 >> d10 >> d11 >> d12 >> d13 >> d14 >> d15){ // EB
-
-	//if (ss >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7 >> d8 >> d9 >> s10 >> d11 >> d12 >> d13 >> d14){ // EE 
+	if(ss >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> s7 >> d8 >> d9 >> d10 >> d11 >> d12 >> d13 >> d14 >> d15 >> d16 >> d17 >> d18 >> d19 >> d20 >> d21 >> d22 >> d23){
 
 			if (string(DOF_path) == "data/EB_DOF.txt") { 
 

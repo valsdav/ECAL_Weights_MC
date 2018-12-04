@@ -22,16 +22,20 @@ using namespace std;
 //#include <experimental/filesystem>
 //namespace fs = std::experimental::filesystem;
 
+// One idea for speeding up process is to save ifstream postitions where a line has already been read. When reading a line, check if position equals any positions on this list. If it does, skip it. 
+
+//#include "CW_H.cpp"
+
 // Include ideal weights algorithm 
 #include "ComputeWeights.cpp"
 
-void Section_Sort_2(int max_sections, int max_lines, string PD, string WC, string note){
+void Section_Sort_6(int max_sections, int max_lines, string PD, string WC, string note){
 
 	cout << "In Section_Sort.cpp\n";
 
 	// if weights configuration contains 'P', compute weights using average parameters
 	bool ap = false; 
-	if (WC == "2P") ap = true;
+	if (WC == "6P") ap = true;
 
 	// copy DOF_P file
 	// Open copy
@@ -64,13 +68,15 @@ void Section_Sort_2(int max_sections, int max_lines, string PD, string WC, strin
 		is.seekg (0, is.beg);
 	}
 
+	//cout << "length = " << length << endl;
+
 
 	// Create output File 1
 	stringstream DOFPWC_ss;
 	DOFPWC_ss << "bin/DOF_P_" << PD << "_" << WC << "_" << note << ".txt";
 	string dofpwc_s = DOFPWC_ss.str(); // P_DOF Output File Path 
 
-	cout << "output file path = " << dofpwc_s << endl;
+	cout << "output file 1 path = " << dofpwc_s << endl;
 
 	ofstream DOFPWC_f;
 	DOFPWC_f.open(dofpwc_s);
@@ -85,7 +91,7 @@ void Section_Sort_2(int max_sections, int max_lines, string PD, string WC, strin
 	DOFPWC_1_ss << "bin/DOF_P_" << PD << "_" << WC << "_1_" << note << ".txt";
 	string dofpwc_1_s = DOFPWC_1_ss.str(); // P_DOF Output File Path 
 
-	cout << "output file path = " << dofpwc_1_s << endl;
+	cout << "output file 2 path = " << dofpwc_1_s << endl;
 
 	ofstream DOFPWC_1_f;
 	DOFPWC_1_f.open(dofpwc_1_s);
@@ -202,7 +208,9 @@ void Section_Sort_2(int max_sections, int max_lines, string PD, string WC, strin
 	// "                 " 0_0_1_2. 
 
 	// Current Section Search Parameters (SP = Section Parameter)
-	int SP1 = 0, SP2 = 0, SP3 = 1, SP4 = 1;
+	//int SP1 = 0, SP2 = 0, SP3 = 1, SP4 = 1;
+	//int SP1 = 0, SP2 = 0; //SP3 = 1;
+	int SP1 = -28; // Eta Ring. Range: [-28,0)U(0,28]
 
 	bool EE_line = false;
 	int section_pop = 0; // population in current section 
@@ -259,7 +267,7 @@ void Section_Sort_2(int max_sections, int max_lines, string PD, string WC, strin
 		// cout << "bool((getline(inDOFPFile, line))) = " << bool((getline(inDOFPFile, line))) << endl;
 		// cout << "!section_full = " << !section_full << endl;
 
-		while((getline(inDOFPFile, line)) && (!section_full) ) { // get line of tmp_DOF_P
+		while((getline(inDOFPFile, line)) && (!section_full) ) { // get line of DOF_P
 		//while((getline(inDOFPFile, line))) { // get line of tmp_DOF_P
 
 		// why is getline executed just from being in the while condition? This I currently don't understand. 
@@ -297,12 +305,9 @@ void Section_Sort_2(int max_sections, int max_lines, string PD, string WC, strin
 				EE_line = false;
 
 			// Is this line in the currently searched for section? 
-
-	//////////////////////////////////
-
-			//if (WC == "2"){
 					
-				if ( (EE_line == SP1) && (DOF1 == SP2) && (DOF2 == SP3) && (Strip == SP4) ){
+				//if ( (EE_line == SP1) && (DOF1 == SP2) && (DOF2 == SP3) && (Strip == SP4) ){
+				if ( eta_ring == SP1 ){
 
 					section_pop += 1;
 
@@ -347,8 +352,6 @@ void Section_Sort_2(int max_sections, int max_lines, string PD, string WC, strin
 					// Trying calc weights without extra function:
 
 					//////////////////////////////////////////////////////////////////////
-
-					// If WC you want average weights among section, need to calculate weights every line here.
 
 					if (!ap){
 
@@ -454,13 +457,19 @@ void Section_Sort_2(int max_sections, int max_lines, string PD, string WC, strin
 					// Was that the final crystal in the currently searched for section? 
 
 					//if ( (WC == "2") && (section_pop == 5) ){ // Section Full. Might need different conditions for EE. 
-					if ( section_pop == 5 ){ // Section Full. Might need different conditions for EE. 
+					//cout << "section_pop = " << section_pop << endl;
+					// This is missing sections
+					// If section_pop max, or if no more lines to read, need to define section. 
+					//cout << "inDOFPFile.tellg() = " << inDOFPFile.tellg() << endl;
+					if ( section_pop == 1000000 ){ // Just making huge number so entire file is searched. Can remove this unless have a desired maximum num xtals to find per eta ring 
 
-						cout << "Section " << SP1 << "_" << SP2 << "_" << SP3 << "_" << SP4 << " is full\n";
+						//cout << "Section " << SP1 << "_" << SP2 << "_" << SP3 << "_" << SP4 << " is full\n";
+						cout << "Eta Ring " << SP1 << " is full\n";
+						//if (inDOFPFile.tellg() == DOFP_length) cout << "Entire DOF_P read. Defining section.\n";
 
 						// Add ID
 
-						ID_ss << SP1 << "_" << SP2 << "_" << SP3 << "_" << SP4 << "\t";
+						ID_ss << SP1 << "\t";
 						ID = ID_ss.str();
 						ID_ss.str(""); // reset ID_ss 
 
@@ -484,6 +493,7 @@ void Section_Sort_2(int max_sections, int max_lines, string PD, string WC, strin
 							else 
 								DOFPWC_ofs << parameters[i] << "\t";
 						}
+
 						// If WC contains 'P', compute weights from average parameters
 
 						if (ap == true){
@@ -596,12 +606,12 @@ void Section_Sort_2(int max_sections, int max_lines, string PD, string WC, strin
 
 				} // Crystal in section 
 
-	
 				// If last line, need to define section before moving on 
 				if ( inDOFPFile.tellg() == DOFP_length ){ 
 
 						//cout << "Section " << SP1 << "_" << SP2 << "_" << SP3 << "_" << SP4 << " is full\n";
-						//if (section_pop == 25) cout << "Section " << SP1 << "_" << SP2 << "_" << SP3 << " is full\n";"
+						//if (section_pop == 25) cout << "Section " << SP1 << "_" << SP2 << "_" << SP3 << " is full\n";
+
 
 						cout << "\tEntire DOF_P read with Section Population = " << section_pop << endl;
 						if (section_pop == 0){
@@ -610,10 +620,10 @@ void Section_Sort_2(int max_sections, int max_lines, string PD, string WC, strin
 							break; 	
 
 							}
-						cout << "\tDefining section " << SP1 << "_" << SP2 << "_" << SP3 << "_" << SP4 << endl;
+						cout << "\tDefining Eta Ring " << SP1 << endl;
 						// Add ID
 
-						ID_ss << SP1 << "_" << SP2 << "_" << SP3 << "_" << SP4 << "\t";
+						ID_ss << SP1 << "\t";
 						ID = ID_ss.str();
 						ID_ss.str(""); // reset ID_ss 
 
@@ -752,6 +762,12 @@ void Section_Sort_2(int max_sections, int max_lines, string PD, string WC, strin
 
 		line_number += 1;
 
+		// if (inDOFPFile.tellg() > 5300000){
+		// 	cout << "outside loop\n";
+		// 	cout << "inDOFPFile.tellg() = " << inDOFPFile.tellg() << endl;
+
+		// 	}
+
 		// Update user 
 		//if (line_number%25 == 0) cout << "line_number = " << line_number << endl;
 		//if (line_number%5000 == 0) cout << "line_number = " << line_number << endl;
@@ -764,7 +780,11 @@ void Section_Sort_2(int max_sections, int max_lines, string PD, string WC, strin
 		// Was final section just filled?
 		//if ( (WC == "2") && (SP1 == 1) && (SP2 == 1) && (SP1 == 316) && (SP1 == 5) ){
 		// Does this depend on section type? 
-		if ( (SP1 == 1) && (SP2 == 1) && (SP3 == 316) && (SP4 == 5) ){
+		//if ( (SP1 == 1) && (SP2 == 1) && (SP3 == 316) && (SP4 == 5) ){
+		//if ( (SP1 == 1) && (SP2 == 1) ){
+
+		// Last eta ring 
+		if ( SP1 == 28 ){
 
 			cout << "All sections filled\n";
 			all_sections_full = true; // stop reading DOF_P
@@ -774,124 +794,14 @@ void Section_Sort_2(int max_sections, int max_lines, string PD, string WC, strin
 		//if not, Define new section and restart search
 
 		else{
-			
-			// If that was an EB section
-			if (SP1 == 0){
 
-				// If that was the last EB section
-				if ( (SP1 == 0) && (SP2 == 35) && (SP3 == 68) && (SP4 == 5) ){
+			// Search for next eta ring 
+			SP1 += 1; 
 
-					cout << "That was last EB section. Switching to EE.\n";
+			// Skip zero ring as it doesn't exist.
+			// crystals in DOF_P with eta ring zero also have eta = 0, because there is no eta or eta ring info.
+			if(SP1 == 0) SP1 += 1;
 
-					SP1 = 1; // Start looking for EE sections 
-					SP2 = -1;
-					SP3 = 1;
-					SP4 = 1; 
-
-				}
-
-				// If that was not the last EB section 
-				else{
-
-					// If that was the last strip in TT
-					if (SP4 == 5){
-						SP4 = 1;
-
-						// If that was the last TT in SM
-
-						if (SP3 == 68){
-							SP3 = 1;
-							cout << "Just filled last TT in SM\n";
-
-							// If that was the last SM in EB
-
-							if (SP2 == 35){
-								cout << "Just filled final EB section\n";
-
-							}
-
-							// if not last SM, increment
-							else
-								SP2 += 1;
-
-						}
-
-						else{
-							// if not last TT, increment
-							SP3 += 1;
-
-						}
-
-
-					}
-
-					else{
-						// if not last strip, increment
-						SP4 += 1;
-
-					}							
-
-				}
-
-			}
-
-			// If that was an EE section
-			else if (SP1 == 1){
-
-				// If that was the last EE section
-				if ( (SP1 == 1) && (SP2 == 1) && (SP3 == 316) && (SP4 == 5) ){
-
-					//Already checked by statement before this one 
-					cout << "Last EE section filled\n";
-					all_sections_full = true;
-
-				}
-
-				// If that was not the last EE section
-
-				else{
-
-				// If that was the last strip in SC
-				if (SP4 == 5){
-					SP4 = 1;
-
-					// If that was the last SC in iz
-
-					if (SP3 == 316){
-						SP3 = 1;
-						cout << "Just filled last SC in iz\n";
-
-						// If that was the last iz in EE
-
-						if (SP2 == 1){
-							cout << "Just filled final iz section\n";
-
-						}
-
-						// if not last iz, change from -1 to 1 
-						else
-							SP2 = 1;
-
-					}
-
-					else{
-						// if not last SC, increment
-						SP3 += 1;
-
-					}
-
-
-				}
-
-				else{
-					// if not last strip, increment
-					SP4 += 1;
-
-				}
-
-				} // if not last EE section 
-
-			}
 
 		}
 

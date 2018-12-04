@@ -52,9 +52,9 @@ int main(int argc, char** argv)
 	// argv[1] = (EC) or (BD) or (BH) or (ECBH)
 	// argv[2] = (ts_min,ts_max,dts) or (ts)
 	// argv[3] = if (BD) { (EB) or (EE+) or (EE-) }  *** if (EC or BH or ECBH) {leave empty}
-	// argv[4] = (online) or (PedSubM+N) // Weights Type
+	// argv[4] = one value in range [0,5]. Weights configuration. 
 	// argv[5] = (MMMYY) // parameter date. Ex: Oct17, Jun18, Sep18 
-	// aBH_rm_outliersrgv[6] = max_rows
+	// argv[6] = max_rows
 	// argv[7] = note
 
 	string note = "";
@@ -79,20 +79,16 @@ int main(int argc, char** argv)
 	
 	bool ideal_weights = false; // True: Compute ideal weights during runtime or read from text file. False: Use single sets defined below 
 	bool online_weights = false;
-	string weights_type = "Online"; // Default weight type. Might Change this.. 
+	string WC = ""; 
 
 	// Read plot type 
 
 	if(string(argv[1]) == "EC"){
-		
 		plot_EC = true;
-
 		}
 
 	else if(string(argv[1]) == "BH"){
-
 		  plot_BH = true;
-
 		}
 
 	else if(string(argv[1]) == "ECBH"){
@@ -167,14 +163,21 @@ int main(int argc, char** argv)
 	}
 
 	// Skip one argument if plotting eta curve or BH, since this doesn't require 3rd argument of EB/EB+-
-	if ( ( string(argv[4 - (ER_Loop)]) == "online" ) || ( string(argv[4 - (ER_Loop)]) == "Online" ) ){
+	//if ( ( string(argv[4 - (ER_Loop)]) == "online" ) || ( string(argv[4 - (ER_Loop)]) == "Online" ) ){
+	//cout << "WC = " << argv[4 - ER_Loop] << endl;
+	if (string(argv[4 - (ER_Loop)]) == "0"){
+		//cout << "WC = 0 0 0" << endl;
+		WC = string(argv[4 - (ER_Loop)]);
 	    online_weights = true;	    
 	  }
 
 	else {
+		
 		ideal_weights = true;
-	        weights_type = string(argv[4 - (ER_Loop)]);
+	        WC = string(argv[4 - (ER_Loop)]);
 	      }
+
+	//cout << "ideal_weights = " << ideal_weights << endl;
 
 	bool note_exists = false;
 
@@ -246,8 +249,8 @@ int main(int argc, char** argv)
 	}
 
 	if (ideal_weights) {
-		ts_range_title << weights_type;
-		single_ts_title << weights_type;
+		ts_range_title << WC;
+		single_ts_title << WC;
 		}
 
 	if (!ideal_weights) {
@@ -286,7 +289,9 @@ int main(int argc, char** argv)
 	
 		cout << "Plotting Eta Curve\n";
 
-		vector<double> eta_boundaries = {-3.0, -2.9, -2.8, -2.7, -2.6, -2.5, -1.485, -1.16, -0.81, -0.46, 0, 0.44, 0.80, 1.14, 1.482, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0};
+		// 
+		vector<double> eta_boundaries = {-3.0, -2.65, -2.5, -2.322, -2.172, -2.0430, -1.93, -1.83, -1.74, -1.653, -1.566, -1.479, -1.131, -0.783, -0.435, 0, 0.435, 0.783, 1.131, 1.479, 1.566, 1.653, 1.74, 1.83, 1.93, 2.0430, 2.172, 2.322, 2.5, 2.65, 3.0};
+		//vector<double> eta_boundaries = {-3.0, -2.9, -2.8, -2.7, -2.6, -2.5, -1.485, -1.16, -0.81, -0.46, 0, 0.44, 0.80, 1.14, 1.482, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0};
 		//vector<double> eta_boundaries = {-2.5,-1.485,1.482,2.5};
 
 		// Define first abs_eta_max
@@ -318,7 +323,7 @@ int main(int argc, char** argv)
 			// in EC_bias, max_rows is max number of eta rows to read. Does not include eta_skip.
 			for (ts = ts_min; ts < ts_max + dts; ts += dts){
 				
-				tie(total, XTAL_count, stddev) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, weights_type, PD, eta_min, eta_max, skip, note_exists, note, plot_BH);
+				tie(total, XTAL_count, stddev) = EC_bias(max_rows, ts, EB_w, EE_w, normalized_A, normalized_t0, ideal_weights, WC, PD, eta_min, eta_max, skip, note_exists, note, plot_BH);
 				if (XTAL_count != 0){ 
 					EC->Fill(ts,total/XTAL_count); // Set histo point 
 					cout << "eta_min = " << eta_min << ", eta_max = " << eta_max << ", ts = " << ts << "\n";
@@ -342,8 +347,9 @@ int main(int argc, char** argv)
 		// Save 2d histo, later to be plotted by plot.PD 
 		ostringstream eta_title;
 		eta_title << "bin/tmp/EC_" << eta_min << "_" << eta_max << "_" << ts_min << "_" << ts_max << "_";
-		if (ideal_weights) eta_title << weights_type << "_" << PD;
-		if (!ideal_weights) eta_title << "Online_" << PD;
+		//if (ideal_weights) eta_title << WC << "_" << PD;
+		//if (!ideal_weights) eta_title << "Online_" << PD;
+		eta_title << WC << "_" << PD;
 
 		if (note_exists) eta_title << "_" << note;
 
@@ -366,7 +372,7 @@ int main(int argc, char** argv)
 	if (plot_BD){ // plot_BD
 
 		// Call function 
-		DOF_bias(single_ts_title_string, plot_EB, plot_EE_minus, plot_EE_plus, EB_w, EE_w, max_rows, ts, normalized_A, normalized_t0, ideal_weights, weights_type, PD);
+		DOF_bias(single_ts_title_string, plot_EB, plot_EE_minus, plot_EE_plus, EB_w, EE_w, max_rows, ts, normalized_A, normalized_t0, ideal_weights, WC, PD);
 
 	} // plot_BD
 

@@ -12,12 +12,15 @@ def Sigma_Calc(g,i_,x,y,xe,ye,percentage):
     sf = TMath.ErfInverse(percentage/100.)*TMath.Sqrt(2) # sigma value for desired percentage events contained in distribution 
     #print"sf = ",sf
 
-    for i in range(i_ - 1):
+    #for i in range(i_ - 1):
+    #print'i_ = ',i_
+    for i in range(i_):
         ye[i] = ye[i]*sf # multiply 1 sigma uncertainties by new sigma value. 
 
     #print sf,'sig errors = ',ye   
 
-    ng = TGraphErrors(i_ - 1, x, y, xe, ye)
+    #ng = TGraphErrors(i_ - 1, x, y, xe, ye)
+    ng = TGraphErrors(i_, x, y, xe, ye)
 
     if percentage == 90: j = 2
     if percentage == 99.5: j = 4

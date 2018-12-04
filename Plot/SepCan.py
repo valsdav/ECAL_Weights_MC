@@ -114,9 +114,13 @@ def SepCan(params):
         #print'1sig errors = ',ye 
 
         # Fill multigraph 
-        mg = Fill_mg(mg,l1,counter,x,y,xe,ye,gne,g)
+
+        num_points_ = counter - 1
+        #print'counter = ',counter
+
+        mg = Fill_mg(mg,l1,num_points_,x,y,xe,ye,gne,g)
   
-        if WT == 'PedSub0+5':
+        if WT == '1':
             WT = 'Ideal' # Eventually Have Ideal1, Ideal2, .. for diff. weights configurations. Online1, Online2, .. 
             
         #if plot_type == 'EC': 
@@ -146,6 +150,8 @@ def SepCan(params):
 
         #mg.SetTitleSize(0.04)
         #mg.GetYaxis().SetTitle("#bar{b}") # rotate this. Maybe with ttext or tlatex. Don't set title just place latex or text at correct position. 
+        #mg.GetYaxis().SetTitleFont(61)
+        mg.GetYaxis().SetTitle("#it{#bar{#Beta}}") 
         #mg.GetYaxis().SetTitleFont(61)
         mg.GetYaxis().SetTitleSize(0.04)
         mg.GetYaxis().SetTitleOffset(1.2) # This doesn't work when ymin=ymax=0
@@ -180,7 +186,7 @@ def SepCan(params):
         yTitle.SetTextFont(53) #63 
         yTitle.SetTextAlign(11)
         yTitle.SetTextSize(26) #22
-        yTitle.DrawLatex(0.02,0.87,"#bar{b}") #0.8625
+        #yTitle.DrawLatex(0.02,0.87,"#bar{b}") #0.8625
         #yTitle.SetTextFont(53)
 
         ER = ER_Dict(min_eta)

@@ -2,8 +2,8 @@ from ROOT import *
 from array import array
 from Sigma_Calc import Sigma_Calc
 
-def Fill_mg(mg,l1,i,x,y,xe,ye,gne,g):
-    'In Fillmg()'
+def Fill_mg(mg,l1,num_points,x,y,xe,ye,gne,g):
+    #print'In Fillmg()'
 
     g.SetMarkerStyle(kFullDotMedium)
     g.SetMarkerColor(kBlack)
@@ -15,7 +15,7 @@ def Fill_mg(mg,l1,i,x,y,xe,ye,gne,g):
     l1.AddEntry(gne, label, "lp") 
         
     g.SetName("g" + str(68))
-    label = "68 percent statistics"
+    label = "68% statistics"
     l1.AddEntry(g, label, "f")
 
     atmp = array('d')
@@ -28,14 +28,17 @@ def Fill_mg(mg,l1,i,x,y,xe,ye,gne,g):
     #print'atmp = ',atmp
     #print'atemp = ',atemp
 
-    g2 = Sigma_Calc(g,i,x,y,xe,atmp,90) # using this not knowing how to copy graph and only changing y errors. 
+    #num_regions = 30 # For same can 
+
+
+    g2 = Sigma_Calc(g,num_points,x,y,xe,atmp,90) # using this not knowing how to copy graph and only changing y errors. 
     g2.SetName("g" + str(90))
-    label = "90 percent statistics"
+    label = "90% statistics"
     l1.AddEntry(g2, label, "f")
 
-    g3 = Sigma_Calc(g,i,x,y,xe,atemp,99.5)
+    g3 = Sigma_Calc(g,num_points,x,y,xe,atemp,99.5)
     g3.SetName("g" + str(99.5))
-    label = "99.5 percent statistics"
+    label = "99.5% statistics"
     l1.AddEntry(g3, label, "f") # options: lpfe 
 
     mg.Add(g3, "L3") # 99.5% error band

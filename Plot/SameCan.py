@@ -80,10 +80,20 @@ def SameCan(params):
                 found = True
                 ab = h.GetBinContent(counter) # average bias 
                 abe = h.GetBinError(counter) # average bias error (one sigma)
-                x.append(i)
+
+                if ((i-16) == 0):
+                    i += 1
+                #print'i = ',i
+                x.append(i - 16) # Offsetting by number_regions/2 + 1
+                    
+                # print i-16
+
                 y.append(ab)
                 xe.append(0)
                 ye.append(abe)
+
+                #print i-16
+                #print ab 
 
             counter += 1
             
@@ -92,18 +102,30 @@ def SameCan(params):
     print'all files checked'
     ts = int(ts)
     
-    g = TGraphErrors(i - 1, x, y, xe, ye) # x, y, x errors, y errors 
+    g = TGraphErrors(30, x, y, xe, ye) # x, y, x errors, y errors 
 
-    gne = TGraph(i - 1, x, y) # Graph with no errors 
+    #gne = TGraph(i - 1, x, y) # Graph with no errors 
+    gne = TGraph(30, x, y) # 30 sections 
     gne.SetName("gne")
     gne.SetMarkerStyle(7)
 
+    
     WT = paths[0].split('_')[-3] # Weights Type
-    if WT == 'online': WT = 'Online'
+    print'WT = ',WT
+    #if WT == 'online': WT = 'Online'
+    if WT == '0': WT = 'Online'
+    if WT == '1': WT = 'Ideal by XTAL'
+    #if WT == '2': WT = 'Online'
+    #if WT == '3': WT = 'Online'
+    #if WT == '4': WT = 'Online'
+    #if WT == '5': WT = 'Online'
+
     PD = path.split('_')[-2]
 
     # Fill multigraph
-    mg = Fill_mg(mg,l1,i,x,y,xe,ye,gne,g)
+
+    num_regions = 30
+    mg = Fill_mg(mg,l1,num_regions,x,y,xe,ye,gne,g)
  
     if plot_type == 'EC': mg.SetTitle(WT + ' Weights, ' + PD + ' Parameters, Time Shift = ' + str(ts) + 'ns')
 
@@ -118,7 +140,7 @@ def SameCan(params):
     mg.Draw("A")
 
     #mg.SetTitleSize(0.04)
-    #mg.GetYaxis().SetTitle("#bar{b}") # rotate this. Maybe with ttext or tlatex. Don't set title just place latex or text at correct position. 
+    mg.GetYaxis().SetTitle("#it{#bar{#Beta}}") 
     #mg.GetYaxis().SetTitleFont(61)
     mg.GetYaxis().SetTitleSize(0.04)
     mg.GetYaxis().SetTitleOffset(1.2) # This doesn't work when ymin=ymax=0
@@ -139,11 +161,11 @@ def SameCan(params):
     xline.SetLineColor(kBlack)
     xline.SetLineStyle(1)
 
-    EBLowLine = TLine(7,lymin,7,lymax)
+    EBLowLine = TLine(-4,lymin,-4,lymax)
     EBLowLine.SetLineColor(kBlack)
     EBLowLine.SetLineStyle(2)
 
-    EBHighLine = TLine(14,lymin,14,lymax)
+    EBHighLine = TLine(4,lymin,4,lymax)
     EBHighLine.SetLineColor(kBlack)
     EBHighLine.SetLineStyle(2)
 
@@ -163,6 +185,7 @@ def SameCan(params):
     xline.Draw("SAME")
     EBLowLine.Draw("SAME")
     EBHighLine.Draw("SAME")
+    
     # tlt.Draw("SAME") # For checking text alignment 
     # tlta.Draw("SAME")
     # tltb.Draw("SAME")
@@ -201,15 +224,27 @@ def SameCan(params):
     EEpL.DrawLatex(0.1+(5*(third)/2) - (width/2),0.8625,"EE+")
     EEpL.SetTextFont(53)
 
-    yTitle = TLatex()
-    yTitle.SetNDC()
-    yTitle.SetTextAngle(0)
-    yTitle.SetTextColor(kBlack)
-    yTitle.SetTextFont(53) #63 
-    yTitle.SetTextAlign(11)
-    yTitle.SetTextSize(26) #22
-    yTitle.DrawLatex(0.02,0.87,"#bar{b}") #0.8625
-    #yTitle.SetTextFont(53)
+
+    # #l = TLatex()
+    # l = TMathText() 
+    # l.SetNDC()
+    # l.SetTextAngle(90)
+    # l.SetTextColor(kBlack)
+    # l.SetTextFont(63)
+    # l.SetTextAlign(23)
+    # l.SetTextSize(22)
+    # #l.DrawMathText(0.50, 1.000, "a")
+    # l.DrawMathText(0.005, 0.9, "#font[12]{B}")
+
+    # yTitle = TLatex()
+    # yTitle.SetNDC()
+    # yTitle.SetTextAngle(0)
+    # yTitle.SetTextColor(kBlack)
+    # yTitle.SetTextFont(53) #63 
+    # yTitle.SetTextAlign(11)
+    # yTitle.SetTextSize(26) #22
+    # yTitle.DrawLatex(0.02,0.87,"#bar{b}") #0.8625
+    # #yTitle.SetTextFont(53)
 
     save_title = "/afs/cern.ch/work/a/atishelm/CMSSW_9_0_1/src/ECAL_Weights/Plot/bin/tmp/ABvsER_ts" + str(ts) + "_" + WT + "_" + PD 
 

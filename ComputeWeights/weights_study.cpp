@@ -96,6 +96,8 @@ int main(int argc, char** argv){
 	int w_count = 0;
 	int num_weights[10];
 
+	
+
 	// Make Histogram for each weight
 
 	TH1F *weight = new TH1F("weight","weight",1000,-1,1);
