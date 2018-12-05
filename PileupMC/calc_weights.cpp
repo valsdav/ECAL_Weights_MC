@@ -58,6 +58,7 @@ int main(int argc, char** argv){
 
     TFile* file = new TFile(argv[1], "update");
     TTree* tree = (TTree*) file->Get("samples");
+    //TTree* tree = (TTree*) file->Get("weights");
 
     calculateWeights(tree);
 

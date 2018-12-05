@@ -28,7 +28,9 @@ PileupMC::~PileupMC(){
 TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double signalAmplitude, int nEvents, 
                                 float eta, int nPU, bool debug=false){
 
-    gRandom->SetSeed(0);
+    TRandom3 * rnd = new TRandom3();
+    rnd->SetSeed(0); //Random seed
+    gRandom = rnd;
 
     // Get PDF for pileup
     int eta_ring =  floor(10* fabs(eta)) +1;

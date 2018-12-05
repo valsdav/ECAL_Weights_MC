@@ -12,9 +12,9 @@ if len(sys.argv)<2:
     print("Missing args: DOF file")
     exit(1)
 
-signalAmplitudes = [10]
-PUs = [0, 20, 40, 50, 60,  80, 100, 150 ]
-nevents = 100000
+signalAmplitudes = [1, 5, 10, 50, 100]
+PUs = [0, 20, 40, 60, 100]
+nevents = 50000
 debug = 0
 
 # dataset of parameters
@@ -33,18 +33,18 @@ def generate(row):
                 row.eta_ring/10., PU, nevents, output_file, debug)
                 )
             # Calc weights
-            os.system("./calc_weights.x {}".format(output_file))
+            #os.system("./calc_weights.x {}".format(output_file))
             output_files.append(output_file)
     return output_files
 
 # Pool of workers based automatically on the cpu number
-worker = Pool(5)
+worker = Pool()
 # map the generate function on every row of the DOF file
 outputs = worker.map(generate, df.iterrows())
 
 print(outputs)
 
 # Join all the files
-outputs_files = [" ".join(l) for l in outputs]
-#os.system("hadd  -f outputs/total.root {}".format(" ".join(outputs_files)))
+# outputs_files = [" ".join(l) for l in outputs]
+# os.system("hadd  -f outputs/total.root {}".format(" ".join(outputs_files)))
 
