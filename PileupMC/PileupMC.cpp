@@ -79,9 +79,7 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double signalAmplitude, in
     treeOut->Branch("nMinBias",       &nMinBias);
     treeOut->Branch("energyPU",       &energyPU);
     treeOut->Branch("digis",        &digis);
-    treeOut->Branch("digis_noise",  &digis_noise);
-    treeOut->Branch("signal_digis", &signal_digis);
-    treeOut->Branch("pileup_digis", &pileup_digis);
+    
     // treeOut->Branch("pedestal",     &pedestal, "pedestal/D");
     // treeOut->Branch("sigmaNoise",   &sigmaNoise,      "sigmaNoise/F");
     // Pulse parameters
@@ -94,6 +92,9 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double signalAmplitude, in
         treeOut->Branch("samples",        &samples);
         treeOut->Branch("signal_samples", &signal_samples);
         treeOut->Branch("pileup_samples", &pileup_samples);
+        treeOut->Branch("digis_noise",  &digis_noise);
+        treeOut->Branch("signal_digis", &signal_digis);
+        treeOut->Branch("pileup_digis", &pileup_digis);
     }
      
     for (int ievt = 0; ievt < nEvents; ievt ++ ){

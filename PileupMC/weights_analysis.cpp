@@ -63,7 +63,7 @@ int main(int argc, char** argv){
     map<int, TTree*> trees;
 
     for (auto et: etarings){
-        files[et] = new TFile(("outputs/weights_2/weights_ID"+ to_string(et)+".root").c_str(), "READ");
+        files[et] = new TFile(("outputs/weights/weights_ID"+ to_string(et)+".root").c_str(), "READ");
         trees[et] = (TTree*)files[et]->Get("weights");
     }
 
@@ -123,6 +123,9 @@ int main(int argc, char** argv){
     }
    
     mg->Draw("APL PLC PMC");
+    mg->GetXaxis()->SetTitle("eta ring");
+    mg->GetYaxis()->SetTitle("weight variation");
+    mg->SetTitle(("Weight "+ iw).c_str());
     leg->Draw("same");
     c->Update();
 

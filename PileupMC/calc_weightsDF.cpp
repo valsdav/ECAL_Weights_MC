@@ -38,12 +38,13 @@ std::vector<double> calculateWeights(unsigned int slot, std::vector<double> digi
 
 int main(int argc, char** argv){
 
-    if (argc <3){
-        std::cout << "Please insert: inputfile | outputfile" <<std::endl;
+    if (argc <4){
+        std::cout << "Please insert: inputfile | outputfile | complete_info" <<std::endl;
         return 1;
     }
     string inputfile {argv[1]};
     string outputfile {argv[2]};
+    bool complete = atoi(argv[3]);
     
     std::cout << "Calculating weights for: "<< argv[1] << std::endl;
 
@@ -60,17 +61,22 @@ int main(int argc, char** argv){
     auto df = RDataFrame("samples", inputfile);
 
     auto dfw = df.DefineSlot("weights", calculateWeights, {"digis", "amplitudeTruth"});
-    dfw.Define("w1", "weights[0]")
+    auto _dfw = dfw.Define("w1", "weights[0]")
        .Define("w2", "weights[1]")
        .Define("w3", "weights[2]")
        .Define("w4", "weights[3]")
        .Define("w5", "weights[4]")
-       .Define("E_pu", "Mean(energyPU)")
-       // Save only useful branches
-       .Snapshot("weights", outputfile, 
-                {"ID", "nPU", "E_pu", "signalTruth", "amplitudeTruth",
-                "digis", "w1","w2","w3","w4","w5"});
+       .Define("E_pu", "Mean(energyPU)");
 
-    
+    if (complete){
+        // Save also digis for debug purposes
+        _dfw.Snapshot("weights", outputfile, {"ID", "nPU", "E_pu", "signalTruth", "amplitudeTruth",
+                "digis", "eta_ring", "w1","w2","w3","w4","w5"});
+    }else{
+        // Save only weights, not digis
+        _dfw.Snapshot("weights", outputfile, {"ID", "nPU", "E_pu", "signalTruth", "amplitudeTruth",
+                "w1","w2","w3","w4","w5"});
+    }
+          
     std::cout << "ok" << std::endl;
 }
