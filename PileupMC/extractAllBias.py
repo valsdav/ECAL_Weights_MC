@@ -7,8 +7,8 @@ if len(sys.argv)<2:
     print("Missing args: Weight file")
     exit(1)
 
-output_dir = "outputs/bias/"
-input_files = "outputs/weights/weights_ID{:.0f}.root"
+output_dir = "/eos/cms/store/user/dvalsecc/etaring_bias/"
+input_files = "/eos/cms/store/user/dvalsecc/etaring_production/etaring_ID{:.0f}.root"
 
 # dataset of parameters
 df = pd.read_csv(sys.argv[1], sep=",")
