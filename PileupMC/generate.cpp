@@ -12,13 +12,13 @@ using namespace std;
 
 /* The script generate a TTree with the simulated pulses. 
 The parameters are: 
-ID | alpha| beta| t0| signalAmpl | eta | nPU | number of events | output_file
+ID | alpha| beta| t0| signalAmpl | eta | nPU | number of events | output_file | complete_info
 The ID is saved in the TTree to distinguish the generated events
 */
 int main(int argc, char** argv){
 
     if (argc< 11) {
-        std::cout << "Missing args: ID | alpha| beta| t0| signalAmpl | eta | nPU | number of events | output_file |debug" << std::endl;
+        std::cout << "Missing args: ID | alpha| beta| t0| signalAmpl | eta | nPU | number of events | output_file | complete_info" << std::endl;
         return 1;
     }
 
