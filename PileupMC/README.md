@@ -27,7 +27,7 @@ The script used to calculate all the weights using as input the root files conta
 The ouput_file contains only some information for each event and the 5 extracted weights. 
 If *complete_info_flag==1* more info are saved in the root file.
 
-To compile the code for lxplus6:
+To compile the code for lxplus6 (more machines on condor):
 ```bash
 source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
 
@@ -45,15 +45,52 @@ Several files are prepared since condor clusters can contain only 20k jobs each.
 
 To start the submission:
 ```
-condor_submit condor_job*.txt
+mkdir log1 log2 log3 log4 output1 output2 output3 output4 error1 error2 error3 error4
+
+condor_submit condor_job1.txt
+condor_submit condor_job2.txt
+condor_submit condor_job3.txt
+condor_submit condor_job4.txt
 ```
 
-# Plot pulse shape
+If the output directory contains already data, the script skips the jobs already completed previously. 
 
-plotSamples
+# Analyse weights distribution: by strip
+
+## Plot weights mean and pileup effect
+
+The next step of the analysis is the extraction of mean weights for different PU values for all the strip. The MC samples of all the crystals that form a strip are merged before extracting the mean of the weights calculated for each event. 
+
+The script **weights_analysis_strips_condor.py** prepares a condor job for each strip. The xtals of each strip are read from the DOF file and read by the job from the eos directory containing single xtal files (no need to join the root files before).
+Each job outputs a text file containing the weights means for each PU. 
+
+The macro used to calculate the mean weights for each pileup in the condor job is **weights_analysis_stripsDF.cpp**. To compile it for lxplus6:
+
+```bash
+source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
+g++ -o weights_analysis_stripsDF.xweights_analysis_stripsDF.cpp  `root-config --libs --cflags`
+```
+
+To prepare the condor jobs run the script:
+```bash
+python weights_analysis_strips_condor.py --dof DOF_file --inputdir  directory_xtal_data --outputdir eos_dir -s signalAmplitude
+```
+Then submit the jobs to condor
+```
+mkdir output log error
+condor_submit condor_job.txt
+```
+
+When all the jobs will be completed, a single dataset with all the weights for all the strips can be created with the script **joinStripWeights.py**
+
+```
+python joinStripWeights.py --dof DOF_file -i inputdir -o outputfile -s signalAmplitude
+```
+
 
 # Extract bias 
 
 extractBias.cpp or extractBiasDF.C
+
 
 

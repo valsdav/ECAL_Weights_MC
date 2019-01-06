@@ -40,9 +40,7 @@ script='''#!/bin/sh
 source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
 
 for PU in {PUs}; do
-    echo -e "$8/output_ID$1_PU$PU_A$5.root";
     pulsefile=pulses_ID$1_PU${PU}_A$5.root;
-    
     ./generate.x $1 $2 $3 $4 $5 $6 $PU $7 $pulsefile $9;
     
 done
@@ -51,8 +49,13 @@ echo -e "Hadding...";
 hadd all_pulses_ID$1.root pulses_ID$1_*.root
 
 echo -e "Calc weights...";
-./calc_weightsDF.x all_pulses_ID$1.root  $8/weights_ID$1_A$5.root 1
+./calc_weightsDF.x all_pulses_ID$1.root final_output.root  1
+
+echo -e "Copying on EOS...";
+xrdcp --nopbar final_output.root  root://eosuser.cern.ch/$8/weights_ID$1_A$5.root
 '''
+
+existing_files = os.listdir(outputdir)
 
 script = script.replace("{PUs}", " ".join(map(str, PUs))) 
 
@@ -64,9 +67,10 @@ def generate(row):
     ID = int(row.CMSSWID)
     params = []
     # Check if the file exists
-    if not os.path.exists(outputdir+ "/weights_ID{}_A{}.root".format(ID,signalAmpl)):
+    if not "weights_ID{}_A{:.1f}.root".format(ID,signalAmpl) in existing_files:
+        print("Adding ID: {}".format(ID))
         # add a line of parameters for this crystal
-        params.append("{} {} {} {} {} {} {} {} {}".format(
+        params.append("{} {} {} {} {:.1f} {} {} {} {}".format(
             ID, row.alpha, row.beta, row.t0, signalAmpl, 
             row.eta, nevents, outputdir, debug))
     return params

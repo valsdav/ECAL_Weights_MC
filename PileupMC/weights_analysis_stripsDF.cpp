@@ -19,27 +19,30 @@ typedef RInterface<ROOT::Detail::RDF::RJittedFilter, void> FilterObj;
 
 int main(int argc, char** argv){
 
-    if (argc< 5) {
-        std::cout << "Missing args: inputfile | signalTruth | outputfile | NThread" << std::endl;
+    if (argc< 4) {
+        std::cout << "Missing args: outputfile | NThread | inputfiles" << std::endl;
         return 1;
     }  
 
     // Path to the file, only the ID will be added at the end
-    string inputfile = argv[1];
-    char* signal = argv[2];
-    string outputfile = argv[3];
-    int nthread = atoi(argv[4]);
+    string outputfile = argv[1];
+    int nthread = atoi(argv[2]);
+
+    vector<string> inputfiles; 
+    for (int i = 3; i < argc; i++){
+        inputfiles.push_back(argv[i]);
+    }
 
     ROOT::EnableImplicitMT(nthread);
     int poolsize = ROOT::GetImplicitMTPoolSize();
     std::cout << "Multi-threading pool: "<< poolsize << std::endl;
 
-    vector<int> PUs = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150};
+    vector<int> PUs = {0, 20, 30, 40, 50, 60, 80, 100, 150};
     
-    RDataFrame df ("weights", inputfile );
+    RDataFrame df ("weights", inputfiles);
 
     // For each weight: map PU,  vector of weights
-    map<int,vector<Rptr>> df_means ; 
+    map<int,vector<Rptr>> df_means; 
      
     for (auto pu : PUs){
         cout << "PU: " << pu <<endl;
@@ -55,7 +58,7 @@ int main(int argc, char** argv){
     
 
     cout << "Calculating..." <<endl; 
-
+    
     //Save the file
     ofstream output;
     output.open (outputfile);
@@ -71,6 +74,6 @@ int main(int argc, char** argv){
 
     output.close();
 
-
+    cout << "Done!" << endl;
 
 }

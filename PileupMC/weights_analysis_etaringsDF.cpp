@@ -175,11 +175,11 @@ int main(int argc, char** argv){
             l->Draw();
             current_y += 1/ 64.;
         }
-        TLine * leta1 = new TLine(-16, c->GetUymin(), -16,c->GetUymax());
+        TLine * leta1 = new TLine(-18, c->GetUymin(), -18,c->GetUymax());
         leta1->SetLineColor(kBlue);
         leta1->SetLineStyle(2);
         leta1->Draw();
-        TLine * leta2 = new TLine(16, c->GetUymin(), 16,c->GetUymax());
+        TLine * leta2 = new TLine(18, c->GetUymin(), 18,c->GetUymax());
         leta2->SetLineColor(kBlue);
         leta2->SetLineStyle(2);
         leta2->Draw();
