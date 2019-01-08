@@ -3,10 +3,6 @@ import os
 import pandas as pd 
 import argparse
 
-if len(sys.argv)< 4:
-    print("Missing args: DOF file | inputtemplate | outputfile")
-    exit(1)
-
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
 parser.add_argument("-i", "--inputdir", type=str, help="Inputdir", required=True)

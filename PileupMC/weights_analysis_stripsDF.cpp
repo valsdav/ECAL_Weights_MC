@@ -43,6 +43,7 @@ int main(int argc, char** argv){
 
     // For each weight: map PU,  vector of weights
     map<int,vector<Rptr>> df_means; 
+    map<int, Rptr> Epu_means;
      
     for (auto pu : PUs){
         cout << "PU: " << pu <<endl;
@@ -54,18 +55,20 @@ int main(int argc, char** argv){
             _means.push_back(pu_df.Mean("w"+to_string(iw)));
         }
         df_means[pu] = _means;
+        // Saving mean PU energy for this PU
+        Epu_means[pu] = pu_df.Mean("E_pu");
     }
-    
+  
 
     cout << "Calculating..." <<endl; 
     
     //Save the file
     ofstream output;
     output.open (outputfile);
-    output << "PU,w1,w2,w3,w4,w5"<<endl;
+    output << "PU,E_pu,w1,w2,w3,w4,w5"<<endl;
     
     for (int pu: PUs){
-        output <<  pu << ",";
+        output <<  pu << "," << Epu_means[pu].GetValue() << "," ;
         for (int iw = 0; iw < 5; iw++){
             output<< df_means[pu][iw].GetValue() << ",";
         }
