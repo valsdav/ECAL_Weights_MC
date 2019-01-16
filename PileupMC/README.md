@@ -35,12 +35,14 @@ g++ -o calc_weightsDF.x calc_weightsDF.cpp ComputeWeights.cpp  `root-config --li
 ```
 
 ## Mass production on Condor
-To production weights data for each crystal HTCondor jobs can be used. The script **preparare_wegithsGen_condor.py** 
-prepares a single condor job for each crystal. Each job generates data for different pileups, calculates weights and produced a single final file.  A *DOF* (Degree Of Freedom) file is used to get the parameters for each crystal of ECAL. 
+To production weights data for each crystal we can use HTCondor jobs. The script **preparare_wegithsGen_condor.py** 
+prepares a single condor job for each crystal. Each job generates data for different pileups and different amplitudes,  calculates weights and produced a single final file.  A *DOF* (Degree Of Freedom) file is used to get the parameters for each crystal of ECAL. 
 
 ```
-python preparare_wegithsGen_condor.py --dof filename --outpudir dirname --signal-amplitude 10.0 --nevents 2000
+python preparare_wegithsGen_condor.py --dof filename --outpudir dirname --signal-amplitudes (list) --pu (list) --nevents 2000 [-st strip list]
 ```
+The *--signal-amplitudes (-s)* option accepts a list of amplitudes, whereas the *--pu (-p)* option a list of PU values. The optional option *--strips (-st)* can be used to filter the wanted strips ids. 
+
 Several files are prepared since condor clusters can contain only 20k jobs each. 
 
 To start the submission:
@@ -64,16 +66,16 @@ The next step of the analysis is the extraction of mean weights for different PU
 The script **weights_analysis_strips_condor.py** prepares a condor job for each strip. The xtals of each strip are read from the DOF file and read by the job from the eos directory containing single xtal files (no need to join the root files before).
 Each job outputs a text file containing the weights means for each PU. 
 
-The macro used to calculate the mean weights for each pileup in the condor job is **weights_analysis_stripsDF.cpp**. To compile it for lxplus6:
+The macro used to calculate the mean weights for each pileup in the condor job is **weights_analysis_stripsDF.cpp**. To compile it for lxplus6 (with updated Root 6.17 Dataframe):
 
 ```bash
-source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
-g++ -o weights_analysis_stripsDF.xweights_analysis_stripsDF.cpp  `root-config --libs --cflags`
+source /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
+g++ -o weights_analysis_stripsDF.x weights_analysis_stripsDF.cpp  `root-config --libs --cflags` -I"/cvmfs/sft-nightlies.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/include"
 ```
 
 To prepare the condor jobs run the script:
 ```bash
-python weights_analysis_strips_condor.py --dof DOF_file --inputdir  directory_xtal_data --outputdir eos_dir -s signalAmplitude
+python weights_analysis_strips_condor.py --dof DOF_file --inputdir  directory_xtal_data --outputdir eos_dir -s signalAmplitudes [-st strips list]
 ```
 Then submit the jobs to condor
 ```

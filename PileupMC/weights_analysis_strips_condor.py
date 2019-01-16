@@ -11,13 +11,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
 parser.add_argument("-i", "--inputdir", type=str, help="Inputdir", required=True)
 parser.add_argument("-o", "--outputdir", type=str, help="Outputdir", required=True)
-parser.add_argument("-s", "--signal-amplitude", type=float, help="Signal amplitude", required=True)
+parser.add_argument("-s", "--signal-amplitudes", nargs="+", type=float, help="Signal amplitude", required=True)
 parser.add_argument("-nt", "--nthreads", type=int, help="Number of threads", required=False, default=3)
+parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
 args = parser.parse_args()
 
 inputdir = args.inputdir
 outputdir = args.outputdir
-signalAmpl = args.signal_amplitude
+signalAmpls = args.signal_amplitudes
 nthreads = args.nthreads
 
 # dataset of parameters
@@ -35,24 +36,42 @@ transfer_input_files    = weights_analysis_stripsDF.x, run_script.sh
 queue arguments from arguments.txt
 '''
 
-script = '''#!/bin/sh
+script = '''#!/bin/sh -e
 
-source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
+#source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
+source /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
 
-./weights_analysis_stripsDF.x output.txt $2 $3 $4;
+OUTPUT=$1;  shift
+NTHREADS=$1; shift
+XTALS="$@"
 
-echo -e "Copying on EOS: $1";
-xrdcp --nopbar output.txt root://eosuser.cern.ch/$1;
+echo -e "xtals: $XTALS";
+
+for A in {Ampls}; do
+
+./weights_analysis_stripsDF.x $A output_A${A}.txt $NTHREADS $XTALS;
+
+xrdcp --nopbar output_A${A}.txt root://eosuser.cern.ch/${OUTPUT}_A${A}.txt;
+
+done
+
 '''
+
+script = script.replace("{Ampls}", " ".join(map(lambda a: "{:.1f}".format(a), signalAmpls)))
 
 arguments= []
 
 for strip, d in df.groupby("stripid"):
-    command = "{0}/weights_stripID{1:.0f}_A{2:.1f}.txt {3} ".format(
-                    outputdir, strip, signalAmpl, nthreads)
+    # Check filter on strips
+    if args.strips != None:
+        if strip not in args.strips:
+            continue
+
+    command = "{0}/weights_stripID{1:.0f} {2} ".format(
+                    outputdir, strip, nthreads)
     for xtal in d.CMSSWID:
         # xrootd protocol is used to read the data
-        command += "root://eosuser.cern.ch/{0}/weights_ID{1}_A{2:.1f}.root ".format(inputdir, xtal, signalAmpl)
+        command += "root://eosuser.cern.ch/{0}/weights_ID{1}.root ".format(inputdir, xtal)
     arguments.append(command)
     
     
