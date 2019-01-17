@@ -64,7 +64,7 @@ If the output directory contains already data, the script skips the jobs already
 The next step of the analysis is the extraction of mean weights for different PU values for all the strip. The MC samples of all the crystals that form a strip are merged before extracting the mean of the weights calculated for each event. 
 
 The script **weights_analysis_strips_condor.py** prepares a condor job for each strip. The xtals of each strip are read from the DOF file and read by the job from the eos directory containing single xtal files (no need to join the root files before).
-Each job outputs a text file containing the weights means for each PU. 
+Each job outputs a text file containing the weights means for each PU and each signal amplitude. 
 
 The macro used to calculate the mean weights for each pileup in the condor job is **weights_analysis_stripsDF.cpp**. To compile it for lxplus6 (with updated Root 6.17 Dataframe):
 
@@ -75,7 +75,7 @@ g++ -o weights_analysis_stripsDF.x weights_analysis_stripsDF.cpp  `root-config -
 
 To prepare the condor jobs run the script:
 ```bash
-python weights_analysis_strips_condor.py --dof DOF_file --inputdir  directory_xtal_data --outputdir eos_dir -s signalAmplitudes [-st strips list]
+python weights_analysis_strips_condor.py --dof DOF_file --inputdir  directory_xtal_data --outputdir eos_dir --signal-amplitudes (list) --pu (list) [-st strips list]
 ```
 Then submit the jobs to condor
 ```
@@ -91,8 +91,22 @@ python joinStripWeights.py --dof DOF_file -i inputdir -o outputfile -s signalAmp
 
 
 # Extract bias 
+For each different set of weights based on different strip, PU and signal amplitudes, the reconstructed amplitude can be simulated using the digis saved for each event. 
 
-extractBias.cpp or extractBiasDF.C
+The script **extractBiasDF.cpp** is used to calculated the reconstructud amplitude and bias on each xtal events file, for a specific set of weights.  The output of this script is a CSV file with the mean and std of the reconstructed ampitude and bias for each combination of PU and signal amplitude. 
+
+All the set of weights for each strip are applied to each xtal data using the script **extractAllBias_condor.py** that prepares several condor_jobs.
+
+```
+python extractAllBias_condor.py --dof DOF_file --weights-file file_with_strips_weights  --inputdir dir --outputdir dir --mode 1/2 [ --nthreads 4]
+
+condor_submit condor_job1.txt (and others)
+```
+If *mode=2* a CSV file with statistical info about the bias for each combination of PU and signal. If *mode=1* a simple root tree with the reconstructed amplitude and bias for each event is created. 
+
+## Join the bias per strip
+At this step the bias is calculated for xtal. We have to merge all the outputs of the previous step and calculated the bias statistics for strip instead of for xtal. 
+
 
 
 

@@ -73,7 +73,7 @@ int main(int argc, char** argv){
         intime_ampls_stds[pu] = pu_df.StdDev("amplitudeTruth");
     }
   
-    cout << "Calculating..." <<endl; 
+    
     
     //Save the file
     ofstream output;
