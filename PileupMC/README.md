@@ -59,12 +59,10 @@ If the output directory contains already data, the script skips the jobs already
 
 # Analyse weights distribution: by strip
 
-## Plot weights mean and pileup effect
-
-The next step of the analysis is the extraction of mean weights for different PU values for all the strip. The MC samples of all the crystals that form a strip are merged before extracting the mean of the weights calculated for each event. 
+The next step of the analysis is the extraction of mean weights for different PU values for all the strips. The MC samples of all the crystals that form a strip are merged before extracting the mean of the weights calculated for each event. 
 
 The script **weights_analysis_strips_condor.py** prepares a condor job for each strip. The xtals of each strip are read from the DOF file and read by the job from the eos directory containing single xtal files (no need to join the root files before).
-Each job outputs a text file containing the weights means for each PU and each signal amplitude. 
+Each job outputs one text file for each signal amplitude containing the weights means for each PU. 
 
 The macro used to calculate the mean weights for each pileup in the condor job is **weights_analysis_stripsDF.cpp**. To compile it for lxplus6 (with updated Root 6.17 Dataframe):
 
@@ -83,17 +81,19 @@ mkdir output log error
 condor_submit condor_job.txt
 ```
 
-When all the jobs will be completed, a single dataset with all the weights for all the strips can be created with the script **joinStripWeights.py**
+When all the jobs will be completed, a single dataset with all the weights for all the strips (with all combinations of PU and signal) can be created with the script **joinStripWeights.py**
 
 ```
-python joinStripWeights.py --dof DOF_file -i inputdir -o outputfile -s signalAmplitude
+python joinStripWeights.py --dof DOF_file -i inputdir -o outputfile -s signalAmplitude [-st stripslist]
 ```
 
 
 # Extract bias 
-For each different set of weights based on different strip, PU and signal amplitudes, the reconstructed amplitude can be simulated using the digis saved for each event. 
+At this point we have a weights dataset with the optimized weights for each strip, each PU and each signal amplitude. 
 
-The script **extractBiasDF.cpp** is used to calculated the reconstructud amplitude and bias on each xtal events file, for a specific set of weights.  The output of this script is a CSV file with the mean and std of the reconstructed ampitude and bias for each combination of PU and signal amplitude. 
+For each different set of weights based on different strip, PU and signal amplitudes, the reconstructed amplitude can be simulated using the digis saved for each event. This calculation is done on xtal base and then the results are aggregated by strip. 
+
+The script **extractBiasDF.cpp** is used to calculate the reconstructed amplitude and bias on each xtal event file, for a specific set of weights.  The output of this script is a CSV file with the mean and std of the reconstructed ampitude and bias for each combination of PU and signal amplitude. 
 
 All the set of weights for each strip are applied to each xtal data using the script **extractAllBias_condor.py** that prepares several condor_jobs.
 
@@ -105,7 +105,14 @@ condor_submit condor_job1.txt (and others)
 If *mode=2* a CSV file with statistical info about the bias for each combination of PU and signal. If *mode=1* a simple root tree with the reconstructed amplitude and bias for each event is created. 
 
 ## Join the bias per strip
-At this step the bias is calculated for xtal. We have to merge all the outputs of the previous step and calculated the bias statistics for strip instead of for xtal. 
+At this step the bias is calculated for xtal for each set of weights optimized for all the combinations of PU and signal. We have to merge all the datasets  and calculate the bias statistics for strip instead of for xtal. 
+
+The script **joinStripBias.py** does this job and produces a final datasets with all the bias for each strip, for each PU and signal amplitude, calculated with each set of weights (identified by the *wPU* and *wS* labels). 
+
+```
+python joinStripBias.py -d DOF -w weights_files_per_strip  -i inputdir -o outputfile [--dry]
+```
+if *--dry* option is used the script checks only the presence of all the necessary files.
 
 
 

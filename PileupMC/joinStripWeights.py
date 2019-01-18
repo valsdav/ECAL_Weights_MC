@@ -28,11 +28,6 @@ for strip in df.stripid.unique():
         wdfs.append(d)
         print(d)
 
-# totaldf = wdfs[0]
 
-# for i in range(1, len(wdfs)):
-#     totaldf = totaldf.append(wdfs[i])
-
-# totaldf.reindex(["stripid", "PU", "w1", "w2", "w3", "w4", "w5"], axis=1)
 totaldf = pd.concat(wdfs, sort=False)
 totaldf.to_csv(args.outputfile, sep="\t", index=False )

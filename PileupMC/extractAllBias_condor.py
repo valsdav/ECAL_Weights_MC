@@ -3,9 +3,6 @@ import pandas as pd
 from math import ceil
 import argparse
 
-if len(sys.argv)<4:
-    print("Missing args: Weights file | inputtemplate | outputdir")
-    exit(1)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
@@ -14,11 +11,15 @@ parser.add_argument("-i", "--inputdir", type=str, help="Inputdir", required=True
 parser.add_argument("-o", "--outputdir", type=str, help="Outputdir", required=True)
 parser.add_argument("-m", "--mode", type=int, help="1=rootfile, 2=stats", required=True)
 parser.add_argument("-nt", "--nthreads", type=int, help="Number of threads", required=False, default=4)
+parser.add_argument("-s", "--signal-amplitudes", type=float, nargs="+", help="Signal amplitudes", required=True)
 args = parser.parse_args()
 
 # dataset of parameters
 dfw = pd.read_csv(args.weights_file, sep="\t")
 dof = pd.read_csv(args.dof, sep="\t")
+
+if args.signal_amplitudes != None:
+    dfw = dfw[dfw.S.isin(args.signal_amplitudes)]
 
 arguments = []
 
