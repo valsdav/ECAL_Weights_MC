@@ -3,26 +3,27 @@ import pandas as pd
 from math import ceil
 import argparse
 
+'''
+This script prepares the condor job to join the MC events for each strip. 
+The events from each xtals are overimposed in single strip events summing the energies 
+and amplitudes. 
+'''
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
-parser.add_argument("-w", "--weights-file", type=str, help="Weights file", required=True)
 parser.add_argument("-i", "--inputdir", type=str, help="Inputdir", required=True)
 parser.add_argument("-o", "--outputdir", type=str, help="Outputdir", required=True)
-parser.add_argument("-m", "--mode", type=int, help="1=rootfile, 2=stats", required=True)
-parser.add_argument("-nt", "--nthreads", type=int, help="Number of threads", required=False, default=4)
 parser.add_argument("-s", "--signal-amplitudes", nargs='+', type=float, help="Signal amplitudes", required=True)
 parser.add_argument("-p", "--pu", nargs='+', type=int, help="Pileups", required=True)
 parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
 args = parser.parse_args()
 
 # dataset of parameters
-dfw = pd.read_csv(args.weights_file, sep="\t")
 dof = pd.read_csv(args.dof, sep="\t")
 
 # filtering strips
 if args.strips != None:
-    dfw = dfw[dfw.stripid.isin(args.strips)]
+    dof = dof[dof.stripid.isin(args.strips)]
 
 # PUs and signals
 PU_string = ",".join(map(str, args.pu))
@@ -30,18 +31,14 @@ S_string = ",".join(map(str, args.signal_amplitudes))
 
 arguments = []
 
-for stripid, df in dfw.groupby("stripid"):
+for stripid, df in dof.groupby("stripid"):
     xtals = dof[dof.stripid == stripid]
-    inputfile = "root://eosuser.cern.ch/{}/weights_stripID{}.root".format(
-                                            args.inputdir,stripid)
-    for _, row in df.iterrows():
-        outputfile = "{}/bias_stripID{}_PU{:.0f}_S{:.0f}.txt".format(
-                    args.outputdir, stripid, row.PU, row.S)
-        arguments.append("{} {} {} {} {} {} {} {} {} {} {}".format(
-                        outputfile, inputfile, PU_string,
-                        S_string, args.mode, args.nthreads,
-                         row.w1, row.w2, row.w3, row.w4, row.w5 )
-        )
+    inputfiles = []
+    for xtalID in xtals["CMSSWID"]:
+        inputfiles.append("root://eosuser.cern.ch/" + args.inputdir + "/weights_ID{:.0f}.root".format(xtalID))
+    outputfile = args.outputdir +"/weights_stripID{}.root".format(stripid)
+    arguments.append("{} {} {} {}".format(
+        outputfile, PU_string, S_string, " ".join(inputfiles)))
 
 print("Njobs: ", len(arguments))
 
@@ -50,9 +47,9 @@ condor = '''executable              = run_script.sh
 output                  = output{N}/bias.$(ClusterId).$(ProcId).out
 error                   = error{N}/bias.$(ClusterId).$(ProcId).err
 log                     = log{N}/bias.$(ClusterId).log
-transfer_input_files    = extractBiasDF.x, run_script.sh
+transfer_input_files    = sum_events_stripDF.x, run_script.sh
 
-+JobFlavour             = "espresso"
++JobFlavour             = "longlunch"
 queue arguments from args{N}.txt
 '''
 
@@ -63,7 +60,7 @@ source /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc
 
 OUTPUTFILE=$1; shift
 
-./extractBiasDF.x output_temp $@
+./sum_events_stripDF.x output_temp $@
 
 echo -e "Copying result to: $OUTPUTFILE";
 xrdcp --nopbar output_temp root://eosuser.cern.ch/${OUTPUTFILE};
@@ -83,7 +80,6 @@ for n in range(n_cluster):
         for i in range(20000):
             if (n*20000 + i) < len(arguments):
                 out.write(arguments[n*20000 + i] +"\n")
-
 
 
 # os.system("condor_submit condor_job.txt")

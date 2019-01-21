@@ -1,8 +1,10 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 #include <map>
 
+#include "TROOT.h"
 #include "ROOT/RDataFrame.hxx"
 #include "TFile.h"
 #include "TTree.h"
@@ -14,87 +16,12 @@ using namespace ROOT::VecOps;
 
 typedef ROOT::RDF::RResultPtr<double> Rptr;
 
-// Class used to read the events for each xtal
-class TreeReader{
-    private:
-    int entryN = -1;
-    TFile *file;
-    
-    public:
-    TTree *tree;
-    int nPU;
-    double E_pu;
-    double signalTruth;
-    double amplitudeTruth;
-    vector<double> * digis = new vector<double>(); 
- 
-    TreeReader(const char* filename, const char* treename){
-        file = new TFile(filename, "READ");
-        tree = (TTree*) file->Get(treename);
-        cout << "N.entries"<< tree->GetEntries() << endl;
-        tree->SetBranchAddress("nPU", &nPU);
-        tree->SetBranchAddress("E_pu", &E_pu);
-        tree->SetBranchAddress("signalTruth", &signalTruth);
-        tree->SetBranchAddress("amplitudeTruth", &amplitudeTruth);
-        tree->SetBranchAddress("digis", &digis);
-    }
-    ~TreeReader(){
-        file->Close();
-    }
-
-    int getEntry(int entry){
-        tree->GetEntry(entry);
-        entryN = entry;
-        return entryN;
-    }
-
-    int getEntries(){
-        return tree->GetEntries();
-    }
-};
-
-// Class used to create a new TTree with events per strips
-// summing all amplitudes and digis
-class TreeWriter{
-
-    public: 
-    TFile * file;
-    TTree * tree;
-    int nPU;
-    double E_pu;
-    double signalTruth;
-    double amplitudeTruth;
-    vector<double> digis ;
-
-    TreeWriter(const char* filename,const char* treename){
-        file = new TFile(filename, "RECREATE");
-        tree = new TTree(treename, treename);
-        tree->Branch("nPU", &nPU, "nPU/I");
-        tree->Branch("E_pu", &E_pu, "E_pu/D");
-        tree->Branch("signalTruth", &signalTruth, "signalTruth/D");
-        tree->Branch("amplitudeTruth", &amplitudeTruth,"amplitudeTruth/D");
-        tree->Branch("digis", &digis);
-    }
-    ~TreeWriter(){
-        file->Close();
-    }
-
-    void reset(){
-        nPU = 0;
-        E_pu = 0.0;
-        signalTruth = 0.0;
-        amplitudeTruth = 0.0;
-        digis.clear();
-        digis.insert(digis.begin(), 10, 0.0);
-    }
-
-    void saveEntry(){
-        tree->Fill();
-    }
-    void saveTree(){
-        file->Write();
-    }
-};
+/*
+*  This script is used to extract the reconstructed amplitude and bias
+*  for a strip using a set of weights. 
+*  The bias is extracted for each combination of signal and PU separately.
+*  The output is a CSV file with all the data.
+*/
 
 auto recoA(double* weights){
     return [=](RVec<double> digis){
@@ -109,24 +36,25 @@ auto recoA(double* weights){
 int main(int argc, char** argv){
 
     if (argc < 11){
-        std::cout << "Missing args: outpufile PUs_string Signals_string output_type nthreads w1 w2 w3 w4 w5 inputfiles" <<std::endl;
+        std::cout << "Missing args:  outpufile inputfile PUs_string Signals_string mode nthreads w1 w2 w3 w4 w5" <<std::endl;
         exit(1);
     }
 
-    // Output_type = 1 ---> Save Root file with all the events
-    // Output_type = 2 ---> Save only statistical infos
+    // mode = 1 ---> Save Root file with all the events
+    // mode = 2 ---> Save only statistical infos
     
-    char* outputfile = argv[1];
-    int output_type = atoi(argv[4]);
-    int nthreads = atoi(argv[5]);
-    double weights [5] = {atof(argv[6]),atof(argv[7]),
-            atof(argv[8]), atof(argv[9]), atof(argv[10])};
+    string outputfile = argv[1];
+    string inputfile = argv[2];
+    int mode = atoi(argv[5]);
+    int nthreads = atoi(argv[6]);
+    double weights [5] = {atof(argv[7]),atof(argv[8]),
+            atof(argv[9]), atof(argv[10]), atof(argv[11])};
 
     // Get PUs and Signals from strings with comma delimiters
     vector<int> PUs ;
     vector<float> Ss;
-    string PU_string = argv[2];
-    string S_string = argv[3];
+    string PU_string = argv[3];
+    string S_string = argv[4];
     // Parse input strings
     size_t pos = 0;
     string delimiter =",";
@@ -146,77 +74,26 @@ int main(int argc, char** argv){
     }
     Ss.push_back(std::stof(S_string));
 
-    cout << "Loading input trees..." << endl;
-    // Load the input trees with the events of the xtals forming the strips
-    vector<TreeReader*> input_trees; 
-    for (int i = 11; i< argc; i++){
-        input_trees.push_back(new TreeReader(argv[i], "weights"));
-    }
-    // Tree that contains the events summed for the strip
-    TreeWriter strip_tree {"strip_tmp_tree.root","strip_weights"};
-    // Loop on all the events
-    cout << "Loop on all the events..." << input_trees[0]->getEntries() <<endl;
-    for (int j = 0; j < 600000; j++){
-        if ((j % 1000) == 0){
-            cout << ".";
-        }
-        // Clear the outputtree entry
-        strip_tree.reset();
-        // Check consistency
-        int npu = -1;
-        double signal = -1.;
-        // Cycle on all the xtal trees
-        for (auto xtaltree : input_trees){
-            xtaltree->getEntry(j);
-            cout << xtaltree->nPU << endl;
-            // Check consistency of the event
-            if (npu!=-1 && xtaltree->nPU != npu){
-                cout << "ERROR! Inconsistent Npu between xtals in the event!" << endl;
-                exit(1);
-            }else if (npu==-1){
-                npu = xtaltree->nPU;
-            }
-            if (signal >= 0 && xtaltree->signalTruth != signal ){
-                cout << "ERROR! Inconsistent signalTruth between xtals in the event!" << endl;
-                exit(1);
-            }else if (signal < 0){
-                signal = xtaltree->signalTruth;
-            }
 
-            strip_tree.E_pu += xtaltree->E_pu;
-            strip_tree.signalTruth += xtaltree->signalTruth;
-            strip_tree.amplitudeTruth += xtaltree->amplitudeTruth;
-            
-            for (int k = 0; k <10; k++){
-                strip_tree.digis[k] += xtaltree->digis->at(k);
-            }
-        }
-        strip_tree.nPU = input_trees.at(0)->nPU;
-        // Save 
-        strip_tree.saveEntry();
-    }
-    strip_tree.saveTree();
-    // Close input trees
-    input_trees.clear();
-    
-    cout << endl << "Strip events tree created!" <<endl;
+    //Enabling multithread
+    ROOT::EnableImplicitMT(nthreads);
+    int poolsize = ROOT::GetImplicitMTPoolSize();
+    std::cout << "Multi-threading pool: "<< poolsize << std::endl;
 
-    ROOT::EnableImplicitMT(nthreads);   
+    auto dftotal = RDataFrame("weights", inputfile);
 
     // Function to reconstruct amplitude
     auto bias_calculator = recoA(weights);
 
     cout << "Dataframe processing starting..." <<endl;
-    auto df = RDataFrame(*(strip_tree.tree));
-    auto df_reco = df.Define("recoA", bias_calculator , {"digis"})
+    auto df_reco = dftotal.Define("recoA", bias_calculator , {"digis"})
                      .Define("bias", "recoA / amplitudeTruth");
-                    
-    
-    if (output_type == 1){
+        
+    if (mode == 1){
         df_reco.Snapshot("bias", outputfile, {"recoA", "bias", "amplitudeTruth", 
                         "signalTruth", "nPU", "E_pu"});
     }
-    else if(output_type ==2 ){
+    else if(mode ==2 ){
 
         // Map of results over PU and signal
         map<int, map<float, Rptr>> recoA_mean;
@@ -267,7 +144,7 @@ int main(int argc, char** argv){
         //Save the file
         ofstream output;
         output.open (outputfile);
-        output << "PU,S,A,A_std,E_pu,E_pu_std,recoA,recoA_std,bias,bias_std"<< endl;
+        output << "stripid,PU,S,A,A_std,E_pu,E_pu_std,recoA,recoA_std,bias,bias_std"<< endl;
         
         for (int pu: PUs){
             for (float s: Ss){
