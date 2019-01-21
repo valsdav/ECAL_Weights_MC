@@ -27,20 +27,18 @@ arguments = []
 
 for stripid, df in dfw.groupby("stripid"):
     xtals = dof[dof.stripid == stripid]
-    
+
+    inputfiles = []
     for xtalID in xtals["CMSSWID"]:
-        for _, row in df.iterrows():
-            if args.mode ==1:
-                outputfile = args.outputdir+"/bias_ID{:.0f}_PU{:.0f}_S{:.0f}.root".format(
-                    xtalID, row.PU, row.S)
-            elif args.mode ==2:
-                outputfile = args.outputdir+"/bias_ID{:.0f}_PU{:.0f}_S{:.0f}.txt".format(
-                    xtalID, row.PU, row.S)
-            inputfile = "root://eosuser.cern.ch/" + args.inputdir + "/weights_ID{:.0f}.root".format(xtalID)
-            arguments.append("{} {} weights {} {} {} {} {} {} {} {} {}".format(
-                outputfile, inputfile, row.w1, row.w2, row.w3, 
-                row.w4, row.w5, PU_string, S_string, args.mode, args.nthreads )
-                )
+        inputfiles.append("root://eosuser.cern.ch/" + args.inputdir + "/weights_ID{:.0f}.root".format(xtalID))
+
+    for _, row in df.iterrows():
+        outputfile = args.outputdir+"/bias_stripID{:.0f}_PU{:.0f}_S{:.0f}.txt".format(
+                    stripid, row.PU, row.S)
+        arguments.append("{} {} {} {} {} {} {} {} {} {} {}".format(
+            outputfile, PU_string, S_string, args.mode, args.nthreads,
+            row.w1, row.w2, row.w3, row.w4, row.w5, " ".join(inputfiles) )
+            )
 
 print("Njobs: ", len(arguments))
 
