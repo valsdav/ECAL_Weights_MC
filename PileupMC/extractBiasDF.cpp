@@ -24,23 +24,48 @@ auto recoA(double* weights){
 
 int main(int argc, char** argv){
 
-    if (argc < 11){
-        std::cout << "Missing args: outpufile inputfile treename w1 w2 w3 w4 w5 output_type nthreads" <<std::endl;
+    if (argc < 13){
+        std::cout << "Missing args: outpufile inputfile treename w1 w2 w3 w4 w5 PUs_string Signals_string output_type nthreads" <<std::endl;
         exit(1);
     }
 
     // Output_type = 1 ---> Save Root file with all the events
     // Output_type = 2 ---> Save only statistical infos
 
-    ROOT::EnableImplicitMT(atoi(argv[10]));   
+    ROOT::EnableImplicitMT(atoi(argv[12]));   
     
     char* outputfile = argv[1];
     char* inputfile = argv[2];
     char* treename = argv[3];
-    int output_type = atoi(argv[9]);
+    int output_type = atoi(argv[11]);
     double weights [5] = {atof(argv[4]),atof(argv[5]),
             atof(argv[6]), atof(argv[7]), atof(argv[8])};
 
+    // Get PUs and Signals from strings with comma delimiters
+    vector<int> PUs ;
+    vector<float> Ss;
+    string PU_string = argv[9];
+    string S_string = argv[10];
+    // Parse input strings
+    size_t pos = 0;
+    string delimiter =",";
+    string token;
+    while ((pos = PU_string.find(delimiter)) != string::npos) {
+        token = PU_string.substr(0, pos);
+        PUs.push_back(std::stoi(token));
+        PU_string.erase(0, pos + delimiter.length());
+    }
+    // Last string
+    PUs.push_back(std::stoi(PU_string));
+    pos = 0;
+    while ((pos = S_string.find(delimiter)) != string::npos) {
+        token = S_string.substr(0, pos);
+        Ss.push_back(std::stof(token));
+        S_string.erase(0, pos + delimiter.length());
+    }
+    Ss.push_back(std::stof(S_string));
+
+    // Function to reconstruct amplitude
     auto bias_calculator = recoA(weights);
 
       
@@ -54,9 +79,6 @@ int main(int argc, char** argv){
                         "signalTruth", "nPU", "E_pu"});
     }
     else if(output_type ==2 ){
-
-        vector<int> PUs = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150};
-        vector<float> Ss = {2.0, 3.0, 5.0, 7.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0};
 
         // Map of results over PU and signal
         map<int, map<float, Rptr>> recoA_mean;

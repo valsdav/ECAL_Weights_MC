@@ -11,15 +11,17 @@ parser.add_argument("-i", "--inputdir", type=str, help="Inputdir", required=True
 parser.add_argument("-o", "--outputdir", type=str, help="Outputdir", required=True)
 parser.add_argument("-m", "--mode", type=int, help="1=rootfile, 2=stats", required=True)
 parser.add_argument("-nt", "--nthreads", type=int, help="Number of threads", required=False, default=4)
-parser.add_argument("-s", "--signal-amplitudes", type=float, nargs="+", help="Signal amplitudes", required=True)
+parser.add_argument("-s", "--signal-amplitudes", nargs='+', type=float, help="Signal amplitudes", required=True)
+parser.add_argument("-p", "--pu", nargs='+', type=int, help="Pileups", required=True)
 args = parser.parse_args()
 
 # dataset of parameters
 dfw = pd.read_csv(args.weights_file, sep="\t")
 dof = pd.read_csv(args.dof, sep="\t")
 
-if args.signal_amplitudes != None:
-    dfw = dfw[dfw.S.isin(args.signal_amplitudes)]
+# PUs and signals
+PU_string = ",".join(map(str, args.pu))
+S_string = ",".join(map(str, args.signal_amplitudes))
 
 arguments = []
 
@@ -35,9 +37,9 @@ for stripid, df in dfw.groupby("stripid"):
                 outputfile = args.outputdir+"/bias_ID{:.0f}_PU{:.0f}_S{:.0f}.txt".format(
                     xtalID, row.PU, row.S)
             inputfile = "root://eosuser.cern.ch/" + args.inputdir + "/weights_ID{:.0f}.root".format(xtalID)
-            arguments.append("{} {} weights {} {} {} {} {} {} {}".format(
+            arguments.append("{} {} weights {} {} {} {} {} {} {} {} {}".format(
                 outputfile, inputfile, row.w1, row.w2, row.w3, 
-                row.w4, row.w5, args.mode, args.nthreads )
+                row.w4, row.w5, PU_string, S_string, args.mode, args.nthreads )
                 )
 
 print("Njobs: ", len(arguments))

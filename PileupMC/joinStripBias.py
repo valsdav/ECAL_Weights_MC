@@ -12,6 +12,7 @@ parser.add_argument("-w", "--weights-file", type=str, help="Weights file", requi
 parser.add_argument("-i", "--inputdir", type=str, help="Inputdir", required=True)
 parser.add_argument("-o", "--outputfile", type=str, help="Output file", required=True)
 parser.add_argument("--dry", action="store_true", help="Dry run", required=False, default=False)
+parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
 args = parser.parse_args()
 
 inputfiles = [args.inputdir +"/"+ f for f in os.listdir(args.inputdir)]
@@ -19,7 +20,8 @@ inputfiles = [args.inputdir +"/"+ f for f in os.listdir(args.inputdir)]
 dof = pd.read_csv(args.dof, sep="\t")
 dfw = pd.read_csv(args.weights_file, sep="\t")
 
-
+if args.strips != None:
+    dfw = dfw[dfw.stripid.isin(args.strips)]
 
 def load_file(file, xtal, stripid, PU, S):
     print(">>> Loading strip: {} | xtal: {} | wPU: {} | wS: {}".format(
@@ -29,20 +31,24 @@ def load_file(file, xtal, stripid, PU, S):
     # Configuration of the weights used for the bias
     d["wPU"] = PU 
     d["wS"]  = S
+    print(d.S.unique())
     return d
 
 def getstripdata(params, df):
-    wPU, wS, pu, s = params
-    means = df.mean() 
-    stds = (df[["A_std", "E_pu_std","recoA_std", "bias_std"]]**2).sum()
-    stds = stds.apply(np.sqrt)
-    stripdata = [df["stripid"].values[0], wPU, wS, pu, s,
-        means["A"], stds["A_std"],
-        means["E_pu"], stds["E_pu_std"], 
-        means["recoA"], stds["recoA_std"],
-        means["bias"], stds["bias_std"]
-    ]
-    return stripdata
+    wPU, wS = params
+    stripdatas = []
+    for (pu, s), dfs in df.groupby(["PU", "S"]):
+        sums = dfs.sum() 
+        stds = (dfs[["A_std", "E_pu_std","recoA_std", "bias_std"]]**2).sum()
+        stds = stds.apply(np.sqrt)
+        stripdata = [dfs["stripid"].values[0], wPU, wS, pu, s,
+            sums["A"], stds["A_std"],
+            sums["E_pu"], stds["E_pu_std"], 
+            sums["recoA"], stds["recoA_std"],
+            sums["recoA"] / sums["A"], stds["bias_std"]
+        ]
+        stripdatas.append(stripdata)
+    return stripdatas
 
 
 tobeloaded_files = []
@@ -83,8 +89,10 @@ stripdfs = []
 print("Aggregating by strip....")
 for stripid, dfs in totaldf.groupby("stripid"):  
     print(">>>Strip: ", stripid)
-    stripdfs += p.starmap(getstripdata, dfs.groupby(["wPU", "wS","PU", "S"]))
-    
+    result = p.starmap(getstripdata, dfs.groupby(["wPU", "wS"]))
+    for r in result:
+        stripdfs += r
+
 
 print("Creating final dataset...")
 finaldf = pd.DataFrame(stripdfs, columns=["stripid", "wPU", "wS", "PU", "S",
