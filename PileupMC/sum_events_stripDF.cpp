@@ -44,7 +44,6 @@ class Event{
         }
     }
     ~Event(){
-        //cout << "Destructor called!" <<endl;
         digis.clear();
     };
 };
@@ -91,6 +90,29 @@ class TreeWriter{
     }
 };
 
+vector<EventPtr> events;
+int _slot = -1;
+int _entry = 0;
+
+
+void dostuff(int nPU, double E_pu, double signalTruth,double amplitudeTruth, RVec<double>digis){
+    if (_slot == 0){
+        EventPtr e {new Event(nPU, E_pu, signalTruth, amplitudeTruth, digis)};
+        events.push_back(std::move(e));
+        _entry += 1;
+    }else{
+        EventPtr e = events.at(_entry);
+        e->E_pu += E_pu;
+        e->amplitudeTruth += amplitudeTruth;
+        for (int di = 0; di <10 ; di++){
+            e->digis[di] += digis[di];
+        }
+        _entry += 1;
+    }
+}   
+
+
+
 int main(int argc, char** argv){
 
     if (argc < 4){
@@ -133,46 +155,28 @@ int main(int argc, char** argv){
     
     // outputtree
     TreeWriter total_strip_events {outputfile, "weights"};
-    vector<EventPtr> events;
-
+    
     for (int pu: PUs){
         for (float s: Ss){
             cout << "PU:"<< pu << " | S:" << s <<endl;
-            vector<RNode> filt_dfs; 
-            for(auto df : input_dfs){
-                filt_dfs.push_back(df.Filter("(nPU=="+ to_string(pu) +
-                                    ")&&(signalTruth=="+to_string(s) +")"));                
-            }
-            // SINGLE THREAD OPERATIONS!
-            auto df1 = filt_dfs.at(0);
-            df1.Foreach([&](int nPU, double E_pu, double signalTruth, double amplitudeTruth, RVec<double> digis){
-                EventPtr e {new Event(nPU, E_pu, signalTruth, amplitudeTruth, digis)};
-                events.push_back(std::move(e));
-                }, {"nPU", "E_pu", "signalTruth", "amplitudeTruth", "digis"}
-            );
 
-            for (int j = 1; j< filt_dfs.size(); j++){
-                //cout << "Summing df: "<< j << endl;
-                auto dff = filt_dfs.at(j);
-                int _entry = 0;
-                dff.Foreach([&](double E_pu, double amplitudeTruth, RVec<double> digis){
-                        EventPtr e = events.at(_entry);
-                        e->E_pu += E_pu;
-                        e->amplitudeTruth += amplitudeTruth;
-                        for (int di = 0; di <10 ; di++){
-                            e->digis[di] += digis[di];
-                        }
-                        _entry += 1;
-                        e.reset();
-                        //cout << "nPU:" << nPU <<"  E_pu" << E_pu << " S: "<< signalTruth << endl;
-                    }, {"E_pu", "amplitudeTruth", "digis"}   
-                );
+            for(int idf = 0; idf< input_dfs.size(); idf++){
+                _slot = idf;
+                // reset cycle on entries
+                _entry  = 0;
+                
+                auto filt_df = input_dfs.at(idf);
+
+                filt_df.Filter([pu,s](int nPU, double signalTruth)
+                                {return nPU == pu && signalTruth == s;}, {"nPU", "signalTruth"})
+                    .Foreach(dostuff, {"nPU", "E_pu", "signalTruth", "amplitudeTruth", "digis"});
             }
 
             // Append the result
             total_strip_events.fill(events);
             cout << "Tree filled" << endl;
             events.clear();
+            
         }
     }
 
