@@ -62,7 +62,7 @@ If the output directory contains already data, the script skips the jobs already
 The next step of the analysis is the extraction of mean weights for different PU values for all the strips. The MC samples of all the crystals that form a strip are merged before extracting the mean of the weights calculated for each event. 
 
 The script **weights_analysis_strips_condor.py** prepares a condor job for each strip. The xtals of each strip are read from the DOF file and read by the job from the eos directory containing single xtal files (no need to join the root files before).
-Each job outputs one text file for each signal amplitude containing the weights means for each PU. 
+Each job outputs one text file for each strips containing the weights means for each PU and signal amplitude 
 
 The macro used to calculate the mean weights for each pileup in the condor job is **weights_analysis_stripsDF.cpp**. To compile it for lxplus6 (with updated Root 6.17 Dataframe):
 
@@ -73,7 +73,7 @@ g++ -o weights_analysis_stripsDF.x weights_analysis_stripsDF.cpp  `root-config -
 
 To prepare the condor jobs run the script:
 ```bash
-python weights_analysis_strips_condor.py --dof DOF_file --inputdir  directory_xtal_data --outputdir eos_dir --signal-amplitudes (list) --pu (list) [-st strips list]
+python weights_analysis_strips_condor.py --dof DOF_file --inputdir directory_xtal_data --outputdir eos_dir --signal-amplitudes (list) --pu (list) [-st strips list  -nt nthreads] 
 ```
 Then submit the jobs to condor
 ```
@@ -84,8 +84,16 @@ condor_submit condor_job.txt
 When all the jobs will be completed, a single dataset with all the weights for all the strips (with all combinations of PU and signal) can be created with the script **joinStripWeights.py**
 
 ```
-python joinStripWeights.py --dof DOF_file -i inputdir -o outputfile -s signalAmplitude [-st stripslist]
+python joinStripWeights.py --dof DOF_file -i inputdir -o outputfile [-st stripslist]
 ```
+
+
+
+
+
+
+#! SISTEMARE
+# Join digis by strip
 
 
 # Extract bias 
