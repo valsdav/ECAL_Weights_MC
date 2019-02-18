@@ -144,7 +144,7 @@ int main(int argc, char** argv){
         //Save the file
         ofstream output;
         output.open (outputfile);
-        output << "stripid,PU,S,A,A_std,E_pu,E_pu_std,recoA,recoA_std,bias,bias_std"<< endl;
+        output << "PU,S,A,A_std,E_pu,E_pu_std,recoA,recoA_std,bias,bias_std"<< endl;
         
         for (int pu: PUs){
             for (float s: Ss){

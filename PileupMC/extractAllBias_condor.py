@@ -14,7 +14,38 @@ parser.add_argument("-nt", "--nthreads", type=int, help="Number of threads", req
 parser.add_argument("-s", "--signal-amplitudes", nargs='+', type=float, help="Signal amplitudes", required=True)
 parser.add_argument("-p", "--pu", nargs='+', type=int, help="Pileups", required=True)
 parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
+parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
+parser.add_argument("--fix", action="store_true", default=False, help="Check missing outputfiles", required=False)
 args = parser.parse_args()
+
+# Prepare condor jobs
+condor = '''executable              = run_script.sh
+output                  = output{N}/bias.$(ClusterId).$(ProcId).out
+error                   = error{N}/bias.$(ClusterId).$(ProcId).err
+log                     = log{N}/bias.$(ClusterId).log
+transfer_input_files    = extractBiasDF.x, run_script.sh
+
++JobFlavour             = "espresso"
+queue arguments from args{N}.txt
+'''
+
+script = '''#!/bin/sh -e 
+
+#source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
+#source /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
+
+OUTPUTFILE=$1; shift
+
+./extractBiasDF.x output_temp $@
+
+echo -e "Copying result to: $OUTPUTFILE";
+xrdcp --nopbar output_temp root://eos{eosinstance}.cern.ch/${OUTPUTFILE};
+'''
+script = script.replace("{eosinstance}", args.eos)
+
+if args.fix != None:
+    outputfiles = [args.outputdir +"/" + s for s in os.listdir(args.outputdir)]
 
 # dataset of parameters
 dfw = pd.read_csv(args.weights_file, sep="\t")
@@ -32,11 +63,15 @@ arguments = []
 
 for stripid, df in dfw.groupby("stripid"):
     xtals = dof[dof.stripid == stripid]
-    inputfile = "root://eosuser.cern.ch/{}/weights_stripID{}.root".format(
-                                            args.inputdir,stripid)
+    inputfile = "root://eos{}.cern.ch/{}/weights_stripID{}.root".format(
+                             args.eos, args.inputdir,stripid)
     for _, row in df.iterrows():
         outputfile = "{}/bias_stripID{}_PU{:.0f}_S{:.0f}.txt".format(
                     args.outputdir, stripid, row.PU, row.S)
+                    
+        if args.fix != None:
+            if outputfile in outputfiles:
+                continue
         arguments.append("{} {} {} {} {} {} {} {} {} {} {}".format(
                         outputfile, inputfile, PU_string,
                         S_string, args.mode, args.nthreads,
@@ -44,30 +79,6 @@ for stripid, df in dfw.groupby("stripid"):
         )
 
 print("Njobs: ", len(arguments))
-
-# Prepare condor jobs
-condor = '''executable              = run_script.sh
-output                  = output{N}/bias.$(ClusterId).$(ProcId).out
-error                   = error{N}/bias.$(ClusterId).$(ProcId).err
-log                     = log{N}/bias.$(ClusterId).log
-transfer_input_files    = extractBiasDF.x, run_script.sh
-
-+JobFlavour             = "espresso"
-queue arguments from args{N}.txt
-'''
-
-script = '''#!/bin/sh -e 
-
-#source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
-source /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
-
-OUTPUTFILE=$1; shift
-
-./extractBiasDF.x output_temp $@
-
-echo -e "Copying result to: $OUTPUTFILE";
-xrdcp --nopbar output_temp root://eosuser.cern.ch/${OUTPUTFILE};
-'''
 
 with open("run_script.sh", "w") as rs:
     rs.write(script)

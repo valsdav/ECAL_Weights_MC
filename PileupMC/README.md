@@ -97,13 +97,14 @@ A python script is used to prepare condor jobs to work on each strip:
 source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
 g++ -o sum_events_stripDF.x sum_events_stripDF.cpp  `root-config --libs --cflags`
 
-python sum_events_strips_condor.py --dof DOF_file --inputdir directory_xtal_data --outputdir eos_dir --signal-amplitudes (list) --pu (list) [-st strips list   --eos user/cms]
+python sum_events_strips_condor.py --dof DOF_file --inputdir directory_xtal_data --outputdir eos_dir 
+                                    --signal-amplitudes (list) --pu (list) 
+                                    [-st strips list   --eos user/cms]
 ```
 
 
 # Extract bias 
 At this point we have a weights dataset with the optimized weights for each strip, each PU and each signal amplitude. 
-
 For each different set of weights based on different strip, PU and signal amplitudes, the reconstructed amplitude can be simulated using the digis saved for each event. This calculation is done on strip base using the aggregated events. 
 
 The script **extractBiasDF.cpp** is used to calculate the reconstructed amplitude and bias on each strip event file, for a specific set of weights.  The output of this script is a CSV file with the mean and std of the reconstructed ampitude and bias for each combination of PU and signal amplitude. 
@@ -111,11 +112,16 @@ The script **extractBiasDF.cpp** is used to calculate the reconstructed amplitud
 All the set of weights for each strip are applied to each strip data using the script **extractAllBias_condor.py** that prepares several condor_jobs.
 
 ```
-python extractAllBias_condor.py --dof DOF_file --weights-file file_with_strips_weights  --inputdir dir --outputdir dir --mode 1/2 [ --nthreads 4]
+python extractAllBias_condor.py --dof DOF_file --weights-file file_with_strips_weights  
+                                --inputdir dir --outputdir dir --mode 1/2 
+                                [ --nthreads 4  --eos cms/user  --fix]
 
 condor_submit condor_job1.txt (and others)
 ```
 If *mode=2* a CSV file with statistical info about the bias for each combination of PU and signal. If *mode=1* a simple root tree with the reconstructed amplitude and bias for each event is created. 
+
+The *--fix* flags makes the script check the output directory and create only jobs for missing files.
+
 
 ## Join the bias per strip
 At this step the bias is calculated for strip for each set of weights optimized for all the combinations of PU and signal. We have to merge all the datasets with the sript  **joinStripBias.py**. 
