@@ -1,7 +1,6 @@
 extra/*
 *.o
 *.x
-*.txt
 *.__afs*
 *.pdf
 *.png

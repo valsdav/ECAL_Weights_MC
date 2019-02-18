@@ -39,7 +39,7 @@ To production weights data for each crystal we can use HTCondor jobs. The script
 prepares a single condor job for each crystal. Each job generates data for different pileups and different amplitudes,  calculates weights and produced a single final file.  A *DOF* (Degree Of Freedom) file is used to get the parameters for each crystal of ECAL. 
 
 ```
-python preparare_wegithsGen_condor.py --dof filename --outpudir dirname --signal-amplitudes (list) --pu (list) --nevents 2000 [-st strip list]
+python preparare_weigthsGen_condor.py --dof filename --outpudir dirname --signal-amplitudes (list) --pu (list) --nevents 2000 [-st strip list]
 ```
 The *--signal-amplitudes (-s)* option accepts a list of amplitudes, whereas the *--pu (-p)* option a list of PU values. The optional option *--strips (-st)* can be used to filter the wanted strips ids. 
 
@@ -67,13 +67,13 @@ Each job outputs one text file for each strips containing the weights means for 
 The macro used to calculate the mean weights for each pileup in the condor job is **weights_analysis_stripsDF.cpp**. To compile it for lxplus6 (with updated Root 6.17 Dataframe):
 
 ```bash
-source /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
-g++ -o weights_analysis_stripsDF.x weights_analysis_stripsDF.cpp  `root-config --libs --cflags` -I"/cvmfs/sft-nightlies.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/include"
+source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
+g++ -o weights_analysis_stripsDF.x weights_analysis_stripsDF.cpp  `root-config --libs --cflags` `clhep-config --include` `clhep-config --libs` 
 ```
 
 To prepare the condor jobs run the script:
 ```bash
-python weights_analysis_strips_condor.py --dof DOF_file --inputdir directory_xtal_data --outputdir eos_dir --signal-amplitudes (list) --pu (list) [-st strips list  -nt nthreads] 
+python weights_analysis_strips_condor.py --dof DOF_file --inputdir directory_xtal_data --outputdir eos_dir --signal-amplitudes (list) --pu (list) [-st strips list  -nt nthreads --eos user/cms] 
 ```
 Then submit the jobs to condor
 ```
@@ -87,23 +87,28 @@ When all the jobs will be completed, a single dataset with all the weights for a
 python joinStripWeights.py --dof DOF_file -i inputdir -o outputfile [-st stripslist]
 ```
 
-
-
-
-
-
-#! SISTEMARE
 # Join digis by strip
+Until now events are calculated and stored by xtal. The events must be merged before calculating the bias on a strip basis. 
+
+The scrpt **sum_events_stripDF.cpp** aggregates the digis of each xtal in a strip and sum their amplitudes to construct the strip event. The event is then saved in a new file. The PU contribution for each xtal are considered completely uncorrelated. 
+
+A python script is used to prepare condor jobs to work on each strip: 
+```
+source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
+g++ -o sum_events_stripDF.x sum_events_stripDF.cpp  `root-config --libs --cflags`
+
+python sum_events_strips_condor.py --dof DOF_file --inputdir directory_xtal_data --outputdir eos_dir --signal-amplitudes (list) --pu (list) [-st strips list   --eos user/cms]
+```
 
 
 # Extract bias 
 At this point we have a weights dataset with the optimized weights for each strip, each PU and each signal amplitude. 
 
-For each different set of weights based on different strip, PU and signal amplitudes, the reconstructed amplitude can be simulated using the digis saved for each event. This calculation is done on xtal base and then the results are aggregated by strip. 
+For each different set of weights based on different strip, PU and signal amplitudes, the reconstructed amplitude can be simulated using the digis saved for each event. This calculation is done on strip base using the aggregated events. 
 
-The script **extractBiasDF.cpp** is used to calculate the reconstructed amplitude and bias on each xtal event file, for a specific set of weights.  The output of this script is a CSV file with the mean and std of the reconstructed ampitude and bias for each combination of PU and signal amplitude. 
+The script **extractBiasDF.cpp** is used to calculate the reconstructed amplitude and bias on each strip event file, for a specific set of weights.  The output of this script is a CSV file with the mean and std of the reconstructed ampitude and bias for each combination of PU and signal amplitude. 
 
-All the set of weights for each strip are applied to each xtal data using the script **extractAllBias_condor.py** that prepares several condor_jobs.
+All the set of weights for each strip are applied to each strip data using the script **extractAllBias_condor.py** that prepares several condor_jobs.
 
 ```
 python extractAllBias_condor.py --dof DOF_file --weights-file file_with_strips_weights  --inputdir dir --outputdir dir --mode 1/2 [ --nthreads 4]
@@ -113,9 +118,9 @@ condor_submit condor_job1.txt (and others)
 If *mode=2* a CSV file with statistical info about the bias for each combination of PU and signal. If *mode=1* a simple root tree with the reconstructed amplitude and bias for each event is created. 
 
 ## Join the bias per strip
-At this step the bias is calculated for xtal for each set of weights optimized for all the combinations of PU and signal. We have to merge all the datasets  and calculate the bias statistics for strip instead of for xtal. 
+At this step the bias is calculated for strip for each set of weights optimized for all the combinations of PU and signal. We have to merge all the datasets with the sript  **joinStripBias.py**. 
 
-The script **joinStripBias.py** does this job and produces a final datasets with all the bias for each strip, for each PU and signal amplitude, calculated with each set of weights (identified by the *wPU* and *wS* labels). 
+The script **joinStripBias.py**  produces a final datasets with all the bias for each strip, for each PU and signal amplitude, calculated with each set of weights (identified by the *wPU* and *wS* labels). 
 
 ```
 python joinStripBias.py -d DOF -w weights_files_per_strip  -i inputdir -o outputfile [--dry]

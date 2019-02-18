@@ -15,6 +15,7 @@ parser.add_argument("-s", "--signal-amplitudes", nargs="+", type=float, help="Si
 parser.add_argument("-p", "--pu", nargs='+', type=int, help="Pileups", required=True)
 parser.add_argument("-nt", "--nthreads", type=int, help="Number of threads", required=False, default=3)
 parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
+parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
 args = parser.parse_args()
 
 
@@ -44,18 +45,21 @@ queue arguments from arguments.txt
 script = '''#!/bin/sh -e
 
 #source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
-source /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
+#source /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
 
 OUTPUTFILE=$1;  shift
 
 ./weights_analysis_stripsDF.x temp_output $@;
 
 echo -e "Copying result to: $OUTPUTFILE";
-xrdcp --nopbar temp_output root://eosuser.cern.ch/${OUTPUTFILE};
+xrdcp --nopbar temp_output root://eos{eosinstance}.cern.ch/${OUTPUTFILE};
 
 done
 
 '''
+
+script = script.replace("{eosinstance}", args.eos)
 
 arguments= []
 
@@ -64,7 +68,8 @@ for stripid, d in dof.groupby("stripid"):
     inputfiles = []
     for xtal in d.CMSSWID:
         # xrootd protocol is used to read the data
-        inputfiles.append("root://eosuser.cern.ch/{0}/weights_ID{1}.root ".format(args.inputdir, xtal))
+        inputfiles.append("root://eos{0}.cern.ch/{1}/weights_ID{2}.root ".format(
+                     args.eos, args.inputdir, xtal))
     
     arguments.append("{} {} {} {} {} {}".format(outputfile, PU_string, S_string, 
                 args.nthreads, stripid, " ".join(inputfiles)))

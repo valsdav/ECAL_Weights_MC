@@ -122,17 +122,17 @@ int main(int argc, char** argv){
     
     for (int pu: PUs){  
         for(auto s: Ss){
-            output << stripid << "\t"<< pu << "\t" << s << "\t" 
-               <<  intime_ampls_means[pu][s].GetValue() << "\t" 
-               <<  intime_ampls_stds[pu][s].GetValue()  << "\t" 
-               <<  Epu_means[pu][s].GetValue() << "\t" 
-               <<  Epu_stds[pu][s].GetValue() << "\t" ;
+            output << stripid << ","<< pu << "," << s << "," 
+                   <<  intime_ampls_means[pu][s].GetValue() << "," 
+                   <<  intime_ampls_stds[pu][s].GetValue()  << "," 
+                   <<  Epu_means[pu][s].GetValue() << "," 
+                   <<  Epu_stds[pu][s].GetValue() << "," ;
 
             for (int iw = 0; iw < 5; iw++){
-                output << w_means[pu][s][iw].GetValue() << "\t";
+                output << w_means[pu][s][iw].GetValue() << ",";
             }
             for (int iw = 0; iw < 5; iw++){
-                output << w_stds[pu][s][iw].GetValue() << "\t";
+                output << w_stds[pu][s][iw].GetValue() << ",";
             }
             output << endl;
         }       

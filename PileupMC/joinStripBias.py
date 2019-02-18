@@ -6,6 +6,11 @@ import argparse
 from math import sqrt
 from multiprocessing import Pool
 
+'''
+This script is used to join the result of the bias calculation for all the strips.
+
+'''
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
 parser.add_argument("-w", "--weights-file", type=str, help="Weights file", required=True)
@@ -40,8 +45,8 @@ missing_files = []
 print("Loading xtals data...")
 for stripid, df in dfw.groupby("stripid"):
     print(">>> Reading strip: ", stripid)
-    # for all the xtals of this script we have to load the file
-    # of the bias created with a certain pair of PU and S. 
+    # we have to load the file with bias for the strip
+    #  created with a certain pair of PU and S. 
     for _, row in df.iterrows():
         # all the pairs of PU and S are in the weights df
         file = args.inputdir+"/bias_stripID{}_PU{:.0f}_S{:.0f}.txt".format(
