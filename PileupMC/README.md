@@ -12,7 +12,7 @@ The **PileupMC** class is responsible for the pulses simulation and it uses the 
 
 To compile the code for lxplus6:
 ```bash
-source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
 
 g++ -o generate.x generate.cpp Pulse.cpp PileupMC.cpp  `root-config --libs --cflags`
 ```
@@ -29,7 +29,7 @@ If *complete_info_flag==1* more info are saved in the root file.
 
 To compile the code for lxplus6 (more machines on condor):
 ```bash
-source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
 
 g++ -o calc_weightsDF.x calc_weightsDF.cpp ComputeWeights.cpp  `root-config --libs --cflags` `clhep-config --include` `clhep-config --libs` 
 ```

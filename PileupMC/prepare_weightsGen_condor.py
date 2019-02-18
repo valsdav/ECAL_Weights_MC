@@ -16,10 +16,11 @@ parser.add_argument("-s", "--signal-amplitudes", nargs='+', type=float, help="Si
 parser.add_argument("-p", "--pu", nargs='+', type=int, help="Pileups", required=True)
 parser.add_argument("-n", "--nevents", type=int, help="Number of events", required=False, default=2000)
 parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
+parser.add_argument("-er","--eta-rings", type=int, nargs="+", help="etarings", required=False)
+parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
 args = parser.parse_args()
 
 signalAmpls = args.signal_amplitudes
-#PUs = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150]
 PUs = args.pu
 nevents = args.nevents
 debug = 0
@@ -40,7 +41,8 @@ queue arguments from args{N}.txt
 
 script='''#!/bin/sh -e
 
-source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
+#source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
 
 for Ampl in {Ampls}; do
 for PU in {PUs}; do
@@ -57,20 +59,24 @@ echo -e "Calc weights...";
 ./calc_weightsDF.x all_pulses_ID$1.root final_output.root  1
 
 echo -e "Copying on EOS...";
-xrdcp --nopbar final_output.root  root://eosuser.cern.ch/$7/weights_ID$1.root
+xrdcp --nopbar final_output.root  root://eos{eosinstance}.cern.ch/$7/weights_ID$1.root
 '''
-
-existing_files = os.listdir(outputdir)
 
 script = script.replace("{PUs}", " ".join(map(str, PUs))) 
 script = script.replace("{Ampls}", " ".join(map(lambda a: "{:.1f}".format(a), signalAmpls)))
+script = script.replace("{eosinstance}", args.eos)
 
 # dataset of parameters
 df = pd.read_csv(args.dof , sep="\t")
 
+existing_files = os.listdir(outputdir)
+
 if args.strips != None:
     print("Filtering on strips: ", args.strips)
     df = df[df.stripid.isin(args.strips)]
+if args.eta_rings != None:
+    print("Filtering on eta_rings: ", args.eta_rings)
+    df = df[df.eta_ring.isin(args.eta_rings)]
 
 def generate(row):
     index, row = row
