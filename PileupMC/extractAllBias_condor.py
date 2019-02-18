@@ -44,7 +44,7 @@ xrdcp --nopbar output_temp root://eos{eosinstance}.cern.ch/${OUTPUTFILE};
 '''
 script = script.replace("{eosinstance}", args.eos)
 
-if args.fix != None:
+if args.fix:
     outputfiles = [args.outputdir +"/" + s for s in os.listdir(args.outputdir)]
 
 # dataset of parameters
@@ -69,9 +69,9 @@ for stripid, df in dfw.groupby("stripid"):
         outputfile = "{}/bias_stripID{}_PU{:.0f}_S{:.0f}.txt".format(
                     args.outputdir, stripid, row.PU, row.S)
                     
-        if args.fix != None:
-            if outputfile in outputfiles:
+        if args.fix and outputfile in outputfiles:
                 continue
+                
         arguments.append("{} {} {} {} {} {} {} {} {} {} {}".format(
                         outputfile, inputfile, PU_string,
                         S_string, args.mode, args.nthreads,

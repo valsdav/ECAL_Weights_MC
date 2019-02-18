@@ -71,6 +71,7 @@ df = pd.read_csv(args.dof , sep="\t")
 
 existing_files = os.listdir(outputdir)
 
+# Filtering strips and etarings
 if args.strips != None:
     print("Filtering on strips: ", args.strips)
     df = df[df.stripid.isin(args.strips)]

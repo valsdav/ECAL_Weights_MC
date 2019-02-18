@@ -16,15 +16,20 @@ parser.add_argument("-o", "--outputdir", type=str, help="Outputdir", required=Tr
 parser.add_argument("-s", "--signal-amplitudes", nargs='+', type=float, help="Signal amplitudes", required=True)
 parser.add_argument("-p", "--pu", nargs='+', type=int, help="Pileups", required=True)
 parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
+parser.add_argument("-er","--eta-rings", type=int, nargs="+", help="etarings", required=False)
 parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
 args = parser.parse_args()
 
 # dataset of parameters
 dof = pd.read_csv(args.dof, sep="\t")
 
-# filtering strips
+# filtering strips and eta rings
 if args.strips != None:
+    print("Filtering on strips: ", args.strips)
     dof = dof[dof.stripid.isin(args.strips)]
+if args.eta_rings != None:
+    print("Filtering on eta_rings: ", args.eta_rings)
+    dof = dof[dof.eta_ring.isin(args.eta_rings)]
 
 # PUs and signals
 PU_string = ",".join(map(str, args.pu))
