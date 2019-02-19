@@ -60,7 +60,7 @@ OUTPUTFILE=$1;  shift
 echo -e "Copying result to: $OUTPUTFILE";
 xrdcp --nopbar temp_output root://eos{eosinstance}.cern.ch/${OUTPUTFILE};
 
-done
+echo -e "done"
 
 '''
 

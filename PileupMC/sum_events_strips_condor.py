@@ -18,6 +18,7 @@ parser.add_argument("-p", "--pu", nargs='+', type=int, help="Pileups", required=
 parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
 parser.add_argument("-er","--eta-rings", type=int, nargs="+", help="etarings", required=False)
 parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
+parser.add_argument("--fix", action="store_true", default=False, help="Check missing outputfiles", required=False)
 args = parser.parse_args()
 
 # dataset of parameters
@@ -30,6 +31,9 @@ if args.strips != None:
 if args.eta_rings != None:
     print("Filtering on eta_rings: ", args.eta_rings)
     dof = dof[dof.eta_ring.isin(args.eta_rings)]
+
+if args.fix:
+    outputfiles = [args.outputdir +"/" + s for s in os.listdir(args.outputdir)]
 
 # PUs and signals
 PU_string = ",".join(map(str, args.pu))
@@ -44,6 +48,10 @@ for stripid, df in dof.groupby("stripid"):
         inputfiles.append("root://eos{}.cern.ch/{}/weights_ID{:.0f}.root".format(
             args.eos, args.inputdir, xtalID))
     outputfile = args.outputdir +"/weights_stripID{}.root".format(stripid)
+    
+    if args.fix and outputfile in outputfiles:
+        continue
+
     arguments.append("{} {} {} {}".format(
         outputfile, PU_string, S_string, " ".join(inputfiles)))
 

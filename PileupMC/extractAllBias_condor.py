@@ -51,9 +51,11 @@ if args.fix:
 dfw = pd.read_csv(args.weights_file, sep="\t")
 dof = pd.read_csv(args.dof, sep="\t")
 
-# filtering strips
+# filtering strips and eta rings
 if args.strips != None:
+    print("Filtering on strips: ", args.strips)
     dfw = dfw[dfw.stripid.isin(args.strips)]
+
 
 # PUs and signals
 PU_string = ",".join(map(str, args.pu))
