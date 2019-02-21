@@ -25,7 +25,7 @@ error                   = error{N}/bias.$(ClusterId).$(ProcId).err
 log                     = log{N}/bias.$(ClusterId).log
 transfer_input_files    = extractBiasDF.x, run_script.sh
 
-+JobFlavour             = "espresso"
++JobFlavour             = "microcentury"
 queue arguments from args{N}.txt
 '''
 

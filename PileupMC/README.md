@@ -112,27 +112,92 @@ The script **extractBiasDF.cpp** is used to calculate the reconstructed amplitud
 All the set of weights for each strip are applied to each strip data using the script **extractAllBias_condor.py** that prepares several condor_jobs.
 
 ```
-python extractAllBias_condor.py --dof DOF_file --weights-file file_with_strips_weights  
-                                --inputdir dir --outputdir dir --mode 1/2 
-                                [ --nthreads 4  --eos cms/user  --fix]
+source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
+g++ -o extractBiasDF.x extractBiasDF.cpp  `root-config --libs --cflags`
+```
 
-condor_submit condor_job1.txt (and others)
+```
+python extractAllBias_condor.py [-h] -d DOF -w WEIGHTS_FILE -i INPUTDIR -o
+                                OUTPUTDIR -m MODE [-nt NTHREADS] -s
+                                SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...] -p
+                                PU [PU ...] [-st STRIPS [STRIPS ...]] [-e EOS]
+                                [--fix]
+
+arguments:
+  -h, --help            show this help message and exit
+  -d DOF, --dof DOF     DOF file
+  -w WEIGHTS_FILE, --weights-file WEIGHTS_FILE
+                        Weights file
+  -i INPUTDIR, --inputdir INPUTDIR
+                        Inputdir
+  -o OUTPUTDIR, --outputdir OUTPUTDIR
+                        Outputdir
+  -m MODE, --mode MODE  1=rootfile, 2=stats
+  -nt NTHREADS, --nthreads NTHREADS
+                        Number of threads
+  -s SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...], --signal-amplitudes SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...]
+                        Signal amplitudes
+  -p PU [PU ...], --pu PU [PU ...]
+                        Pileups
+  -st STRIPS [STRIPS ...], --strips STRIPS [STRIPS ...]
+                        Strips ID
+  -e EOS, --eos EOS     EOS instance user/cms
+  --fix                 Check missing outputfiles
+
 ```
 If *mode=2* a CSV file with statistical info about the bias for each combination of PU and signal. If *mode=1* a simple root tree with the reconstructed amplitude and bias for each event is created. 
 
 The *--fix* flags makes the script check the output directory and create only jobs for missing files.
 
+Then all the condor jobs have to be submitted:
+```
+condor_submit condor_job1.txt (and others)
+```
+
 
 ## Join the bias per strip
 At this step the bias is calculated for strip for each set of weights optimized for all the combinations of PU and signal. We have to merge all the datasets with the sript  **joinStripBias.py**. 
 
-The script **joinStripBias.py**  produces a final datasets with all the bias for each strip, for each PU and signal amplitude, calculated with each set of weights (identified by the *wPU* and *wS* labels). 
+The script **joinStripBias.py**  produces a final datasets with all the bias for each strip, for each PU and signal amplitude, calculated with each set of weights (identified by the *wPU* and *wS* labels).
+
+By default all the biases are saved in one file, you can choose to group them by strip or ring using the following options. 
 
 ```
-python joinStripBias.py -d DOF -w weights_files_per_strip  -i inputdir -o outputfile [--dry]
+python joinStripBias.py [-h] -d DOF -w WEIGHTS_FILE -i INPUTDIR -o OUTPUTFILE
+                        [--dry] [-st STRIPS [STRIPS ...]] [-gbs] [-gbr]
+
+arguments:
+  -h, --help            show this help message and exit
+  -d DOF, --dof DOF     DOF file
+  -w WEIGHTS_FILE, --weights-file WEIGHTS_FILE
+                        Weights file
+  -i INPUTDIR, --inputdir INPUTDIR
+                        Inputdir
+  -o OUTPUTFILE, --outputfile OUTPUTFILE
+                        Output file
+  --dry                 Dry run
+  -st STRIPS [STRIPS ...], --strips STRIPS [STRIPS ...]
+                        Strips ID
+  -gbs, --groupbystrip  Save one file per strip
+  -gbr, --groupbyring   Save one file per eta ring
 ```
 if *--dry* option is used the script checks only the presence of all the necessary files.
 
 
+# Plotting
+# Bias histogram
+For each set of weights and for each strip a 2D histogram can show the bias over PU and signal amplitude. 
 
+The script **buildBiasHistos.py** creates one Root file for each set of weights, containing one histogram for each strip.
 
+```
+python buildBiasHistos.py [-h] -i INPUTFILE -o OUTPUTDIR
+
+arguments:
+  -h, --help            show this help message and exit
+  -i INPUTFILE, --inputfile INPUTFILE
+                        Input file
+  -o OUTPUTDIR, --outputdir OUTPUTDIR
+                        Output dir
+
+```

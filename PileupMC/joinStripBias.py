@@ -5,6 +5,7 @@ import pandas as pd
 import argparse
 from math import sqrt
 from multiprocessing import Pool
+from collections import defaultdict
 
 '''
 This script is used to join the result of the bias calculation for all the strips.
@@ -18,6 +19,8 @@ parser.add_argument("-i", "--inputdir", type=str, help="Inputdir", required=True
 parser.add_argument("-o", "--outputfile", type=str, help="Output file", required=True)
 parser.add_argument("--dry", action="store_true", help="Dry run", required=False, default=False)
 parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
+parser.add_argument("-gbs", "--groupbystrip", action="store_true", help="Save one file per strip") 
+parser.add_argument("-gbr", "--groupbyring", action="store_true", help="Save one file per eta ring") 
 args = parser.parse_args()
 
 inputfiles = [args.inputdir +"/"+ f for f in os.listdir(args.inputdir)]
@@ -41,9 +44,13 @@ def load_file(file, stripid, PU, S):
 
 tobeloaded_files = []
 missing_files = []
+if args.groupbystrip or args.groupbyring:
+    tobeloaded_files = defaultdict(list)
+
 
 print("Loading xtals data...")
 for stripid, df in dfw.groupby("stripid"):
+    eta_ring = dof[dof.stripid == stripid].eta_ring.unique()[0]
     print(">>> Reading strip: ", stripid)
     # we have to load the file with bias for the strip
     #  created with a certain pair of PU and S. 
@@ -52,7 +59,12 @@ for stripid, df in dfw.groupby("stripid"):
         file = args.inputdir+"/bias_stripID{}_PU{:.0f}_S{:.0f}.txt".format(
                     stripid, row.PU, row.S)
         # Added to the list of files
-        tobeloaded_files.append((file,  stripid, row.PU, row.S))
+        if args.groupbystrip:
+            tobeloaded_files[stripid].append((file,  stripid, row.PU, row.S))
+        elif args.groupbyring:
+            tobeloaded_files[eta_ring].append((file,  stripid, row.PU, row.S))
+        else:
+            tobeloaded_files.append((file,  stripid, row.PU, row.S))
         # Check if the file exists in case of dry run
         if args.dry and not file in inputfiles:
             missing_files.append(file)
@@ -65,9 +77,29 @@ if args.dry:
 
 # Load all the pandas df with multiprocessing
 p = Pool()
-wdfs = p.starmap(load_file, tobeloaded_files)
-print("Joining dataframes...")
-totaldf = pd.concat(wdfs, sort=False)
+if args.groupbystrip:
+    for stripid, files in tobeloaded_files.items():
+        eta_ring = dof[dof.stripid == stripid].eta_ring.unique()[0]
+        outputdir = "{}/ring_{}".format(args.outputfile, eta_ring)
+        if not os.path.exists(outputdir): os.makedirs(outputdir)
 
+        wdfs = p.starmap(load_file, files)
+        print("Joining dataframes:  strip {}".format(stripid))
+        totaldf = pd.concat(wdfs, sort=False)
+        totaldf.to_csv("{}/ring_{}/bias_stripID{}.txt".format(
+                args.outputfile, eta_ring, stripid), sep="\t", 
+                index=False, float_format='%.5f')
+elif args.groupbyring:
+    for eta_ring, files in tobeloaded_files.items():
+        wdfs = p.starmap(load_file, files)
+        print("Joining dataframes:  ring {}".format(eta_ring))
+        totaldf = pd.concat(wdfs, sort=False)
+        totaldf.to_csv("{}/bias_ring{}.txt".format(
+                args.outputfile, eta_ring), sep="\t", 
+                index=False, float_format='%.5f')
+else:
 
-totaldf.to_csv(args.outputfile, sep="\t", index=False, float_format='%.5f')
+    wdfs = p.starmap(load_file, tobeloaded_files)
+    print("Joining dataframes...")
+    totaldf = pd.concat(wdfs, sort=False)
+    totaldf.to_csv(args.outputfile, sep="\t", index=False, float_format='%.5f')
