@@ -5,20 +5,15 @@ import argparse
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
 parser.add_argument("-r", "--rechits", type=str, help="Rechits tree", required=True)
-parser.add_argument("-i", "--inputdir", type=str, help="Inputdir", required=True)
+parser.add_argument("-i", "--inputdir", type=str, help="Directory with bias histograms", required=True)
 parser.add_argument("-o", "--outputdir", type=str, help="Outputdir", required=True)
 parser.add_argument("-nt", "--nthreads", type=int, help="Number of threads", required=False, default=4)
-parser.add_argument("-s", "--signal-amplitudes", nargs='+', type=float, help="Signal amplitudes", required=True)
-parser.add_argument("-p", "--pu", nargs='+', type=int, help="Pileups", required=True)
 parser.add_argument("-er","--eta-rings", type=int, nargs="+", help="etarings", required=False)
 parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
 parser.add_argument("--fix", action="store_true", default=False, help="Check missing outputfiles", required=False)
 args = parser.parse_args()
 
-
-dof = pd.read_csv(args.dof, sep=",")
 
 # Prepare condor jobs
 condor = '''executable              = run_script.sh
@@ -50,21 +45,14 @@ if args.fix:
 # Get bias sets
 bias_sets = os.listdir(args.inputdir)
 
-# PUs and signals
-PU_string = ",".join(map(str, args.pu))
 etarings = ",".join(map(str, args.eta_rings))
 
 arguments = []
 
 for  bset in bias_sets:
-    # Get number of xtals to fix the signal amplitudes
-    stripid = int(bset.split("_")[1])
-    nxtals = dof[dof.stripid == stripid].shape[0]
-    S_string = ",".join(map(lambda i: str(i*nxtals), args.signal_amplitudes))
-
-    arguments.append("{} {} {} {} {} {} {}".format(
+    arguments.append("{} {} {} {} {}".format(
         args.outputdir + "/" +bset, args.rechits, args.inputdir+"/"+bset,
-        PU_string, S_string, etarings, args.nthreads
+        etarings, args.nthreads
     ))
 
 print("Njobs: ", len(arguments))

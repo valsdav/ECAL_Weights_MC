@@ -13,14 +13,15 @@ with lumisection:pu:strip:energy data.
 '''
 
 parser = argparse.ArgumentParser()
+parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
 parser.add_argument("-i", "--inputdir", type=str, help="input dir", required=True)
 parser.add_argument("-o", "--output", type=str, help="outputfile file", required=True)
 parser.add_argument("-l", "--lumi", type=str, help="pu-lumi file", required=True)
 parser.add_argument("-n", "--nevents", type=int, help="N events", required=False)
-parser.add_argument("-r", "--rings", type=int, nargs="+", help="Eta rings", required=False)
+parser.add_argument("-er", "--eta-rings", type=int, nargs="+", help="Eta rings", required=False)
 args = parser.parse_args()
 
-dof = pd.read_csv("/eos/user/d/dvalsecc/ECAL/ECAL_Weights/PileupMC/parameters/ChannelNumberingEE.csv", sep=",")
+dof = pd.read_csv(args.dof, sep=",")
 strips_map = {}
 strips_rings = {}
 
@@ -32,7 +33,7 @@ tree.define_branches({
     }
 })
 
-print("rings", args.rings)
+print("Filtering on eta rings: ", args.eta_rings)
 
 for stripid, df in dof.groupby("stripid"):
     strips_rings[stripid] = df.eta_ring.values[0]
@@ -61,14 +62,17 @@ def read_file(f):
 
         strips_energy = defaultdict(int)
         for rechit, ix, iy,iz in zip(event.rechits, event.ixs, event.iys, event.izs):
-            stripid, eta_ring = strips_map[(ix, iy, iz)]
-            strips_energy[stripid] += rechit 
+            if (ix, iy, iz) in strips_map:
+                stripid, eta_ring = strips_map[(ix, iy, iz)]
+                strips_energy[stripid] += rechit 
+            else:
+                continue
         
         for sid, energy in strips_energy.items():
             ring = strips_rings[sid]
-            if args.rings != None:
-                if ring not in args.rings:
-                    continue
+            if args.eta_rings != None and ring not in args.eta_rings:
+                continue
+                
             output.append( (event.run, event.lumi, pulevel, sid, ring, energy))
 
     return output

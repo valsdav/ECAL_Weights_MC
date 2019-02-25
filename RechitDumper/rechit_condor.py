@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-f", "--files", type=str, help="input file", required=True)
 parser.add_argument("-n", "--nevents", type=int, help="n events", required=True)
 parser.add_argument("-o", "--outputdir", type=str, help="Outputdir", required=True)
+parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
 args = parser.parse_args()
 
 
@@ -46,12 +47,12 @@ echo -e "cmsRun.."
 cmsRun RechitDumper/RechitDumper/test/runRechitDumper.py inputFiles="${INPUTFILE}" outputFile=temp.root maxEvents=$NEVENTS
 
 echo -e "Copying result to: $OUTPUTFILE";
-xrdcp --nopbar temp_numEvent${NEVENTS}.root root://eoscms.cern.ch/${OUTPUTFILE};
+xrdcp --nopbar temp_numEvent${NEVENTS}.root root://eos{eosinstance}.cern.ch/${OUTPUTFILE};
 
 echo -e "DONE";
-
 '''
 
+script = script.replace("{eosinstance}", args.eos)
 script = script.replace("{user1}", user[:1])
 script = script.replace("{user}", user)
 
