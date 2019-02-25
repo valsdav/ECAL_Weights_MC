@@ -3,6 +3,10 @@ import os
 import pandas as pd 
 import argparse
 
+'''
+This script joins all the weights files in one file
+'''
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
 parser.add_argument("-i", "--inputdir", type=str, help="Inputdir", required=True)
@@ -13,7 +17,7 @@ args = parser.parse_args()
 
 
 # dataset of parameters
-df = pd.read_csv(args.dof, sep="\t")
+df = pd.read_csv(args.dof, sep=",")
 
 # filter strips and etarings
 if args.strips != None:

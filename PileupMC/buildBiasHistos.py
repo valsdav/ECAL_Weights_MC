@@ -15,12 +15,18 @@ One Root file is created for each set containing one histogram for each strip.
 '''
 
 parser = argparse.ArgumentParser()
+parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
 parser.add_argument("-i", "--inputfile", type=str, help="Input file", required=True)
 parser.add_argument("-o", "--outputdir", type=str, help="Output dir", required=True)
+parser.add_argument("-s", "--signal-amplitudes", nargs='+', type=float, help="Signal amplitudes", required=True)
+parser.add_argument("-p", "--pu", nargs='+', type=int, help="Pileups", required=True)
 args = parser.parse_args()
 
+PUs = args.pu
+Ss = args.signal_amplitudes
 
-bias_data = pd.read_csv(args.inputfile, sep=",")
+dof = pd.read_csv(args.dof, sep=",")
+bias_data = pd.read_csv(args.inputfile, sep="\t")
 
 def bias_histo(conf, df):
     wPU, wS = conf
@@ -28,14 +34,15 @@ def bias_histo(conf, df):
     file = R.TFile(args.outputdir +"/bias_histo_wPU{:.0f}_wS{:.0f}.root".format(wPU, wS), "RECREATE")
 
     for strip, dfs in df.groupby("stripid"):
+        # Check the number of xtals 
+        nxtals = dof[dof.stripid == strip].shape[0]
+        if nxtals < 5:
+            print("Strip: {}, | Nxtals: {}".format(strip, nxtals))
+        As = [i*nxtals for i in Ss]
+
         print("< stripid: ", strip)
-        h = R.TH2F("bias_{}".format(strip), "weights set (PU={}, S={})".format(wPU, wS*5),
-                 15,0, 15, 12, 0, 12)
-
-        PUs = [0, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60]
-        Ss = [1.0, 2.0, 4.0, 6.0, 8., 10.,12.,16.,20.,40.,60.,100.,160.,200]
-        As = [i*5 for i in Ss]
-
+        h = R.TH2F("bias_{}".format(strip), "weights set (PU={}, S={})".format(wPU, wS*nxtals),
+                            len(Ss),0, len(Ss), len(PUs), 0, len(PUs))
     
         for _, row in dfs.iterrows():
             x = Ss.index(row.S)
@@ -53,9 +60,9 @@ def bias_histo(conf, df):
         h.GetXaxis().SetTitle("Strip signal amplitude (GeV)")
         h.GetYaxis().SetTitleOffset(1.4)
         h.GetYaxis().SetTitle("PU")
-        contours = array("d", [ -40, -30,-20,-10,-5, -1,1, 5, 10, 20, 30, 40])
+        contours = array("d", [-60, -50, -40, -30,-20,-10,-5, -1,1, 5, 10, 20, 30, 40, 50, 60])
         h.SetContour(len(contours), contours )
-        h.GetZaxis().SetRangeUser(-40, 40)
+        h.GetZaxis().SetRangeUser(contours[0], contours[-1])
         h.GetZaxis().SetNdivisions(12)
         h.GetZaxis().SetTitle("bias%")
 

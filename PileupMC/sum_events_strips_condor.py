@@ -22,7 +22,7 @@ parser.add_argument("--fix", action="store_true", default=False, help="Check mis
 args = parser.parse_args()
 
 # dataset of parameters
-dof = pd.read_csv(args.dof, sep="\t")
+dof = pd.read_csv(args.dof, sep=",")
 
 # filtering strips and eta rings
 if args.strips != None:

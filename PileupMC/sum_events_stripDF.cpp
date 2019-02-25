@@ -32,12 +32,13 @@ class Event{
     double signalTruth;
     double amplitudeTruth;
     RVec<double> digis;
+    int nxtals;
  
     Event(): nPU{0}, E_pu{0.}, signalTruth{0.}, amplitudeTruth{0.} {
         digis.resize(10, 0.0);
     }
-    Event(int _nPU, double _E_pu, double _signalTruth, double _amplitudeTruth, RVec<double> _digis):
-         nPU{_nPU}, E_pu{_E_pu}, signalTruth{_signalTruth}, amplitudeTruth{_amplitudeTruth} 
+    Event(int _nPU, double _E_pu, double _signalTruth, double _amplitudeTruth, RVec<double> _digis, int _nxtals):
+         nPU{_nPU}, E_pu{_E_pu}, signalTruth{_signalTruth}, amplitudeTruth{_amplitudeTruth}, nxtals{_nxtals}
     {
         for (auto d: _digis){
             digis.push_back(d);
@@ -58,6 +59,7 @@ class TreeWriter{
     double signalTruth;
     double amplitudeTruth;
     vector<double> digis;
+    int nxtals;
  
     TreeWriter(const char* filename, const char* treename){
         file = new TFile(filename, "RECREATE");
@@ -67,6 +69,7 @@ class TreeWriter{
         tree->Branch("signalTruth", &signalTruth, "signalTruth/D");
         tree->Branch("amplitudeTruth", &amplitudeTruth, "amplitudeTruth/D");
         tree->Branch("digis", &digis);
+        tree->Branch("nxtals", &nxtals, "nxtals/I");
     }
     ~TreeWriter(){
         file->Close();
@@ -74,6 +77,7 @@ class TreeWriter{
 
     void fill(vector<EventPtr> events){
         for (EventPtr e : events){
+            nxtals = e->nxtals;
             nPU = e->nPU;
             E_pu = e->E_pu;
             signalTruth = e->signalTruth;
@@ -95,13 +99,14 @@ int _slot = -1;
 int _entry = 0;
 
 
-void dostuff(int nPU, double E_pu, double signalTruth,double amplitudeTruth, RVec<double>digis){
+void sumEvents(int nPU, double E_pu, double signalTruth,double amplitudeTruth, RVec<double>digis){
     if (_slot == 0){
-        EventPtr e {new Event(nPU, E_pu, signalTruth, amplitudeTruth, digis)};
+        EventPtr e {new Event(nPU, E_pu, signalTruth, amplitudeTruth, digis, 1)};
         events.push_back(std::move(e));
         _entry += 1;
     }else{
         EventPtr e = events.at(_entry);
+        e->nxtals += 1; 
         e->E_pu += E_pu;
         e->amplitudeTruth += amplitudeTruth;
         for (int di = 0; di <10 ; di++){
@@ -169,7 +174,7 @@ int main(int argc, char** argv){
 
                 filt_df.Filter([pu,s](int nPU, double signalTruth)
                                 {return nPU == pu && signalTruth == s;}, {"nPU", "signalTruth"})
-                    .Foreach(dostuff, {"nPU", "E_pu", "signalTruth", "amplitudeTruth", "digis"});
+                    .Foreach(sumEvents, {"nPU", "E_pu", "signalTruth", "amplitudeTruth", "digis"});
             }
 
             // Append the result

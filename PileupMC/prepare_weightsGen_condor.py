@@ -67,7 +67,7 @@ script = script.replace("{Ampls}", " ".join(map(lambda a: "{:.1f}".format(a), si
 script = script.replace("{eosinstance}", args.eos)
 
 # dataset of parameters
-df = pd.read_csv(args.dof , sep="\t")
+df = pd.read_csv(args.dof , sep=",")
 
 existing_files = os.listdir(outputdir)
 

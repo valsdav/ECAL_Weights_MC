@@ -22,7 +22,7 @@ args = parser.parse_args()
 
 
 # dataset of parameters
-dof = pd.read_csv(args.dof, sep="\t")
+dof = pd.read_csv(args.dof, sep=",")
 
 # filtering strips and etarings
 if args.strips != None:

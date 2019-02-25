@@ -13,7 +13,10 @@ parser.add_argument("-m", "--mode", type=int, help="1=rootfile, 2=stats", requir
 parser.add_argument("-nt", "--nthreads", type=int, help="Number of threads", required=False, default=4)
 parser.add_argument("-s", "--signal-amplitudes", nargs='+', type=float, help="Signal amplitudes", required=True)
 parser.add_argument("-p", "--pu", nargs='+', type=int, help="Pileups", required=True)
+parser.add_argument("-ws", "--weights-signal", nargs='+', type=float, help="Select signal in weights set", required=False)
+parser.add_argument("-wp", "--weights-pu", nargs='+', type=int, help="Select PU in weights set", required=False)
 parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
+parser.add_argument("-er","--eta-rings", type=int, nargs="+", help="etarings", required=False)
 parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
 parser.add_argument("--fix", action="store_true", default=False, help="Check missing outputfiles", required=False)
 args = parser.parse_args()
@@ -49,12 +52,19 @@ if args.fix:
 
 # dataset of parameters
 dfw = pd.read_csv(args.weights_file, sep="\t")
-dof = pd.read_csv(args.dof, sep="\t")
+dof = pd.read_csv(args.dof, sep=",")
 
-# filtering strips and eta rings
+# filtering strips from weights file
 if args.strips != None:
     print("Filtering on strips: ", args.strips)
     dfw = dfw[dfw.stripid.isin(args.strips)]
+# filtering on wS and wPU
+if args.weights_signal != None:
+    print("Filtering on wS: ", args.weights_signal)
+    dfw = dfw[dfw.S.isin(args.weights_signal)]
+if args.weights_pu != None:
+    print("Filtering on wPU: ", args.weights_pu)
+    dfw = dfw[dfw.PU.isin(args.weights_pu)]
 
 
 # PUs and signals
@@ -64,7 +74,10 @@ S_string = ",".join(map(str, args.signal_amplitudes))
 arguments = []
 
 for stripid, df in dfw.groupby("stripid"):
-    xtals = dof[dof.stripid == stripid]
+    eta_ring = dof[dof.stripid == stripid].eta_ring.unique()[0]
+    # filter on eta_rings
+    if args.eta_rings != None and (not eta_ring in args.eta_rings): continue
+
     inputfile = "root://eos{}.cern.ch/{}/weights_stripID{}.root".format(
                              args.eos, args.inputdir,stripid)
     for _, row in df.iterrows():
@@ -72,7 +85,7 @@ for stripid, df in dfw.groupby("stripid"):
                     args.outputdir, stripid, row.PU, row.S)
                     
         if args.fix and outputfile in outputfiles:
-                continue
+            continue
                 
         arguments.append("{} {} {} {} {} {} {} {} {} {} {}".format(
                         outputfile, inputfile, PU_string,
@@ -85,7 +98,7 @@ print("Njobs: ", len(arguments))
 with open("run_script.sh", "w") as rs:
     rs.write(script)
 
-n_cluster = ceil(len(arguments)/ 20000)
+n_cluster = ceil(len(arguments)/ 10000)
 
 for n in range(n_cluster):
     #writing down condor_job for this generation
@@ -93,9 +106,9 @@ for n in range(n_cluster):
         condor_scr.write(condor.replace("{N}", str(n+1)))
 
     with open("args{}.txt".format(n+1), "w") as out:
-        for i in range(20000):
-            if (n*20000 + i) < len(arguments):
-                out.write(arguments[n*20000 + i] +"\n")
+        for i in range(10000):
+            if (n*10000 + i) < len(arguments):
+                out.write(arguments[n*10000 + i] +"\n")
 
 
 

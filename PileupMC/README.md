@@ -39,9 +39,31 @@ To production weights data for each crystal we can use HTCondor jobs. The script
 prepares a single condor job for each crystal. Each job generates data for different pileups and different amplitudes,  calculates weights and produced a single final file.  A *DOF* (Degree Of Freedom) file is used to get the parameters for each crystal of ECAL. 
 
 ```
-python preparare_weigthsGen_condor.py --dof filename --outpudir dirname --signal-amplitudes (list) --pu (list) --nevents 2000 [-st strip list]
+python prepare_weightsGen_condor.py [-h] -d DOF -o OUTPUTDIR -s
+                                    SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...]
+                                    -p PU [PU ...] [-n NEVENTS]
+                                    [-st STRIPS [STRIPS ...]]
+                                    [-er ETA_RINGS [ETA_RINGS ...]] [-e EOS]
+
+arguments:
+  -h, --help            
+  -d DOF, --dof DOF     DOF file
+  -o OUTPUTDIR, --outputdir OUTPUTDIR
+                        output_dir
+  -s SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...], --signal-amplitudes SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...]
+                        Signal amplitudes
+  -p PU [PU ...], --pu PU [PU ...]
+                        Pileups
+  -n NEVENTS, --nevents NEVENTS
+                        Number of events
+  -st STRIPS [STRIPS ...], --strips STRIPS [STRIPS ...]
+                        Strips ID
+  -er ETA_RINGS [ETA_RINGS ...], --eta-rings ETA_RINGS [ETA_RINGS ...]
+                        etarings
+  -e EOS, --eos EOS     EOS instance user/cms
 ```
-The *--signal-amplitudes (-s)* option accepts a list of amplitudes, whereas the *--pu (-p)* option a list of PU values. The optional option *--strips (-st)* can be used to filter the wanted strips ids. 
+
+The *--signal-amplitudes (-s)* option accepts a list of amplitudes, whereas the *--pu (-p)* option a list of PU values. The optional options *--strips (-st)* or *--eta-rings (-er)*  can be used to filter the wanted strips ids or eta rings. 
 
 Several files are prepared since condor clusters can contain only 20k jobs each. 
 
@@ -73,8 +95,37 @@ g++ -o weights_analysis_stripsDF.x weights_analysis_stripsDF.cpp  `root-config -
 
 To prepare the condor jobs run the script:
 ```bash
-python weights_analysis_strips_condor.py --dof DOF_file --inputdir directory_xtal_data --outputdir eos_dir --signal-amplitudes (list) --pu (list) [-st strips list  -nt nthreads --eos user/cms] 
+python weights_analysis_strips_condor.py [-h] -d DOF -i INPUTDIR -o OUTPUTDIR
+                                         -s SIGNAL_AMPLITUDES
+                                         [SIGNAL_AMPLITUDES ...] -p PU
+                                         [PU ...] [-nt NTHREADS]
+                                         [-st STRIPS [STRIPS ...]]
+                                         [-er ETA_RINGS [ETA_RINGS ...]]
+                                         [-e EOS] [--fix]
+
+arguments:
+  -h, --help           
+  -d DOF, --dof DOF     DOF file
+  -i INPUTDIR, --inputdir INPUTDIR
+                        Inputdir
+  -o OUTPUTDIR, --outputdir OUTPUTDIR
+                        Outputdir
+  -s SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...], --signal-amplitudes SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...]
+                        Signal amplitude
+  -p PU [PU ...], --pu PU [PU ...]
+                        Pileups
+  -nt NTHREADS, --nthreads NTHREADS
+                        Number of threads
+  -st STRIPS [STRIPS ...], --strips STRIPS [STRIPS ...]
+                        Strips ID
+  -er ETA_RINGS [ETA_RINGS ...], --eta-rings ETA_RINGS [ETA_RINGS ...]
+                        etarings
+  -e EOS, --eos EOS     EOS instance user/cms
+  --fix                 Check missing outputfiles
 ```
+The *--fix* options checks the missing output file instead of recreating all the outputs.
+
+
 Then submit the jobs to condor
 ```
 mkdir output log error
@@ -84,7 +135,21 @@ condor_submit condor_job.txt
 When all the jobs will be completed, a single dataset with all the weights for all the strips (with all combinations of PU and signal) can be created with the script **joinStripWeights.py**
 
 ```
-python joinStripWeights.py --dof DOF_file -i inputdir -o outputfile [-st stripslist]
+python joinStripWeights.py [-h] -d DOF -i INPUTDIR -o OUTPUTFILE
+                           [-st STRIPS [STRIPS ...]]
+                           [-er ETA_RINGS [ETA_RINGS ...]]
+
+arguments:
+  -h, --help            
+  -d DOF, --dof DOF     DOF file
+  -i INPUTDIR, --inputdir INPUTDIR
+                        Inputdir
+  -o OUTPUTFILE, --outputfile OUTPUTFILE
+                        Output file
+  -st STRIPS [STRIPS ...], --strips STRIPS [STRIPS ...]
+                        Strips ID
+  -er ETA_RINGS [ETA_RINGS ...], --eta-rings ETA_RINGS [ETA_RINGS ...]
+                        etarings
 ```
 
 # Join digis by strip
@@ -97,9 +162,28 @@ A python script is used to prepare condor jobs to work on each strip:
 source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
 g++ -o sum_events_stripDF.x sum_events_stripDF.cpp  `root-config --libs --cflags`
 
-python sum_events_strips_condor.py --dof DOF_file --inputdir directory_xtal_data --outputdir eos_dir 
-                                    --signal-amplitudes (list) --pu (list) 
-                                    [-st strips list   --eos user/cms]
+python  sum_events_strips_condor.py [-h] -d DOF -i INPUTDIR -o OUTPUTDIR -s
+                                   SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...]
+                                   -p PU [PU ...] [-st STRIPS [STRIPS ...]]
+                                   [-er ETA_RINGS [ETA_RINGS ...]] [-e EOS]
+                                   [--fix]
+arguments:
+  -h, --help           
+  -d DOF, --dof DOF     DOF file
+  -i INPUTDIR, --inputdir INPUTDIR
+                        Inputdir
+  -o OUTPUTDIR, --outputdir OUTPUTDIR
+                        Outputdir
+  -s SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...], --signal-amplitudes SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...]
+                        Signal amplitudes
+  -p PU [PU ...], --pu PU [PU ...]
+                        Pileups
+  -st STRIPS [STRIPS ...], --strips STRIPS [STRIPS ...]
+                        Strips ID
+  -er ETA_RINGS [ETA_RINGS ...], --eta-rings ETA_RINGS [ETA_RINGS ...]
+                        etarings
+  -e EOS, --eos EOS     EOS instance user/cms
+  --fix                 Check missing outputfiles
 ```
 
 
@@ -120,11 +204,14 @@ g++ -o extractBiasDF.x extractBiasDF.cpp  `root-config --libs --cflags`
 python extractAllBias_condor.py [-h] -d DOF -w WEIGHTS_FILE -i INPUTDIR -o
                                 OUTPUTDIR -m MODE [-nt NTHREADS] -s
                                 SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...] -p
-                                PU [PU ...] [-st STRIPS [STRIPS ...]] [-e EOS]
+                                PU [PU ...]
+                                [-ws WEIGHTS_SIGNAL [WEIGHTS_SIGNAL ...]]
+                                [-wp WEIGHTS_PU [WEIGHTS_PU ...]]
+                                [-st STRIPS [STRIPS ...]]
+                                [-er ETA_RINGS [ETA_RINGS ...]] [-e EOS]
                                 [--fix]
-
 arguments:
-  -h, --help            show this help message and exit
+  -h, --help            
   -d DOF, --dof DOF     DOF file
   -w WEIGHTS_FILE, --weights-file WEIGHTS_FILE
                         Weights file
@@ -139,8 +226,14 @@ arguments:
                         Signal amplitudes
   -p PU [PU ...], --pu PU [PU ...]
                         Pileups
+  -ws WEIGHTS_SIGNAL [WEIGHTS_SIGNAL ...], --weights-signal WEIGHTS_SIGNAL [WEIGHTS_SIGNAL ...]
+                        Select signal in weights set
+  -wp WEIGHTS_PU [WEIGHTS_PU ...], --weights-pu WEIGHTS_PU [WEIGHTS_PU ...]
+                        Select PU in weights set
   -st STRIPS [STRIPS ...], --strips STRIPS [STRIPS ...]
                         Strips ID
+  -er ETA_RINGS [ETA_RINGS ...], --eta-rings ETA_RINGS [ETA_RINGS ...]
+                        etarings
   -e EOS, --eos EOS     EOS instance user/cms
   --fix                 Check missing outputfiles
 
@@ -148,6 +241,8 @@ arguments:
 If *mode=2* a CSV file with statistical info about the bias for each combination of PU and signal. If *mode=1* a simple root tree with the reconstructed amplitude and bias for each event is created. 
 
 The *--fix* flags makes the script check the output directory and create only jobs for missing files.
+
+The **-ws** and **-wp** options can be used to select the set of weights to be used for the bias estimation. If they are not specified all the possible combination of weights and PU present in the data are used. 
 
 Then all the condor jobs have to be submitted:
 ```
@@ -164,10 +259,13 @@ By default all the biases are saved in one file, you can choose to group them by
 
 ```
 python joinStripBias.py [-h] -d DOF -w WEIGHTS_FILE -i INPUTDIR -o OUTPUTFILE
-                        [--dry] [-st STRIPS [STRIPS ...]] [-gbs] [-gbr]
+                        [--dry] [-st STRIPS [STRIPS ...]]
+                        [-er ETA_RINGS [ETA_RINGS ...]]
+                        [-ws WEIGHTS_SIGNAL [WEIGHTS_SIGNAL ...]]
+                        [-wp WEIGHTS_PU [WEIGHTS_PU ...]] [-gbs] [-gbr]
 
 arguments:
-  -h, --help            show this help message and exit
+  -h, --help            
   -d DOF, --dof DOF     DOF file
   -w WEIGHTS_FILE, --weights-file WEIGHTS_FILE
                         Weights file
@@ -178,6 +276,12 @@ arguments:
   --dry                 Dry run
   -st STRIPS [STRIPS ...], --strips STRIPS [STRIPS ...]
                         Strips ID
+  -er ETA_RINGS [ETA_RINGS ...], --eta-rings ETA_RINGS [ETA_RINGS ...]
+                        etarings
+  -ws WEIGHTS_SIGNAL [WEIGHTS_SIGNAL ...], --weights-signal WEIGHTS_SIGNAL [WEIGHTS_SIGNAL ...]
+                        Select signal in weights set
+  -wp WEIGHTS_PU [WEIGHTS_PU ...], --weights-pu WEIGHTS_PU [WEIGHTS_PU ...]
+                        Select PU in weights set
   -gbs, --groupbystrip  Save one file per strip
   -gbr, --groupbyring   Save one file per eta ring
 ```
@@ -185,19 +289,24 @@ if *--dry* option is used the script checks only the presence of all the necessa
 
 
 # Plotting
-# Bias histogram
+# Bias histograms
 For each set of weights and for each strip a 2D histogram can show the bias over PU and signal amplitude. 
 
 The script **buildBiasHistos.py** creates one Root file for each set of weights, containing one histogram for each strip.
 
 ```
-python buildBiasHistos.py [-h] -i INPUTFILE -o OUTPUTDIR
-
+python buildBiasHistos.py [-h] -d DOF -i INPUTFILE -o OUTPUTDIR -s
+                          SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...] -p PU
+                          [PU ...]
 arguments:
-  -h, --help            show this help message and exit
+  -h, --help            
+  -d DOF, --dof DOF     DOF file
   -i INPUTFILE, --inputfile INPUTFILE
                         Input file
   -o OUTPUTDIR, --outputdir OUTPUTDIR
                         Output dir
-
+  -s SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...], --signal-amplitudes SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...]
+                        Signal amplitudes
+  -p PU [PU ...], --pu PU [PU ...]
+                        Pileups
 ```
