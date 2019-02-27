@@ -18,12 +18,13 @@ parser.add_argument("-n", "--nevents", type=int, help="Number of events", requir
 parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
 parser.add_argument("-er","--eta-rings", type=int, nargs="+", help="etarings", required=False)
 parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
+parser.add_argument("--debug", action="store_true", default=False, help="Activate debug output", required=False)
 args = parser.parse_args()
 
 signalAmpls = args.signal_amplitudes
 PUs = args.pu
 nevents = args.nevents
-debug = 0
+debug = args.debug
 outputdir = args.outputdir
 
 condor= '''executable              = run_condor.sh

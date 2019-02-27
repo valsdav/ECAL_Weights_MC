@@ -14,6 +14,8 @@ parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance 
 parser.add_argument("--fix", action="store_true", default=False, help="Check missing outputfiles", required=False)
 args = parser.parse_args()
 
+if args.fix:
+    outputfiles = [args.outputdir +"/" + s for s in os.listdir(args.outputdir)]
 
 # Prepare condor jobs
 condor = '''executable              = run_script.sh
@@ -50,8 +52,11 @@ etarings = ",".join(map(str, args.eta_rings))
 arguments = []
 
 for  bset in bias_sets:
+    outputfile = args.outputdir + "/" +bset
+    if args.fix and outputfile in outputfiles:
+        continue
     arguments.append("{} {} {} {} {}".format(
-        args.outputdir + "/" +bset, args.rechits, args.inputdir+"/"+bset,
+        outputfile, args.rechits, args.inputdir+"/"+bset,
         etarings, args.nthreads
     ))
 

@@ -4,6 +4,7 @@
 #include <TApplication.h>
 #include <TTree.h>
 #include <TFile.h>
+#include <TAxis.h>
 #include <TLegend.h>
 
 #include <iostream>
@@ -12,13 +13,14 @@ using namespace std;
 
 int main(int argc, char** argv){
 
-    if (argc <2){
-        std::cout << "Please insert file..." <<std::endl;
+    if (argc <3){
+        std::cout << "Please insert file | event number" <<std::endl;
         return 1;
     }
 
     TFile* file = new TFile(argv[1], "READ");
     TTree* tree = (TTree*) file->Get("samples");
+    int event = atoi(argv[2]);
 
 
     TApplication app("app", &argc, argv);
@@ -33,7 +35,7 @@ int main(int argc, char** argv){
     tree->SetBranchAddress("pileup_digis", &pileup_digis);
     tree->SetBranchAddress("digis", &digis);
     tree->SetBranchAddress("digis_noise", &digis_noise);
-    tree->GetEntry(0);
+    tree->GetEntry(event);
     
     TCanvas c;
     TGraph g; 
@@ -41,7 +43,11 @@ int main(int argc, char** argv){
         g.SetPoint(i, 25*i, samples->at(i));
     }
     g.Draw("A*");
-    g.SetTitle("All samples");
+    g.SetMarkerStyle(22);
+    g.SetMarkerSize(2);
+    g.SetMarkerColor(kRed);
+    g.SetTitle("Digis; ns; GeV");
+    g.GetYaxis()->SetRangeUser(-1., 55.);
     c.Draw();
 
     TCanvas c2;
@@ -75,6 +81,7 @@ int main(int argc, char** argv){
     mg->Add(g_pu);
     mg->Add(g_noise);
     mg->Draw("ALP PMC");
+    mg->SetTitle("10 samples window;ns;GeV");
     
     legend->Draw("same");
     c.Draw();

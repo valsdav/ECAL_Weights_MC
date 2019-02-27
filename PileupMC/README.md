@@ -44,9 +44,10 @@ python prepare_weightsGen_condor.py [-h] -d DOF -o OUTPUTDIR -s
                                     -p PU [PU ...] [-n NEVENTS]
                                     [-st STRIPS [STRIPS ...]]
                                     [-er ETA_RINGS [ETA_RINGS ...]] [-e EOS]
+                                    [--debug]
 
 arguments:
-  -h, --help            
+  -h, --help            show this help message and exit
   -d DOF, --dof DOF     DOF file
   -o OUTPUTDIR, --outputdir OUTPUTDIR
                         output_dir
@@ -61,6 +62,8 @@ arguments:
   -er ETA_RINGS [ETA_RINGS ...], --eta-rings ETA_RINGS [ETA_RINGS ...]
                         etarings
   -e EOS, --eos EOS     EOS instance user/cms
+  --debug               Activate debug output
+
 ```
 
 The *--signal-amplitudes (-s)* option accepts a list of amplitudes, whereas the *--pu (-p)* option a list of PU values. The optional options *--strips (-st)* or *--eta-rings (-er)*  can be used to filter the wanted strips ids or eta rings. 
@@ -295,18 +298,15 @@ For each set of weights and for each strip a 2D histogram can show the bias over
 The script **buildBiasHistos.py** creates one Root file for each set of weights, containing one histogram for each strip.
 
 ```
-python buildBiasHistos.py [-h] -d DOF -i INPUTFILE -o OUTPUTDIR -s
-                          SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...] -p PU
-                          [PU ...]
+python buildBiasHistos.py [-h] -d DOF -i INPUTFILE -o OUTPUTDIR -t TYPE
+
 arguments:
-  -h, --help            
+  -h, --help            show this help message and exit
   -d DOF, --dof DOF     DOF file
   -i INPUTFILE, --inputfile INPUTFILE
                         Input file
   -o OUTPUTDIR, --outputdir OUTPUTDIR
                         Output dir
-  -s SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...], --signal-amplitudes SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...]
-                        Signal amplitudes
-  -p PU [PU ...], --pu PU [PU ...]
-                        Pileups
+  -t TYPE, --type TYPE  Bias map type (wPU_wS or PU_wPU)
 ```
+

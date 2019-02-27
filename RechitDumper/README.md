@@ -31,16 +31,19 @@ dasgoclient -query "file dataset=/ZeroBias/Run2018C-v1/RAW run=320065" > configs
 The script **rechit_condor.py** is then useful to create one job for each CMS data file on condor:
 
 ```
-python rechit_condor.py [-h] -f FILES -n NEVENTS -o OUTPUTDIR
+python rechit_condor.py [-h] -f FILES -n NEVENTS -o OUTPUTDIR [-e EOS] [--fix]
 
 arguments:
-  -h, --help           
-  -f file with list of samples , --files FILES
+  -h, --help            
+  -f FILES, --files FILES
                         input file
   -n NEVENTS, --nevents NEVENTS
                         n events
   -o OUTPUTDIR, --outputdir OUTPUTDIR
                         Outputdir
+  -e EOS, --eos EOS     EOS instance user/cms
+  --fix                 Check missing outputfiles
+
 ```
 
 Some set of files can be found in the folder **configs/**: in particular the run=324725 was a special one done with full ECAL in *FullReadout*- 

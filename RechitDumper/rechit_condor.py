@@ -12,6 +12,7 @@ parser.add_argument("-f", "--files", type=str, help="input file", required=True)
 parser.add_argument("-n", "--nevents", type=int, help="n events", required=True)
 parser.add_argument("-o", "--outputdir", type=str, help="Outputdir", required=True)
 parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
+parser.add_argument("--fix", action="store_true", default=False, help="Check missing outputfiles", required=False)
 args = parser.parse_args()
 
 
@@ -56,13 +57,20 @@ script = script.replace("{eosinstance}", args.eos)
 script = script.replace("{user1}", user[:1])
 script = script.replace("{user}", user)
 
+if args.fix:
+    outputfiles = [args.outputdir +"/" + s for s in os.listdir(args.outputdir)]
+
 arguments= []
 
 with open(args.files) as inputfiles:
     files = [s[:-1] for s in inputfiles.readlines()]
 
     for i, file in enumerate(files):
-        arguments.append("{0}/output_{1}.root {2} {3}".format(args.outputdir, i, file, args.nevents))
+        outfile = "{}/output_{}.root".format(args.outputdir, i)
+        if args.fix and outfile in outputfiles:
+            continue
+
+        arguments.append("{} {} {}".format(outfile, file, args.nevents))
 
 
 print("Njobs: ", len(arguments))

@@ -81,8 +81,12 @@ for stripid, df in dfw.groupby("stripid"):
     inputfile = "root://eos{}.cern.ch/{}/weights_stripID{}.root".format(
                              args.eos, args.inputdir,stripid)
     for _, row in df.iterrows():
-        outputfile = "{}/bias_stripID{}_PU{:.0f}_S{:.0f}.txt".format(
-                    args.outputdir, stripid, row.PU, row.S)
+        if args.mode ==1:
+            ext = "root"
+        else:
+            ext = "txt"
+        outputfile = "{}/bias_stripID{}_PU{:.0f}_S{:.0f}.{}".format(
+                    args.outputdir, stripid, row.PU, row.S, ext)
                     
         if args.fix and outputfile in outputfiles:
             continue
