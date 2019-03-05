@@ -33,6 +33,8 @@ for strip in df.stripid.unique():
     print("Strip: ", strip)
     d = pd.read_csv(args.inputdir+"/weights_stripID{}.txt".format(strip),
             sep=",", index_col=False )
+    etaring = df[df.stripid == strip].eta_ring.unique()[0]
+    d["eta_ring"] = etaring
     wdfs.append(d)
 
 

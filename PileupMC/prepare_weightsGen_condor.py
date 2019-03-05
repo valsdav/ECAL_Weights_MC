@@ -90,7 +90,7 @@ def generate(row):
         # add a line of parameters for this crystal
         params.append("{} {} {} {} {} {} {} {}".format(
             ID, row.alpha, row.beta, row.t0, 
-            row.eta, nevents, outputdir, debug))
+            row.eta, nevents, outputdir, int(debug)))
     return params
 
 params = []
