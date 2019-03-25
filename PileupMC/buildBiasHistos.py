@@ -18,7 +18,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
 parser.add_argument("-i", "--inputfile", type=str, help="Input file", required=True)
 parser.add_argument("-o", "--outputdir", type=str, help="Output dir", required=True)
-parser.add_argument("-t", "--type", type=str, help="Bias map type (wPU_wS or PU_wPU)R", required=True)
+parser.add_argument("-t", "--type", type=str, help="Bias map type (wPU_wS or PU_wPU)", required=True)
 args = parser.parse_args()
 
 
@@ -31,16 +31,16 @@ def bias_histo_wPU_wS(conf, df):
     file = R.TFile(args.outputdir +"/bias_histo_wPU{:.0f}_wS{:.0f}.root".format(wPU, wS), "RECREATE")
 
     for strip, dfs in df.groupby("stripid"):
-        # Check the number of xtals 
-        nxtals = dof[dof.stripid == strip].shape[0]
-        if nxtals < 5:
-            print("Strip: {}, | Nxtals: {}".format(strip, nxtals))
+        # # Check the number of xtals 
+        # nxtals = dof[dof.stripid == strip].shape[0]
+        # if nxtals < 5:
+        #     print("Strip: {}, | Nxtals: {}".format(strip, nxtals))
         PUs = list(dfs.PU.unique())
         Ss = list(dfs.S.unique())
-        As = [i*nxtals for i in Ss]
+        As = Ss
 
         print("< stripid: ", strip)
-        h = R.TH2F("bias_{}".format(strip), "weights set (PU={}, S={})".format(wPU, wS*nxtals),
+        h = R.TH2F("bias_{}".format(strip), "weights set (PU={}, S={})".format(wPU, wS),
                             len(Ss),0, len(Ss), len(PUs), 0, len(PUs))
     
         for _, row in dfs.iterrows():
@@ -75,13 +75,13 @@ def bias_histo_PU_wPU(conf, df):
 
     for strip, dfs in df.groupby("stripid"):
         # Check the number of xtals 
-        nxtals = dof[dof.stripid == strip].shape[0]
-        if nxtals < 5:
-            print("Strip: {}, | Nxtals: {}".format(strip, nxtals))
+        # nxtals = dof[dof.stripid == strip].shape[0]
+        # if nxtals < 5:
+        #     print("Strip: {}, | Nxtals: {}".format(strip, nxtals))
         Ss = list(dfs.S.unique())
         wS = list(dfs.wS.unique())
-        As = [i*nxtals for i in Ss]
-        AwS = [i*nxtals for i in wS]
+        As = Ss
+        AwS = wS
 
         print("< stripid: ", strip)
         h = R.TH2F("bias_{}".format(strip), "bias % - PU={}, wPU={:.0f}".format(PU, wPU),
@@ -114,8 +114,6 @@ def bias_histo_PU_wPU(conf, df):
 
         h.Write()
     file.Close()
-
-
 
 
 p = Pool()

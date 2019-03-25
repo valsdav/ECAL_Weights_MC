@@ -91,7 +91,7 @@ int main(int argc, char** argv){
         
     if (mode == 1){
         df_reco.Snapshot("bias", outputfile, {"recoA", "bias", "amplitudeTruth", 
-                        "signalTruth", "nPU", "E_pu"});
+                        "ET", "signalTruth", "nPU", "E_pu"});
     }
     else if(mode ==2 ){
 
@@ -118,7 +118,7 @@ int main(int argc, char** argv){
             auto pu_df = df_reco.Filter("nPU=="+to_string(pu));
 
             for (auto S : Ss){
-                auto s_df = pu_df.Filter("signalTruth=="+ to_string(S));
+                auto s_df = pu_df.Filter("ET=="+ to_string(S));
                 recoA_mean_pu[S] = s_df.Mean("recoA");
                 recoA_std_pu[S]  = s_df.StdDev("recoA");
                 bias_mean_pu[S]  = s_df.Mean("bias");

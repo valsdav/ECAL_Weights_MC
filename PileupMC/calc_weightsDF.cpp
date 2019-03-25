@@ -70,11 +70,11 @@ int main(int argc, char** argv){
 
     if (complete){
         // Save also digis for debug purposes
-        _dfw.Snapshot("weights", outputfile, {"ID", "nPU", "E_pu", "signalTruth", "amplitudeTruth",
+        _dfw.Snapshot("weights", outputfile, {"ID", "nPU", "E_pu", "ET", "ET_strip", "signalTruth", "amplitudeTruth",
                 "digis", "eta_ring", "w1","w2","w3","w4","w5"});
     }else{
         // Save only weights, not digis
-        _dfw.Snapshot("weights", outputfile, {"ID", "nPU", "E_pu", "signalTruth", "amplitudeTruth",
+        _dfw.Snapshot("weights", outputfile, {"ID", "nPU", "E_pu", "ET", "ET_strip", "signalTruth", "amplitudeTruth",
                 "w1","w2","w3","w4","w5"});
     }
           

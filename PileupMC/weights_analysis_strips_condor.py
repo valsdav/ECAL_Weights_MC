@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
 parser.add_argument("-i", "--inputdir", type=str, help="Inputdir", required=True)
 parser.add_argument("-o", "--outputdir", type=str, help="Outputdir", required=True)
-parser.add_argument("-s", "--signal-amplitudes", nargs="+", type=float, help="Signal amplitude", required=True)
+parser.add_argument("-s", "--signal-amplitudes", nargs="+", type=float, help="Signal amplitude (ET per strip)", required=True)
 parser.add_argument("-p", "--pu", nargs='+', type=int, help="Pileups", required=True)
 parser.add_argument("-nt", "--nthreads", type=int, help="Number of threads", required=False, default=3)
 parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
@@ -36,6 +36,7 @@ if args.eta_rings != None:
 PU_string = ",".join(map(str, args.pu))
 S_string = ",".join(map(str, args.signal_amplitudes))
 
+
 # Prepare condor jobs
 condor = '''executable              = run_script.sh
 output                  = output/strips.$(ClusterId).$(ProcId).out
@@ -44,14 +45,14 @@ log                     = log/strips.$(ClusterId).log
 transfer_input_files    = weights_analysis_stripsDF.x, run_script.sh
 
 +JobFlavour             = "espresso"
+requirements = (OpSysAndVer=?= "CentOS7")
+
 queue arguments from arguments.txt
 '''
 
 script = '''#!/bin/sh -e
 
-#source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
-#source /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
-source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-centos7-gcc7-opt/setup.sh
 
 OUTPUTFILE=$1;  shift
 

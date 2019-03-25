@@ -28,7 +28,10 @@ public:
     PileupMC(int nBX, int BX0, std::string puFile, int NSamples);
     ~PileupMC();
 
-    TTree* simulatePileup(int id, Pulse* pulse, double signalAmplitude, int nEvents, 
+    TTree* simulatePileup(int id, Pulse* pulse, double stripAmplitude, double signalAmplitudeT, int nEvents, 
+            float eta, int nPU, bool debug);
+
+    TTree* simulatePileupSignalDistribution(int id, Pulse* pulse, TH1F* TPs, int nxtals, int nEvents, 
             float eta, int nPU, bool debug);
 
 };

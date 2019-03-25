@@ -4,7 +4,7 @@
 #include <TObject.h>
 #include <TCanvas.h>
 #include <TTreeReader.h>
-
+#include <cmath>
 #include <iostream>
 
 using namespace std;
@@ -17,8 +17,8 @@ The ID is saved in the TTree to distinguish the generated events
 */
 int main(int argc, char** argv){
 
-    if (argc< 11) {
-        std::cout << "Missing args: ID | alpha| beta| t0| signalAmpl | eta | nPU | number of events | output_file | complete_info" << std::endl;
+    if (argc< 12) {
+        std::cout << "Missing args: ID | alpha| beta| t0| stripAmplitude_ET | nxtals_in_strip| eta | nPU | number of events | output_file | complete_info" << std::endl;
         return 1;
     }
 
@@ -26,17 +26,22 @@ int main(int argc, char** argv){
     double alpha = atof(argv[2]);
     double beta = atof(argv[3]);
     double t0 = atof(argv[4]);
-    double signalAmplitude = atof(argv[5]);
-    float eta = atof(argv[6]);
-    int PU = atoi(argv[7]);
-    int nevents = atoi(argv[8]);
-    char* outputFile = argv[9];
-    bool debug = atoi(argv[10]);
+    // in transverse energy
+    double stripAmplitude = atof(argv[5]);
+    int nxtals_in_strip = atoi(argv[6]);
+    //divide the energy by the number of xtals in the strip
+    double ET = stripAmplitude / nxtals_in_strip;
+    float eta = atof(argv[7]);
+    int PU = atoi(argv[8]);
+    int nevents = atoi(argv[9]);
+    char* outputFile = argv[10];
+    bool debug = atoi(argv[11]);
 
     std::cout << "ID = "<< ID << std::endl 
      << "alpha = " << alpha << ", beta = " << beta << ", t0 = " << t0 <<std::endl 
-     << "signal Amplitude = " << signalAmplitude << ", eta = "<< eta << ", PU = " << PU <<std::endl
-     << "Generating "<< nevents << " events" <<std::endl;
+     << "ET = " << ET << ", signal Amplitude = " << ET * cosh(eta) << std::endl
+     << "eta = "<< eta << ", PU = " << PU <<std::endl
+     << ">>> Generating "<< nevents << " events" <<std::endl;
 
     Pulse * pulse = new Pulse(1., t0, alpha, beta);
     pulse->SetNoiseCorrelationZero();
@@ -49,7 +54,7 @@ int main(int argc, char** argv){
     PileupMC * mc = new PileupMC(nBX, BX0, puFile, NSamples);
 
     TFile* file_nopu = new TFile(outputFile, "RECREATE");
-    TTree* tree_nopu = mc->simulatePileup(ID, pulse, signalAmplitude, nevents, eta, PU, debug);
+    TTree* tree_nopu = mc->simulatePileup(ID, pulse,stripAmplitude, ET, nevents, eta, PU, debug);
     file_nopu->Write("", TObject::kOverwrite);
     file_nopu->Close();
 }

@@ -64,15 +64,15 @@ error                   = error{N}/bias.$(ClusterId).$(ProcId).err
 log                     = log{N}/bias.$(ClusterId).log
 transfer_input_files    = sum_events_stripDF.x, run_script.sh
 
-+JobFlavour             = "longlunch"
++JobFlavour             = "microcentury"
+requirements = (OpSysAndVer=?= "CentOS7")
+
 queue arguments from args{N}.txt
 '''
 
 script = '''#!/bin/sh -e 
 
-#source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
-#source /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
-source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-centos7-gcc7-opt/setup.sh
 
 OUTPUTFILE=$1; shift
 
@@ -80,6 +80,8 @@ OUTPUTFILE=$1; shift
 
 echo -e "Copying result to: $OUTPUTFILE";
 xrdcp --nopbar output_temp root://eos{eosinstance}.cern.ch/${OUTPUTFILE};
+
+echo -e "DONE";
 '''
 
 script = script.replace("{eosinstance}", args.eos)
@@ -87,7 +89,7 @@ script = script.replace("{eosinstance}", args.eos)
 with open("run_script.sh", "w") as rs:
     rs.write(script)
 
-n_cluster = ceil(len(arguments)/ 20000)
+n_cluster = ceil(len(arguments)/ 10000)
 
 for n in range(n_cluster):
     #writing down condor_job for this generation
@@ -95,9 +97,9 @@ for n in range(n_cluster):
         condor_scr.write(condor.replace("{N}", str(n+1)))
 
     with open("args{}.txt".format(n+1), "w") as out:
-        for i in range(20000):
-            if (n*20000 + i) < len(arguments):
-                out.write(arguments[n*20000 + i] +"\n")
+        for i in range(10000):
+            if (n*10000 + i) < len(arguments):
+                out.write(arguments[n*10000 + i] +"\n")
 
 
 # os.system("condor_submit condor_job.txt")

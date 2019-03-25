@@ -29,16 +29,14 @@ class Event{
     public: 
     int nPU;
     double E_pu;
+    double ET;
     double signalTruth;
     double amplitudeTruth;
     RVec<double> digis;
     int nxtals;
  
-    Event(): nPU{0}, E_pu{0.}, signalTruth{0.}, amplitudeTruth{0.} {
-        digis.resize(10, 0.0);
-    }
-    Event(int _nPU, double _E_pu, double _signalTruth, double _amplitudeTruth, RVec<double> _digis, int _nxtals):
-         nPU{_nPU}, E_pu{_E_pu}, signalTruth{_signalTruth}, amplitudeTruth{_amplitudeTruth}, nxtals{_nxtals}
+    Event(int _nPU, double _E_pu, double _ET, double _signalTruth, double _amplitudeTruth, RVec<double> _digis, int _nxtals):
+         nPU{_nPU}, E_pu{_E_pu}, ET(_ET), signalTruth{_signalTruth}, amplitudeTruth{_amplitudeTruth}, nxtals{_nxtals}
     {
         for (auto d: _digis){
             digis.push_back(d);
@@ -56,6 +54,7 @@ class TreeWriter{
     TTree* tree;
     int nPU;
     double E_pu;
+    double ET;
     double signalTruth;
     double amplitudeTruth;
     vector<double> digis;
@@ -66,6 +65,7 @@ class TreeWriter{
         tree = new TTree(treename, treename);
         tree->Branch("nPU", &nPU, "nPU/I");
         tree->Branch("E_pu", &E_pu, "E_pu/D");
+        tree->Branch("ET", &ET, "ET/D");
         tree->Branch("signalTruth", &signalTruth, "signalTruth/D");
         tree->Branch("amplitudeTruth", &amplitudeTruth, "amplitudeTruth/D");
         tree->Branch("digis", &digis);
@@ -80,6 +80,7 @@ class TreeWriter{
             nxtals = e->nxtals;
             nPU = e->nPU;
             E_pu = e->E_pu;
+            ET = e->ET;
             signalTruth = e->signalTruth;
             amplitudeTruth = e->amplitudeTruth;
             digis.clear();
@@ -99,15 +100,16 @@ int _slot = -1;
 int _entry = 0;
 
 
-void sumEvents(int nPU, double E_pu, double signalTruth,double amplitudeTruth, RVec<double>digis){
+void sumEvents(int nPU, double E_pu, double ET, double signalTruth,double amplitudeTruth, RVec<double>digis){
     if (_slot == 0){
-        EventPtr e {new Event(nPU, E_pu, signalTruth, amplitudeTruth, digis, 1)};
+        EventPtr e {new Event(nPU, E_pu, ET, signalTruth, amplitudeTruth, digis, 1)};
         events.push_back(std::move(e));
         _entry += 1;
     }else{
         EventPtr e = events.at(_entry);
         e->nxtals += 1; 
         e->E_pu += E_pu;
+        e->ET += ET;
         e->amplitudeTruth += amplitudeTruth;
         for (int di = 0; di <10 ; di++){
             e->digis[di] += digis[di];
@@ -163,7 +165,7 @@ int main(int argc, char** argv){
     
     for (int pu: PUs){
         for (float s: Ss){
-            cout << "PU:"<< pu << " | S:" << s <<endl;
+            cout << "PU:"<< pu << " | ET:" << s <<endl;
 
             for(int idf = 0; idf< input_dfs.size(); idf++){
                 _slot = idf;
@@ -172,9 +174,9 @@ int main(int argc, char** argv){
                 
                 auto filt_df = input_dfs.at(idf);
 
-                filt_df.Filter([pu,s](int nPU, double signalTruth)
-                                {return nPU == pu && signalTruth == s;}, {"nPU", "signalTruth"})
-                    .Foreach(sumEvents, {"nPU", "E_pu", "signalTruth", "amplitudeTruth", "digis"});
+                filt_df.Filter([pu,s](int nPU, double ET_strip)
+                                {return nPU == pu && ET_strip == s;}, {"nPU", "ET_strip"})
+                    .Foreach(sumEvents, {"nPU", "E_pu", "ET", "signalTruth", "amplitudeTruth", "digis"});
             }
 
             // Append the result

@@ -29,7 +29,7 @@ args = parser.parse_args()
 inputfiles = [args.inputdir +"/"+ f for f in os.listdir(args.inputdir)]
 # dataset of parameters
 dof = pd.read_csv(args.dof, sep=",")
-dfw = pd.read_csv(args.weights_file, sep="\t")
+dfw = pd.read_csv(args.weights_file, sep=",")
 
 # filtering strips from weights file
 if args.strips != None:

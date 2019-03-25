@@ -39,4 +39,6 @@ for strip in df.stripid.unique():
 
 
 totaldf = pd.concat(wdfs, sort=False)
-totaldf.to_csv(args.outputfile, sep="\t", index=False )
+totaldf.to_csv(args.outputfile, sep=",", index=False )
+
+print("DONE!")

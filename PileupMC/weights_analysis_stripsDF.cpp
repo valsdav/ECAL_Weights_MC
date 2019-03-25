@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cmath>
 #include <map>
 
 #include "TFile.h"
@@ -89,7 +90,7 @@ int main(int argc, char** argv){
         auto pu_df = df.Filter("nPU=="+to_string(pu));
 
         for (auto S: Ss){
-            auto s_df = pu_df.Filter("signalTruth=="+ to_string(S));
+            auto s_df = pu_df.Filter("ET_strip=="+ to_string(S));
 
             _w_means[S] = vector<Rptr>{};
             _w_stds[S] = vector<Rptr>{};
@@ -118,6 +119,7 @@ int main(int argc, char** argv){
     //Save the file
     ofstream output;
     output.open (outputfile);
+    // S is now in ET
     output << "stripid,PU,S,A,A_std,E_pu,E_pu_std,w1,w2,w3,w4,w5,sw1,sw2,sw3,sw4,sw5"<<endl;
     
     for (int pu: PUs){  
