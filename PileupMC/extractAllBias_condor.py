@@ -3,7 +3,6 @@ import pandas as pd
 from math import ceil
 import argparse
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
 parser.add_argument("-w", "--weights-file", type=str, help="Weights file", required=True)
@@ -19,6 +18,7 @@ parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", req
 parser.add_argument("-er","--eta-rings", type=int, nargs="+", help="etarings", required=False)
 parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
 parser.add_argument("--fix", action="store_true", default=False, help="Check missing outputfiles", required=False)
+parser.add_argument("--enc", action="store_true", default=False, help="Use encoded weights", required=False)
 args = parser.parse_args()
 
 # Prepare condor jobs
@@ -29,14 +29,13 @@ log                     = log{N}/bias.$(ClusterId).log
 transfer_input_files    = extractBiasDF.x, run_script.sh
 
 +JobFlavour             = "microcentury"
+requirements = (OpSysAndVer=?= "CentOS7")
 queue arguments from args{N}.txt
 '''
 
 script = '''#!/bin/sh -e 
 
-#source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
-#source /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
-source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-centos7-gcc7-opt/setup.sh
 
 OUTPUTFILE=$1; shift
 
@@ -51,7 +50,7 @@ if args.fix:
     outputfiles = [args.outputdir +"/" + s for s in os.listdir(args.outputdir)]
 
 # dataset of parameters
-dfw = pd.read_csv(args.weights_file, sep="\t")
+dfw = pd.read_csv(args.weights_file, sep=",")
 dof = pd.read_csv(args.dof, sep=",")
 
 # filtering strips from weights file
@@ -80,6 +79,8 @@ for stripid, df in dfw.groupby("stripid"):
 
     inputfile = "root://eos{}.cern.ch/{}/weights_stripID{}.root".format(
                              args.eos, args.inputdir,stripid)
+    if not os.path.exists("{}/weights_stripID{}.root".format(args.inputdir,stripid)):
+        print("non esiste: ", stripid)
     for _, row in df.iterrows():
         if args.mode ==1:
             ext = "root"
@@ -90,11 +91,17 @@ for stripid, df in dfw.groupby("stripid"):
                     
         if args.fix and outputfile in outputfiles:
             continue
+
+        if args.enc :
+            # Use encoding (1/64) fixed weights
+            weights = [row.w1c, row.w2c, row.w3c, row.w4c, row.w5c]
+        else:
+            weights = [row.w1, row.w2, row.w3, row.w4, row.w5 ]
                 
         arguments.append("{} {} {} {} {} {} {} {} {} {} {}".format(
                         outputfile, inputfile, PU_string,
                         S_string, args.mode, args.nthreads,
-                         row.w1, row.w2, row.w3, row.w4, row.w5 )
+                        *weights)
         )
 
 print("Njobs: ", len(arguments))
@@ -102,7 +109,8 @@ print("Njobs: ", len(arguments))
 with open("run_script.sh", "w") as rs:
     rs.write(script)
 
-n_cluster = ceil(len(arguments)/ 10000)
+njobspercluster = 20000
+n_cluster = ceil(len(arguments)/ njobspercluster)
 
 for n in range(n_cluster):
     #writing down condor_job for this generation
@@ -110,9 +118,9 @@ for n in range(n_cluster):
         condor_scr.write(condor.replace("{N}", str(n+1)))
 
     with open("args{}.txt".format(n+1), "w") as out:
-        for i in range(10000):
-            if (n*10000 + i) < len(arguments):
-                out.write(arguments[n*10000 + i] +"\n")
+        for i in range(njobspercluster):
+            if (n*njobspercluster + i) < len(arguments):
+                out.write(arguments[n*njobspercluster + i] +"\n")
 
 
 
