@@ -19,6 +19,7 @@ parser.add_argument("-er","--eta-rings", type=int, nargs="+", help="etarings", r
 parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
 parser.add_argument("--fix", action="store_true", default=False, help="Check missing outputfiles", required=False)
 parser.add_argument("--enc", action="store_true", default=False, help="Use encoded weights", required=False)
+parser.add_argument("--fixedweights", action="store_true", default=False, help="Use fixed weights", required=False)
 args = parser.parse_args()
 
 # Prepare condor jobs
@@ -57,13 +58,14 @@ dof = pd.read_csv(args.dof, sep=",")
 if args.strips != None:
     print("Filtering on strips: ", args.strips)
     dfw = dfw[dfw.stripid.isin(args.strips)]
-# filtering on wS and wPU
-if args.weights_signal != None:
-    print("Filtering on wS: ", args.weights_signal)
-    dfw = dfw[dfw.S.isin(args.weights_signal)]
-if args.weights_pu != None:
-    print("Filtering on wPU: ", args.weights_pu)
-    dfw = dfw[dfw.PU.isin(args.weights_pu)]
+if not args.fixedweights:
+    # filtering on wS and wPU
+    if args.weights_signal != None:
+        print("Filtering on wS: ", args.weights_signal)
+        dfw = dfw[dfw.S.isin(args.weights_signal)]
+    if args.weights_pu != None:
+        print("Filtering on wPU: ", args.weights_pu)
+        dfw = dfw[dfw.PU.isin(args.weights_pu)]
 
 
 # PUs and signals
@@ -79,14 +81,17 @@ for stripid, df in dfw.groupby("stripid"):
 
     inputfile = "root://eos{}.cern.ch/{}/weights_stripID{}.root".format(
                              args.eos, args.inputdir,stripid)
-    if not os.path.exists("{}/weights_stripID{}.root".format(args.inputdir,stripid)):
-        print("non esiste: ", stripid)
     for _, row in df.iterrows():
         if args.mode ==1:
             ext = "root"
         else:
             ext = "txt"
-        outputfile = "{}/bias_stripID{}_PU{:.0f}_S{:.0f}.{}".format(
+
+        if args.fixedweights:
+            outputfile = "{}/bias_stripID{}.{}".format(
+                    args.outputdir, stripid, ext)
+        else:
+            outputfile = "{}/bias_stripID{}_PU{:.0f}_S{:.0f}.{}".format(
                     args.outputdir, stripid, row.PU, row.S, ext)
                     
         if args.fix and outputfile in outputfiles:

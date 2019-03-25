@@ -18,7 +18,8 @@ The ID is saved in the TTree to distinguish the generated events
 int main(int argc, char** argv){
 
     if (argc< 12) {
-        std::cout << "Missing args: ID | alpha| beta| t0| stripAmplitude_ET | nxtals_in_strip| eta | nPU | number of events | output_file | complete_info" << std::endl;
+        std::cout << "Missing args: ID | alpha| beta| t0| stripAmplitude_ET | nxtals_in_strip| " <<
+          " eta | nPU | number of events | output_file | complete_info" << std::endl;
         return 1;
     }
 
