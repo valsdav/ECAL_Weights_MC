@@ -19,7 +19,8 @@ parser.add_argument("-o", "--outputdir", type=str, help="Outputdir", required=Tr
 parser.add_argument("-s", "--signal-amplitudes", nargs='+', type=float, help="Signal amplitudes", required=True)
 parser.add_argument("-p", "--pu", nargs='+', type=int, help="Pileups", required=True)
 parser.add_argument("-t", "--train", type=str, help="Train structure 01", required=True)
-parser.add_argument("-st","--strip", type=int,  help="Strip ID", required=True)
+parser.add_argument("--ntrains", type=int, help="Number of train repetetions", required=True)
+parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
 parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
 parser.add_argument("--fix", action="store_true", default=False, help="Check missing outputfiles", required=False)
 args = parser.parse_args()
@@ -54,10 +55,11 @@ script = script.replace("{eosinstance}", args.eos)
 # parse train #nbunches-#nempty
 full = int(args.train.split("-")[0])
 empty = int(args.train.split("-")[1])
-train = "1"*full + "0"*empty + "1"*full
+train = ("1"*full + "0"*empty)*args.ntrains + "1"*full
+print("train: ", train)
 
 # dataset of parameters
-df = pd.read_csv(args.dof, sep=",")
+dof = pd.read_csv(args.dof, sep=",")
 
 if args.fix:
     outputfiles = [args.outputdir +"/" + s for s in os.listdir(args.outputdir)]
@@ -68,23 +70,21 @@ S_string = ",".join(map(str, args.signal_amplitudes))
 
 arguments = []
 
-for i, bx in enumerate(train):
-    if bx == "1":
-        inputfiles = []
-        # this is a collision BX
-        for _, xtalrow in df[df.stripid==args.strip].iterrows():
-            ID = xtalrow.CMSSWID
-            inputfile ="root://eos{}.cern.ch/{}/samples_ID{}_BX{}.root".format(args.eos, args.inputdir, ID, i)
-            inputfiles.append(inputfile)
-        
-        outputfile = args.outputdir +"/samples_stripID{}_BX{}.root".format(args.strip, i)
-        if args.fix and outputfile in outputfiles:
-            continue
-        
-        arguments.append("{} {} {} {}".format(
-            outputfile, PU_string, S_string,  " ".join(inputfiles))
+for stripid, df in dof.groupby("stripid"):
+    xtals = dof[dof.stripid == stripid]
+    inputfiles = []
+    for xtalID in xtals["CMSSWID"]:
+        inputfiles.append("root://eos{}.cern.ch/{}/samples_ID{:.0f}.root".format(
+            args.eos, args.inputdir, xtalID))
+    outputfile = args.outputdir +"/samples_stripID{}.root".format(stripid)
+    
+    if args.fix and outputfile in outputfiles:
+        continue
+
+    arguments.append("{} {} {} {} {} {}".format(
+            outputfile, PU_string, S_string, len(train), train, " ".join(inputfiles))
         )
-        
+
 
 print("Njobs: ", len(arguments))
 

@@ -91,7 +91,7 @@ int main(int argc, char** argv){
         
     if (mode == 1){
         df_reco.Snapshot("bias", outputfile, {"recoA", "bias", "amplitudeTruth", 
-                        "signalTruth", "nPU"});
+                        "signalTruth", "nPU", "BX0"});
     }
     else if(mode ==2 ){
 

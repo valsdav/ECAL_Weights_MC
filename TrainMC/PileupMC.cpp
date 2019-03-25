@@ -17,8 +17,8 @@ PileupMC::~PileupMC(){
 }
 
 // This functions returns a tree containing the simulated samples
-TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double signalAmplitude, int nEvents, 
-                                float eta, int nPU, bool debug=false){
+TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double stripAmplitude, double signalAmplitudeT, 
+                                int nEvents, float eta, int nPU, bool debug=false){
 
     TRandom3 * rnd = new TRandom3();
     rnd->SetSeed(0); //Random seed
@@ -51,8 +51,11 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double signalAmplitude, in
     std::vector<double> signal_digis;
     std::vector<double> pileup_digis;
     std::vector<int> nMinBias;
-    std::vector<double> energyPU; 
-    double signalTruth = signalAmplitude;
+    std::vector<double> energyPU;
+    // Transverse energy 
+    double ET = signalAmplitudeT;
+    double ET_strip = stripAmplitude;
+    double signalTruth = ET * cosh(eta);
     // given by signal + in-time pileup
     double amplitudeTruth;
     // pulse parameters
@@ -66,6 +69,8 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double signalAmplitude, in
     // treeOut->Branch("pileup_shift",   &pileup_shift,    "pileup_shift/F");
     treeOut->Branch("ID", &id, "ID/I");
     treeOut->Branch("BX0", &BX0, "BX0/I");
+    treeOut->Branch("ET",             &ET,              "ET/D");
+    treeOut->Branch("ET_strip",       &ET_strip,        "ET_strip/D");
     treeOut->Branch("signalTruth",    &signalTruth,     "signalTruth/D");
     treeOut->Branch("amplitudeTruth", &amplitudeTruth,  "amplitudeTruth/D");
     treeOut->Branch("nPU",            &nPU,         "nPU/I");
@@ -132,7 +137,7 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double signalAmplitude, in
             if ((BX0 + ipul) < nBX_samples){
                 // Align BX0 to the start of the pulse so at the second
                 // BX in the pulse window
-                signal_samples.at(BX0 + ipul) = signalAmplitude * pulse->sample(ipul+2);
+                signal_samples.at(BX0 + ipul) = signalTruth * pulse->sample(ipul+2);
             }
             
         }

@@ -30,8 +30,8 @@ public:
     PileupMC(int nBX, int BX0, std::string puFile, int NSamples, std::vector<bool> trainMask);
     ~PileupMC();
 
-    TTree* simulatePileup(int id, Pulse* pulse, double signalAmplitude, int nEvents, 
-            float eta, int nPU, bool debug);
+    TTree* simulatePileup(int id, Pulse* pulse, double stripAmplitude, double signalAmplitudeT, 
+                        int nEvents, float eta, int nPU, bool debug);
 
 };
 
