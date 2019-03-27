@@ -1,9 +1,18 @@
-'''
-Credits: William Richard Smith 2019
-'''
-
+import argparse
 import pandas as pd
 import numpy as np
+
+''' 
+This script simulate the loss of precision in decimal weights given by 
+the encoding. 
+
+Author: William Richard Smith 2019
+'''
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", "--input", type=str, help="DOF file", required=True)
+parser.add_argument("-o", "--output", type=str, help="DOF file", required=True)
+args = parser.parse_args()
 
 #Decimal weights to encoded weights
 def decimal_to_encoded(weights):
@@ -33,7 +42,7 @@ def encoded_to_decimal(enc_weights_not_corrected):
     return back_weights
 
 #Performs a correction to encoded weights that don't sum to 256
-def correction(enc_weights_not_corrected, back_weights, i):
+def correction(enc_weights_not_corrected, back_weights):
     diff = 256 - sum(enc_weights_not_corrected)
     weightdiff = np.subtract(weights, back_weights)
     if diff>0 and diff <6:
@@ -48,10 +57,9 @@ def correction(enc_weights_not_corrected, back_weights, i):
         for k in pos:
             enc_weights_not_corrected[k] = enc_weights_not_corrected[k] - 1                     
     else:
-        enc_weights_not_corrected = 0
+        enc_weights_not_corrected = [0]*5
         print("\nError. Sum of encoded weights differ from 256 by more than 5. Needs more investigation- dodgy numbers?")
-        print("CMSSWID of XTAL: ", data.loc[i, 'CMSSWID'])
-        print("The encoded weights for this XTAL have been set to 0")
+        print("The encoded weights for this strip have been set to 0")
     
     return enc_weights_not_corrected
 
@@ -62,10 +70,29 @@ def get_decimal_after_correction(weights):
     #Check if encoded weights sum =256. If not, correction is performed on the weight(s) that are furthest 
     #from the perfect weights they correspond to.
     if sum(enc_weights_not_corrected) != 256:
-        enc_weights_corrected = correction(enc_weights_not_corrected, back_weights, i)
+        enc_weights_corrected = correction(enc_weights_not_corrected, back_weights)
     else:
         enc_weights_corrected = enc_weights_not_corrected
     
     backtodecimal = encoded_to_decimal(enc_weights_corrected)
     return backtodecimal
 
+if __name__ == "__main__":
+    dof = pd.read_csv(args.input , sep=",")
+    print("Get weights after encoding loss of precision...")
+    for i in dof.index:
+        weights = [dof.loc[i, 'w1'] , dof.loc[i, 'w2'], 
+                   dof.loc[i, 'w3'], dof.loc[i, 'w4'], 
+                   dof.loc[i, 'w5']]
+
+        encoded = get_decimal_after_correction(weights)
+
+        dof.at[i, 'w1c'] = encoded[0]
+        dof.at[i, 'w2c'] = encoded[1]
+        dof.at[i, 'w3c'] = encoded[2]
+        dof.at[i, 'w4c'] = encoded[3]
+        dof.at[i, 'w5c'] = encoded[4]
+
+    dof.to_csv(args.output, index=False, sep=",", float_format="%.6f")
+    
+    print("Done")

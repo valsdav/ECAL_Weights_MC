@@ -43,7 +43,6 @@ queue arguments from args{N}.txt
 
 script='''#!/bin/sh -e
 
-#source /cvmfs/sft.cern.ch/lcg/views/LCG_94python3/x86_64-slc6-gcc7-opt/setup.sh
 source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-centos7-gcc7-opt/setup.sh
 
 

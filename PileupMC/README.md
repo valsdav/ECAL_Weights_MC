@@ -92,7 +92,7 @@ Each job outputs one text file for each strips containing the weights means for 
 The macro used to calculate the mean weights for each pileup in the condor job is **weights_analysis_stripsDF.cpp**. To compile it for lxplus6 (with updated Root 6.17 Dataframe):
 
 ```bash
-source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-centos7-gcc7-opt/setup.sh
 g++ -o weights_analysis_stripsDF.x weights_analysis_stripsDF.cpp  `root-config --libs --cflags` `clhep-config --include` `clhep-config --libs` 
 ```
 
@@ -162,7 +162,7 @@ The scrpt **sum_events_stripDF.cpp** aggregates the digis of each xtal in a stri
 
 A python script is used to prepare condor jobs to work on each strip: 
 ```
-source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-centos7-gcc7-opt/setup.sh
 g++ -o sum_events_stripDF.x sum_events_stripDF.cpp  `root-config --libs --cflags`
 
 python  sum_events_strips_condor.py [-h] -d DOF -i INPUTDIR -o OUTPUTDIR -s
@@ -199,7 +199,7 @@ The script **extractBiasDF.cpp** is used to calculate the reconstructed amplitud
 All the set of weights for each strip are applied to each strip data using the script **extractAllBias_condor.py** that prepares several condor_jobs.
 
 ```
-source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-slc6-gcc7-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-centos6-gcc7-opt/setup.sh
 g++ -o extractBiasDF.x extractBiasDF.cpp  `root-config --libs --cflags`
 ```
 
@@ -253,7 +253,7 @@ condor_submit condor_job1.txt (and others)
 ```
 
 
-## Join the bias per strip
+## Join the bias dataset
 At this step the bias is calculated for strip for each set of weights optimized for all the combinations of PU and signal. We have to merge all the datasets with the sript  **joinStripBias.py**. 
 
 The script **joinStripBias.py**  produces a final datasets with all the bias for each strip, for each PU and signal amplitude, calculated with each set of weights (identified by the *wPU* and *wS* labels).

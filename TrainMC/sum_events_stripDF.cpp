@@ -206,8 +206,8 @@ int main(int argc, char** argv){
                     filt_df.Filter([bx,pu,s](int BX0, int nPU, double ET)
                                     {return BX0==bx && nPU == pu && ET == s;}, 
                                     {"BX0", "nPU", "ET_strip"})
-                        .Foreach(sumEvents, {"BX0","nPU", "ET", "signalTruth", "amplitudeTruth", 
-                                        "digis", "energyPU"});
+                        .Foreach(sumEvents, {"BX0", "nPU", "ET", "signalTruth",
+                                         "amplitudeTruth", "digis", "energyPU"});
                 }
 
                 // Append the result
