@@ -2,6 +2,8 @@
 
 // The purpose of this program is to study DOF parameters 
 
+// g++ -std=c++11 -o run.x Combine_DOF.cpp  `root-config --ldflags --glibs --cflags`
+
 using namespace std;
 
 // Include root header files
@@ -123,9 +125,12 @@ int main(int argc, char** argv){
 //ss >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7 >> d8 >> d9 >> s10 >> d11 >> d12 >> d13 >> d14
 
 	// Not sure how to if/then correct line here between EB and EE. For now just changing between them when running for EB/EE
+	// cout << "Hello" << endl;
 	//if(ss >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> s7 >> d8 >> d9 >> d10 >> d11 >> d12 >> d13 >> d14 >> d15){ // EB
-	
 	if (ss >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7 >> d8 >> d9 >> s10 >> d11 >> d12 >> d13 >> d14){ // EE 
+	// cout << "d1 = " << d1 << endl;
+	// cout << "d2 = " << d2 << endl;
+	// cout << "d3 = " << d3 << endl;
 
 			if (!EE) { 
 
@@ -183,12 +188,15 @@ int main(int argc, char** argv){
 		no_eta = false;
 
 		//cout << CMSSWID << endl;
+		//cout << "Right before while eta file " << endl;
 		while(getline(inEtaFile, Eta_line) && (!leave)){
 
 			stringstream ss_(Eta_line);
 
 			if(ss_ >> d1_ >> d2_ >> d3_ >> d4_ >> d5_){ // Eta file contains 5 doubles 
- 
+				cout.precision(17);
+				//cout << "eta hello" << endl;
+				//cout << "d1_ = " << d1_ << endl;
 				CMSSWID_ = d1_;
 				eta = d5_;				
 
@@ -212,8 +220,9 @@ int main(int argc, char** argv){
 					//cout << "CMSSWID = " << CMSSWID << endl;
 					//cout << "CMSSWID_ = " << CMSSWID_ << endl;
 					//cout << "ID's Don't Match\n";
-					cout << "Exiting\n";
-					exit(1); // terminate with error 
+
+					//cout << "Exiting\n";
+					//exit(1); // terminate with error 
 						
 				}
 				
