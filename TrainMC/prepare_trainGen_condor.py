@@ -4,6 +4,9 @@ from multiprocessing import Pool
 from math import ceil
 import argparse
 
+#save command line
+with open("command", "w") as cmd:
+    cmd.write(" ".join(sys.argv))
 
 # This script prepares arguments for condor jobs 
 # to run generate.x and calc_weightsDF.x for each crystal parameter
@@ -35,10 +38,11 @@ empty = int(args.train.split("-")[1])
 train = ("1"*full + "0"*empty)*args.ntrains + "1"*full
 print("train: ", train)
 BX0s = []
-for bx,i in enumerate(train):
+for bx,i in enumerate(train[full+empty:]):
     if i=="1":
-        BX0s.append(str(bx))
+        BX0s.append(str(full+empty+bx))
 BX0string = " ".join(BX0s)
+print("BX0: ", BX0string)
 
 condor= '''executable              = run_condor.sh
 output                  = output{N}/$(ClusterId).$(ProcId).out
@@ -48,7 +52,7 @@ log                     = log{N}/$(ClusterId).log
 transfer_input_files = generate.x, PileupPDF.root
 transfer_output_files = ""
 
-+JobFlavour = "espresso"
++JobFlavour = "microcentury"
 requirements = (OpSysAndVer=?= "CentOS7")
 
 queue arguments from args{N}.txt
@@ -85,6 +89,9 @@ script = script.replace("{eosinstance}", args.eos)
 
 # dataset of parameters
 df = pd.read_csv(args.dof , sep=",")
+
+if not os.path.exists(outputdir):
+    os.mkdirs(outputdir)
 existing_files = os.listdir(outputdir)
 
 # Filtering strips and etarings

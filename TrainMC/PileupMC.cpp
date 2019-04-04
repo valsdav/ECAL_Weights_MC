@@ -9,6 +9,12 @@
 PileupMC::PileupMC(int nBX, int BX0, std::string puFile, int NSamples, std::vector<bool> trainMask):
                      nBX(nBX), BX0(BX0), NSamples(NSamples), trainMask(trainMask){
     PUfile = new TFile(puFile.c_str());
+    // Check taht nBX is at least 8 more than BX0
+    if (nBX < BX0 + 8) {
+        std::cout << ">>> Error! number of bunches nBX is smaller than BX0+8 " 
+             << "    The pulse would be cutted! Resetting it <<<<" << std::endl;
+        nBX = BX0 + 8;
+    }
 }
 
 
@@ -53,8 +59,8 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double stripAmplitude, dou
     std::vector<int> nMinBias;
     std::vector<double> energyPU;
     // Transverse energy 
-    double ET = signalAmplitudeT;
     double ET_strip = stripAmplitude;
+    double ET = signalAmplitudeT;
     double signalTruth = ET * cosh(eta);
     // given by signal + in-time pileup
     double amplitudeTruth;
@@ -69,24 +75,23 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double stripAmplitude, dou
     // treeOut->Branch("pileup_shift",   &pileup_shift,    "pileup_shift/F");
     treeOut->Branch("ID", &id, "ID/I");
     treeOut->Branch("BX0", &BX0, "BX0/I");
-    treeOut->Branch("ET",             &ET,              "ET/D");
     treeOut->Branch("ET_strip",       &ET_strip,        "ET_strip/D");
+    treeOut->Branch("ET",             &ET,              "ET/D");
+    treeOut->Branch("nPU",            &nPU,         "nPU/I");
     treeOut->Branch("signalTruth",    &signalTruth,     "signalTruth/D");
     treeOut->Branch("amplitudeTruth", &amplitudeTruth,  "amplitudeTruth/D");
-    treeOut->Branch("nPU",            &nPU,         "nPU/I");
-    treeOut->Branch("nMinBias",       &nMinBias);
-    treeOut->Branch("energyPU",       &energyPU);
     treeOut->Branch("digis",        &digis);
-    
-    // treeOut->Branch("pedestal",     &pedestal, "pedestal/D");
-    // treeOut->Branch("sigmaNoise",   &sigmaNoise,      "sigmaNoise/F");
-    // Pulse parameters
-    treeOut->Branch("pulseAlpha",   &pulseAlpha, "pulseAlpha/D");
-    treeOut->Branch("pulseBeta",   &pulseBeta, "pulseBeta/D");
-    treeOut->Branch("pulseT0",   &pulseT0, "pulseT0/D");
     treeOut->Branch("eta_ring", &eta_ring, "eta_ring/I");
     // If debug save the entire BX train
     if (debug){
+         // treeOut->Branch("pedestal",     &pedestal, "pedestal/D");
+        // treeOut->Branch("sigmaNoise",   &sigmaNoise,      "sigmaNoise/F");
+        // Pulse parameters
+        treeOut->Branch("pulseAlpha",   &pulseAlpha, "pulseAlpha/D");
+        treeOut->Branch("pulseBeta",   &pulseBeta, "pulseBeta/D");
+        treeOut->Branch("pulseT0",   &pulseT0, "pulseT0/D");
+        treeOut->Branch("nMinBias",       &nMinBias);
+        treeOut->Branch("energyPU",       &energyPU);
         treeOut->Branch("samples",        &samples);
         treeOut->Branch("signal_samples", &signal_samples);
         treeOut->Branch("pileup_samples", &pileup_samples);
@@ -102,9 +107,11 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double stripAmplitude, dou
         // Get number of minBias interactions and their energy 
         // using a Poisson distribution and the energy pdf of pileup
         // for the requested eta interval.
+        // The lenght of the trainMask is used as a reference.
         // N.B: using also the PU mask
+        int nbx_pu = trainMask.size();
         for (int ibx = 0; ibx < nBX; ibx ++){
-            if (trainMask[ibx]){
+            if (ibx < nbx_pu && trainMask[ibx]){
                 // number of min-bias interactions in each bunch crossing
                 nMinBias.push_back(gRandom->Poisson(nPU));
                 // total energy per BX
@@ -123,10 +130,10 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double stripAmplitude, dou
         samples.clear();
         signal_samples.clear();
         pileup_samples.clear();
-        // N.B.: we have to go 7 BX over the last bx
-        //       to be able to save the last digis
-        int nBX_samples = nBX + 7;
-        for (int ibx = 0; ibx < nBX_samples ; ibx ++) {
+        // N.B.: nBX is already BX0 + 8 to save time
+        // we are already able to save all the bx also if the BX0 is at the end of the
+        // train.
+        for (int ibx = 0; ibx < nBX ; ibx ++) {
             samples.push_back(0.);
             signal_samples.push_back(0.);
             pileup_samples.push_back(0.);
@@ -134,7 +141,7 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double stripAmplitude, dou
 
         // Signal samples
         for (int ipul = 0; ipul < (pulseLength -2); ipul++){
-            if ((BX0 + ipul) < nBX_samples){
+            if ((BX0 + ipul) < nBX){
                 // Align BX0 to the start of the pulse so at the second
                 // BX in the pulse window
                 signal_samples.at(BX0 + ipul) = signalTruth * pulse->sample(ipul+2);
@@ -147,7 +154,7 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double stripAmplitude, dou
             // Add the pulse amplitude on pulseLength following BXs
             for (int ipul = 0; ipul < (pulseLength - 2); ipul++){   
                 if (energyPU.at(ibx) == 0.) continue;                
-                if ((ibx + ipul) < nBX_samples){
+                if ((ibx + ipul) < nBX){
                     // Starting from BX2 when the pulse start
                     pileup_samples.at(ibx + ipul) += energyPU.at(ibx)*pulse->sample(ipul+2);
                 }
@@ -155,7 +162,7 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double stripAmplitude, dou
         }
 
         // Sum signal and pileup samples
-        for (int ibx = 0; ibx < nBX_samples; ibx ++){
+        for (int ibx = 0; ibx < nBX; ibx ++){
             // Save total amplitude signal + pu in all samples
             samples.at(ibx) = pileup_samples.at(ibx) + signal_samples.at(ibx);
         }

@@ -49,6 +49,9 @@ int main(int argc, char** argv){
         trainMask.push_back(mask[i] == '1');
     }
     int BX0 = atoi(argv[14]);
+    // Reset the nBX to speed up the simulation. 
+    // We don't need to simulate more than 7 digis after the BX0
+    nBX = BX0 + 8;
     
 
     std::cout << "ID = "<< ID << std::endl 

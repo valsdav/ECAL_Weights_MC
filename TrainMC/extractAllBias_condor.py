@@ -3,7 +3,10 @@ import pandas as pd
 from math import ceil
 import argparse
 
-
+#save command line
+with open("command", "w") as cmd:
+    cmd.write(" ".join(sys.argv))
+    
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
 parser.add_argument("-w", "--weights-file", type=str, help="Weights file", required=True)

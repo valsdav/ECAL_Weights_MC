@@ -12,6 +12,10 @@ N.B.: this script has been adopted to join the trainMC results, summing all the
 digis for same BX signals, by PU and S.
 '''
 
+#save command line
+with open("command", "w") as cmd:
+    cmd.write(" ".join(sys.argv))
+    
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
 parser.add_argument("-i", "--inputdir", type=str, help="Inputdir", required=True)
