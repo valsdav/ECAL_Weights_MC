@@ -90,8 +90,8 @@ int main(int argc, char** argv){
                      .Define("bias", "recoA / amplitudeTruth");
         
     if (mode == 1){
-        df_reco.Snapshot("bias", outputfile, {"recoA", "bias", "amplitudeTruth", 
-                        "signalTruth", "nPU", "BX0"});
+        df_reco.Snapshot("bias", outputfile, 
+                        {"BX0", "ET", "nPU", "recoA", "bias", "amplitudeTruth"});
     }
     else if(mode ==2 ){
 

@@ -15,7 +15,7 @@ digis for same BX signals, by PU and S.
 #save command line
 with open("command", "w") as cmd:
     cmd.write(" ".join(sys.argv))
-    
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
 parser.add_argument("-i", "--inputdir", type=str, help="Inputdir", required=True)
@@ -61,6 +61,12 @@ full = int(args.train.split("-")[0])
 empty = int(args.train.split("-")[1])
 train = ("1"*full + "0"*empty)*args.ntrains + "1"*full
 print("train: ", train)
+BX0s = []
+for bx,i in enumerate(train[full+empty:]):
+    if i=="1":
+        BX0s.append(str(full+empty+bx))
+BX0string = " ".join(BX0s)
+print("BX0: ", BX0string)
 
 # dataset of parameters
 dof = pd.read_csv(args.dof, sep=",")
@@ -71,6 +77,7 @@ if args.fix:
 # PUs and signals
 PU_string = ",".join(map(str, args.pu))
 S_string = ",".join(map(str, args.signal_amplitudes))
+BX0_string = ",".join(BX0s)
 
 arguments = []
 
@@ -85,8 +92,8 @@ for stripid, df in dof.groupby("stripid"):
     if args.fix and outputfile in outputfiles:
         continue
 
-    arguments.append("{} {} {} {} {} {}".format(
-            outputfile, PU_string, S_string, len(train), train, " ".join(inputfiles))
+    arguments.append("{} {} {} {} {}".format(
+            outputfile, PU_string, S_string, BX0_string, " ".join(inputfiles))
         )
 
 

@@ -81,12 +81,11 @@ TTree* PileupMC::simulatePileup(int id, Pulse* pulse, double stripAmplitude, dou
     treeOut->Branch("signalTruth",    &signalTruth,     "signalTruth/D");
     treeOut->Branch("amplitudeTruth", &amplitudeTruth,  "amplitudeTruth/D");
     treeOut->Branch("digis",        &digis);
-    treeOut->Branch("eta_ring", &eta_ring, "eta_ring/I");
     // If debug save the entire BX train
     if (debug){
-         // treeOut->Branch("pedestal",     &pedestal, "pedestal/D");
+        // treeOut->Branch("pedestal",     &pedestal, "pedestal/D");
         // treeOut->Branch("sigmaNoise",   &sigmaNoise,      "sigmaNoise/F");
-        // Pulse parameters
+        treeOut->Branch("eta_ring", &eta_ring, "eta_ring/I");
         treeOut->Branch("pulseAlpha",   &pulseAlpha, "pulseAlpha/D");
         treeOut->Branch("pulseBeta",   &pulseBeta, "pulseBeta/D");
         treeOut->Branch("pulseT0",   &pulseT0, "pulseT0/D");

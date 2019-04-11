@@ -35,24 +35,20 @@ class Event{
     RVec<double> digis;
     //RVec<double> samples;
     //RVec<double> pileup_samples;
-    RVec<double> energyPU;
+    //RVec<double> energyPU;
     int nxtals;
  
-    Event(int _BX0, int _nPU, double _ET, double _signalTruth, double _amplitudeTruth, RVec<double> _digis,
-              RVec<double> _energyPU, int _nxtals):
+    Event(int _BX0, int _nPU, double _ET, double _signalTruth, double _amplitudeTruth,
+               RVec<double> _digis, int _nxtals):
             BX0(_BX0), nPU{_nPU}, ET(_ET), signalTruth{_signalTruth}, 
             amplitudeTruth{_amplitudeTruth}, nxtals{_nxtals}
     {
         for (auto d: _digis){
             digis.push_back(d);
         }
-        for (auto d: _energyPU){
-            energyPU.push_back(d);
-        }
     }
     ~Event(){
         digis.clear();
-        energyPU.clear();
     };
 };
 typedef shared_ptr<Event> EventPtr;
@@ -67,7 +63,6 @@ class TreeWriter{
     double signalTruth;
     double amplitudeTruth;
     vector<double> digis;
-    vector<double> energyPU;
     int nxtals;
  
     TreeWriter(const char* filename, const char* treename){
@@ -79,7 +74,6 @@ class TreeWriter{
         tree->Branch("signalTruth", &signalTruth, "signalTruth/D");
         tree->Branch("amplitudeTruth", &amplitudeTruth, "amplitudeTruth/D");
         tree->Branch("digis", &digis);
-        tree->Branch("energyPU", &energyPU);
         tree->Branch("nxtals", &nxtals, "nxtals/I");
     }
     ~TreeWriter(){
@@ -95,9 +89,7 @@ class TreeWriter{
             signalTruth = e->signalTruth;
             amplitudeTruth = e->amplitudeTruth;
             digis.clear();
-            energyPU.clear();
             std::copy(e->digis.begin(), e->digis.end(), std::back_inserter(digis));
-            std::copy(e->energyPU.begin(), e->energyPU.end(), std::back_inserter(energyPU));
             tree->Fill();
         }
     }
@@ -113,10 +105,9 @@ int _slot = -1;
 int _entry = 0;
 
 
-void sumEvents(int BX0, int nPU, double ET, double signalTruth, double amplitudeTruth, RVec<double>digis,
-                 RVec<double>energyPU){
+void sumEvents(int BX0, int nPU, double ET, double signalTruth, double amplitudeTruth, RVec<double>digis){
     if (_slot == 0){
-        EventPtr e {new Event(BX0, nPU, ET, signalTruth, amplitudeTruth, digis, energyPU, 1)};
+        EventPtr e {new Event(BX0, nPU, ET, signalTruth, amplitudeTruth, digis, 1)};
         events.push_back(std::move(e));
         _entry += 1;
     }else{
@@ -130,9 +121,6 @@ void sumEvents(int BX0, int nPU, double ET, double signalTruth, double amplitude
         for (int di = 0; di <10 ; di++){
             e->digis[di] += digis[di];
         }
-        for (int si =0; si < energyPU.size(); si++){
-            e->energyPU[si] += energyPU[si];
-        }
         _entry += 1;
     }
 }   
@@ -142,7 +130,7 @@ void sumEvents(int BX0, int nPU, double ET, double signalTruth, double amplitude
 int main(int argc, char** argv){
 
     if (argc < 6){
-        std::cout << "Missing args: outpufile PUs_string Signals_string nbx train inputfiles" <<std::endl;
+        std::cout << "Missing args: outpufile PUs_string Signals_string BX0s inputfiles" <<std::endl;
         exit(1);
     }
     
@@ -151,8 +139,10 @@ int main(int argc, char** argv){
     // Get PUs and Signals from strings with comma delimiters
     vector<int> PUs ;
     vector<float> Ss;
+    vector<int> BX0s;
     string PU_string = argv[2];
     string S_string = argv[3];
+    string BX0_string = argv[4];
     // Parse input strings
     size_t pos = 0;
     string delimiter =",";
@@ -171,30 +161,31 @@ int main(int argc, char** argv){
         S_string.erase(0, pos + delimiter.length());
     }
     Ss.push_back(std::stof(S_string));
-
-    vector<bool> trainMask ;
-    int nBX = atoi(argv[4]);
-    char * mask = argv[5];
-    // Parse input strings
-    for (int i = 0; i< nBX; i++){
-        trainMask.push_back(mask[i] == '1');
+    // bx0
+    pos = 0;
+    while ((pos = BX0_string.find(delimiter)) != string::npos) {
+        token = BX0_string.substr(0, pos);
+        BX0s.push_back(std::stof(token));
+        BX0_string.erase(0, pos + delimiter.length());
     }
+    BX0s.push_back(std::stof(BX0_string));
+
+
 
     cout << "Loading input trees..." << endl;
     // Load the input trees with the events of the xtals forming the strips
     vector<RDataFrame> input_dfs; 
-    for (int i = 6; i< argc; i++){
+    for (int i = 5; i< argc; i++){
         input_dfs.push_back(RDataFrame("samples", argv[i]));
     }
     
     // outputtree
     TreeWriter total_strip_events {outputfile, "samples"};
     
-    for (int bx = 0; bx<nBX; bx++){
-        if (!trainMask[bx]) continue;
+    for (int bx: BX0s){
         for (int pu: PUs){
             for (float s: Ss){
-                cout << "PU:"<< pu << " | S:" << s <<endl;
+                cout << "BX:" << bx << " | PU:"<< pu << " | S:" << s <<endl;
 
                 for(int idf = 0; idf< input_dfs.size(); idf++){
                     _slot = idf;
@@ -207,7 +198,7 @@ int main(int argc, char** argv){
                                     {return BX0==bx && nPU == pu && ET == s;}, 
                                     {"BX0", "nPU", "ET_strip"})
                         .Foreach(sumEvents, {"BX0", "nPU", "ET", "signalTruth",
-                                         "amplitudeTruth", "digis", "energyPU"});
+                                         "amplitudeTruth", "digis"});
                 }
 
                 // Append the result
