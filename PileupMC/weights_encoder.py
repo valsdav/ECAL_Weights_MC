@@ -80,11 +80,9 @@ def get_decimal_after_correction(weights):
 if __name__ == "__main__":
     dof = pd.read_csv(args.input , sep=",")
     print("Get weights after encoding loss of precision...")
-    for i in dof.index:
-        weights = [dof.loc[i, 'w1'] , dof.loc[i, 'w2'], 
-                   dof.loc[i, 'w3'], dof.loc[i, 'w4'], 
-                   dof.loc[i, 'w5']]
-
+    for i, row in dof.iterrows():
+        weights = [row.w1, row.w2, row.w3, row.w4,  row.w5]
+        print(weights)
         encoded = get_decimal_after_correction(weights)
 
         dof.at[i, 'w1c'] = encoded[0]

@@ -161,7 +161,8 @@ Until now events are calculated and stored by xtal. The events must be merged be
 The scrpt **sum_events_stripDF.cpp** aggregates the digis of each xtal in a strip and sum their amplitudes to construct the strip event. The event is then saved in a new file. The PU contribution for each xtal are considered completely uncorrelated. 
 
 A python script is used to prepare condor jobs to work on each strip: 
-```
+
+```bash
 source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-centos7-gcc7-opt/setup.sh
 g++ -o sum_events_stripDF.x sum_events_stripDF.cpp  `root-config --libs --cflags`
 
@@ -198,7 +199,7 @@ The script **extractBiasDF.cpp** is used to calculate the reconstructed amplitud
 
 All the set of weights for each strip are applied to each strip data using the script **extractAllBias_condor.py** that prepares several condor_jobs.
 
-```
+```bash
 source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-centos6-gcc7-opt/setup.sh
 g++ -o extractBiasDF.x extractBiasDF.cpp  `root-config --libs --cflags`
 ```

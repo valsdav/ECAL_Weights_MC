@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cmath>
 #include <algorithm>
 #include <map>
 
@@ -35,8 +36,8 @@ auto recoA(double* weights){
 
 int main(int argc, char** argv){
 
-    if (argc < 11){
-        std::cout << "Missing args:  outpufile inputfile PUs_string Signals_string mode nthreads w1 w2 w3 w4 w5" <<std::endl;
+    if (argc < 12){
+        std::cout << "Missing args:  outpufile inputfile PUs_string Signals_string mode nthreads eta_strip w1 w2 w3 w4 w5" <<std::endl;
         exit(1);
     }
 
@@ -47,8 +48,9 @@ int main(int argc, char** argv){
     string inputfile = argv[2];
     int mode = atoi(argv[5]);
     int nthreads = atoi(argv[6]);
-    double weights [5] = {atof(argv[7]),atof(argv[8]),
-            atof(argv[9]), atof(argv[10]), atof(argv[11])};
+    double eta_strip = atof(argv[7]);
+    double weights [5] = {atof(argv[8]),atof(argv[9]),
+            atof(argv[10]), atof(argv[11]), atof(argv[12])};
 
     // Get PUs and Signals from strings with comma delimiters
     vector<int> PUs ;
@@ -74,7 +76,6 @@ int main(int argc, char** argv){
     }
     Ss.push_back(std::stof(S_string));
 
-
     //Enabling multithread
     ROOT::EnableImplicitMT(nthreads);
     int poolsize = ROOT::GetImplicitMTPoolSize();
@@ -87,11 +88,14 @@ int main(int argc, char** argv){
 
     cout << "Dataframe processing starting..." <<endl;
     auto df_reco = dftotal.Define("recoA", bias_calculator , {"digis"})
-                     .Define("bias", "recoA / amplitudeTruth");
+                     .Alias("trueA","amplitudeTruth")
+                     .Define("bias", "recoA / trueA")
+                     .Define("recoA_T", [&eta_strip](double recoA){return recoA/cosh(eta_strip);},{"recoA"})
+                     .Define("trueA_T", [&eta_strip](double trueA){return trueA/cosh(eta_strip);},{"trueA"});
         
     if (mode == 1){
         df_reco.Snapshot("bias", outputfile, 
-                        {"BX0", "ET", "nPU", "recoA", "bias", "amplitudeTruth"});
+                        {"BX0", "ET", "nPU", "recoA", "recoA_T", "bias", "trueA", "trueA_T"});
     }
     else if(mode ==2 ){
 

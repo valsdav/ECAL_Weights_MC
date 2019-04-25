@@ -110,6 +110,7 @@ void sumEvents(int nPU, double E_pu, double ET, double signalTruth,double amplit
         e->nxtals += 1; 
         e->E_pu += E_pu;
         e->ET += ET;
+        e->signalTruth += signalTruth;
         e->amplitudeTruth += amplitudeTruth;
         for (int di = 0; di <10 ; di++){
             e->digis[di] += digis[di];
