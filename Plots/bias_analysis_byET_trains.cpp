@@ -1,7 +1,8 @@
 #include "ROOT/RDataFrame.hxx"
 #include "ROOT/RDF/InterfaceUtils.hxx"
-#include <TGraph.h>
 #include <TROOT.h>
+#include <TGraph.h>
+#include <TMultiGraph.h>
 #include <TH1F.h>
 #include <TH1.h>
 #include <TCanvas.h>
@@ -10,7 +11,6 @@
 #include <TTree.h>
 #include <TFile.h>
 #include <TObject.h>
-#include <TMultiGraph.h>
 #include <TText.h>
 #include <iostream>
 #include <string>
@@ -62,10 +62,6 @@ auto getBXSF(string train){
     };
 }
 
-double roundTP(double TP){
-    return  round(TP*2) / 2;
-}
-
 pair<TGraph*,TGraph*> produceGraphs(string id, RResultPtr<TProfile> prof, int nbins){
     float means [nbins];
     float stds [nbins];
@@ -76,7 +72,7 @@ pair<TGraph*,TGraph*> produceGraphs(string id, RResultPtr<TProfile> prof, int nb
         means[i] = prof->GetBinContent(i+1);
         stds[i] = prof->GetBinError(i+1);
         //cout << xbins[i] << " " << means[i] << " " << stds[i] << endl;
-    }
+    }    
 
     TGraph* gmean = new TGraph(nbins, xbins, means);
     gmean->SetName((id + "_mean").c_str());
@@ -88,7 +84,7 @@ pair<TGraph*,TGraph*> produceGraphs(string id, RResultPtr<TProfile> prof, int nb
 
 map<string, pair<TGraph*, TGraph*>> analyzeBias(RNode rdf, string name, string train){
     auto et_bins = ETbins[train]; 
-    auto df = rdf.Range(100000, 102000).Define("Bias", [](double bias){return (bias-1)*100;}, {"bias"})
+    auto df = rdf.Define("Bias", [](double bias){return (bias-1)*100;}, {"bias"})
                 // Define the ET bin on trueA_T, the e-rec
                 .Define("ET_bin", getETbin(train), {"trueA_T"})
                 // Get the BX scale factor from BX0 and ET_bin true
@@ -122,18 +118,18 @@ map<string, pair<TGraph*, TGraph*>> analyzeBias(RNode rdf, string name, string t
 int main(int argc, char** argv){
 
     if (argc <6){
-        std::cout << "Please insert: BXSF_file basedir train ring outputdir" <<std::endl;
+        std::cout << "Please insert: BXSF_file basedir train ring outputfile" <<std::endl;
         return 1;
     }
 
     string basedir {argv[2]};
     string train {argv[3]};
     string ring {argv[4]};
-    string outputdir {argv[5]};
+    string outputfile {argv[5]};
     cout << "basedir: " << basedir
          << " |train: " << train 
          << " |ring: " << ring
-         << " |outputdir: " << outputdir << endl;
+         << " |outputfile: " << outputfile << endl;
 
     TH1::SetDefaultSumw2();
 
@@ -141,7 +137,7 @@ int main(int argc, char** argv){
     BXSF_file = new TFile(argv[1], "read");
     BXSF_histo = (TH1F*) BXSF_file->Get(("bxsf_" + ring).c_str());
     
-    //ROOT::EnableImplicitMT();
+    ROOT::EnableImplicitMT();
     int poolsize = ROOT::GetImplicitMTPoolSize();
     std::cout << "Multi-threading pool: "<< poolsize << std::endl;
     
@@ -157,125 +153,22 @@ int main(int argc, char** argv){
 
     auto et_bins = ETbins[train];
 
+    TFile output (outputfile.c_str(), "recreate");
+
     for (auto const& biaselem : curr){
         string bias_label = biaselem.first;
         cout << "Working on: " << bias_label << endl;
-        //======================================================
-        //Drawing the mean of bias 
-        TCanvas c1 ("c1", "c1", 1200, 700);
-        curr[bias_label].first->SetMarkerStyle(20);
-        curr[bias_label].first->SetMarkerSize(0.6);
-        curr[bias_label].first->SetMarkerColor(kOrange+1);
-        curr[bias_label].first->SetLineColor(kOrange+1);
-        pu0[bias_label].first->SetMarkerStyle(20);
-        pu0[bias_label].first->SetMarkerSize(0.6);
-        pu0[bias_label].first->SetMarkerColor(kRed+1);
-        pu0[bias_label].first->SetLineColor(kRed+1);
-        pu50s2[bias_label].first->SetMarkerStyle(20);
-        pu50s2[bias_label].first->SetMarkerSize(0.6);
-        pu50s2[bias_label].first->SetMarkerColor(kGreen+1);
-        pu50s2[bias_label].first->SetLineColor(kGreen+1);
-        pu50s30[bias_label].first->SetMarkerStyle(20);
-        pu50s30[bias_label].first->SetMarkerSize(0.6);
-        pu50s30[bias_label].first->SetMarkerColor(kBlue+1);
-        pu50s30[bias_label].first->SetLineColor(kBlue+1);
 
-        curr[bias_label].first->Draw("APL");
-        pu0[bias_label].first->Draw("PL same");
-        pu50s2[bias_label].first->Draw("PL same");
-        pu50s30[bias_label].first->Draw("PL same");
-
-        curr[bias_label].first->GetYaxis()->SetRangeUser(-50., 150.);
-        curr[bias_label].first->SetTitle(("Bias by ET, eta rings " +ring +", " +  train + 
-                                             " train, PU=50;ET true (GeV);Bias %").c_str());
-
-        TLegend leg (0.75, 0.65, 0.87, 0.85);
-        leg.AddEntry(curr[bias_label].first, "Current", "lp");
-        leg.AddEntry(pu0[bias_label].first, "PU=0", "lp");
-        leg.AddEntry(pu50s2[bias_label].first, "PU50 S2", "lp");
-        leg.AddEntry(pu50s30[bias_label].first, "PU50 S30", "lp");
-
-        leg.Draw("same");
-       
-
-        for (int j = 0; j< et_bins.size()-2;j++){
-            curr[bias_label].first->GetXaxis()->ChangeLabel(j+1, -1,-1,-1,-1,-1, to_string((int)et_bins[j])+"<E<="+to_string((int)et_bins[j+1]));
-        }
-        curr[bias_label].first->GetXaxis()->ChangeLabel(et_bins.size()-1, -1,-1,-1,-1,-1, "E>"+to_string((int)et_bins[et_bins.size()-2]));
-                    
-        curr[bias_label].first->GetXaxis()->SetTitleOffset(1.3);
-
-        TText label;
-        label.SetNDC();
-        label.SetTextFont(42);
-        label.SetTextColor(13);
-        label.SetTextSize(0.04);
-        label.SetTextAlign(22);
-        label.DrawText(0.49, 0.83, "PU 50");
-
-        c1.SetTicks();
-        c1.SetGridy();
-        c1.Update();
-        c1.Draw();
-        c1.SaveAs((bias_label + "_"+ train +"_"+ring+ ".png").c_str());
-
-        //======================================================
-        //Drawing the Spread of bias 
-        // TCanvas c2 ("c2", "c2", 1200, 700);
-        // curr[bias_label].second->SetMarkerStyle(20);
-        // curr[bias_label].second->SetMarkerSize(0.6);
-        // curr[bias_label].second->SetMarkerColor(kOrange+1);
-        // curr[bias_label].second->SetLineColor(kOrange+1);
-        // pu0[bias_label].second->SetMarkerStyle(20);
-        // pu0[bias_label].second->SetMarkerSize(0.6);
-        // pu0[bias_label].second->SetMarkerColor(kRed+1);
-        // pu0[bias_label].second->SetLineColor(kRed+1);
-        // pu50s2[bias_label].second->SetMarkerStyle(20);
-        // pu50s2[bias_label].second->SetMarkerSize(0.6);
-        // pu50s2[bias_label].second->SetMarkerColor(kGreen+1);
-        // pu50s2[bias_label].second->SetLineColor(kGreen+1);
-        // pu50s30[bias_label].second->SetMarkerStyle(20);
-        // pu50s30[bias_label].second->SetMarkerSize(0.6);
-        // pu50s30[bias_label].second->SetMarkerColor(kBlue+1);
-        // pu50s30[bias_label].second->SetLineColor(kBlue+1);
-
-        // curr[bias_label].second->Draw("APLX");
-        // pu0[bias_label].second->Draw("PLX same");
-        // pu50s2[bias_label].second->Draw("PLX same");
-        // pu50s30[bias_label].second->Draw("PLX same");
-
-        // curr[bias_label].second->GetYaxis()->SetRangeUser(-3, 60);
-        // curr[bias_label].second->SetTitle(("Bias spread by ET, eta rings " +ring +", " +  train +
-        //                                  " train, PU=50;ET true (GeV);Bias % spread").c_str());
-
-        // TLegend leg2 (0.75, 0.65, 0.87, 0.85);
-        // leg2.AddEntry(curr[bias_label].second, "Current", "lp");
-        // leg2.AddEntry(pu0[bias_label].second, "PU=0", "lp");
-        // leg2.AddEntry(pu50s2[bias_label].second, "PU50 S2", "lp");
-        // leg2.AddEntry(pu50s30[bias_label].second, "PU50 S30", "lp");
-
-        // c2.SetTicks();
-        // leg2.Draw("same");
-
-        // for (int j = 0; j< et_bins.size()-2;j++){
-        //     curr[bias_label].second->GetXaxis()->ChangeLabel(j+1, -1,-1,-1,-1,-1, to_string((int)et_bins[j])+"<E<="+to_string((int)et_bins[j+1]));
-        // }
-        // curr[bias_label].second->GetXaxis()->ChangeLabel(et_bins.size()-1, -1,-1,-1,-1,-1, "E>"+to_string((int)et_bins[et_bins.size()-2]));
-        // curr[bias_label].second->GetXaxis()->SetTitleOffset(1.3);
-
-        // TText label2;
-        // label2.SetNDC();
-        // label2.SetTextFont(42);
-        // label2.SetTextColor(13);
-        // label2.SetTextSize(0.04);
-        // label2.SetTextAlign(22);
-        // label2.DrawText(0.49, 0.83, "PU 50");
+        curr[bias_label].first->Write();
+        pu0[bias_label].first->Write();
+        pu50s2[bias_label].first->Write();
+        pu50s30[bias_label].first->Write();
         
-        // c2.SetGridy();
-        // c2.Update();
-        // c2.Draw();
-        // c2.SaveAs((bias_label + "_spread.png").c_str());
+        curr[bias_label].second->Write();
+        pu0[bias_label].second->Write();
+        pu50s2[bias_label].second->Write();
+        pu50s30[bias_label].second->Write();
     }
-
+    output.Close();
    
 }   
