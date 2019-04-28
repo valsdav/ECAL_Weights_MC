@@ -18,7 +18,7 @@ There are different histograms for different eta regions:
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--inputfile", type=str, help="Input file", required=True)
-parser.add_argument("-o", "--outputfile", type=str, help="Train", required=True)
+parser.add_argument("-o", "--outputfile", type=str, help="Outputfile", required=True)
 parser.add_argument("-n", "--nbx", type=int, help="Number of BX", required=True)
 args = parser.parse_args()
 
