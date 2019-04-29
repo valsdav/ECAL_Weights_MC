@@ -76,6 +76,7 @@ arguments = []
 
 for stripid, df in dfw.groupby("stripid"):
     eta_ring = dof[dof.stripid == stripid].eta_ring.unique()[0]
+    eta_strip = dof[dof.stripid == stripid].eta.mean()
     # filter on eta_rings
     if args.eta_rings != None and (not eta_ring in args.eta_rings): continue
 
@@ -103,9 +104,9 @@ for stripid, df in dfw.groupby("stripid"):
         else:
             weights = [row.w1, row.w2, row.w3, row.w4, row.w5 ]
                 
-        arguments.append("{} {} {} {} {} {} {} {} {} {} {}".format(
+        arguments.append("{} {} {} {} {} {} {} {} {} {} {} {}".format(
                         outputfile, inputfile, PU_string,
-                        S_string, args.mode, args.nthreads,
+                        S_string, args.mode, args.nthreads, eta_strip, 
                         *weights)
         )
 

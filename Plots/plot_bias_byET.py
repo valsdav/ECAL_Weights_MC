@@ -1,4 +1,6 @@
 import argparse
+import sys
+sys.argv.append( '-b' ) # batch mode for root
 import ROOT as r 
 import os
 
@@ -7,6 +9,7 @@ parser.add_argument("-i", "--inputfile", type=str, help="Input file", required=T
 parser.add_argument("-o", "--outputdir", type=str, help="Output dir", required=True)
 parser.add_argument("-t", "--train", type=str, help="Output dir", required=True)
 parser.add_argument("-r", "--rings", type=str, help="Etarings region", required=True)
+parser.add_argument('-b', '--batch', action="store_true" ) 
 args = parser.parse_args()
 
 train = args.train
