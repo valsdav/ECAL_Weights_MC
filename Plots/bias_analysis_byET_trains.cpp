@@ -143,13 +143,15 @@ int main(int argc, char** argv){
     
     RDataFrame df_curr ("bias", basedir +"/bias_current_rings/bias_rings_"+ ring + ".root");
     RDataFrame df_pu0 ("bias", basedir +"/bias_pu0_rings/bias_rings_"+ ring + ".root");
+    RDataFrame df_pu0_newavg ("bias", basedir +"/bias_pu0_newavg_rings/bias_rings_"+ ring + ".root");
     RDataFrame df_pu50_s2 ("bias", basedir +"/bias_pu_opt_rings/bias_rings_"+ ring + "_PU50_S2.root");
     RDataFrame df_pu50_s30 ("bias", basedir +"/bias_pu_opt_rings/bias_rings_"+ ring + "_PU50_S30.root");
 
-    map<string, pair<TGraph*, TGraph*>> curr    = analyzeBias(df_curr, "curr", train);
-    map<string, pair<TGraph*, TGraph*>> pu0     = analyzeBias(df_pu0, "pu0", train);
-    map<string, pair<TGraph*, TGraph*>> pu50s2  = analyzeBias(df_pu50_s2, "pu50s2", train);
-    map<string, pair<TGraph*, TGraph*>> pu50s30 = analyzeBias(df_pu50_s30, "pu50s30", train);
+    map<string, pair<TGraph*, TGraph*>> curr         = analyzeBias(df_curr, "curr", train);
+    map<string, pair<TGraph*, TGraph*>> pu0          = analyzeBias(df_pu0, "pu0", train);
+    map<string, pair<TGraph*, TGraph*>> pu0_newavg   = analyzeBias(df_pu0_newavg, "pu0_newavg", train);
+    map<string, pair<TGraph*, TGraph*>> pu50s2       = analyzeBias(df_pu50_s2, "pu50s2", train);
+    map<string, pair<TGraph*, TGraph*>> pu50s30      = analyzeBias(df_pu50_s30, "pu50s30", train);
 
     auto et_bins = ETbins[train];
 
@@ -161,11 +163,13 @@ int main(int argc, char** argv){
 
         curr[bias_label].first->Write();
         pu0[bias_label].first->Write();
+        pu0_newavg[bias_label].first->Write();
         pu50s2[bias_label].first->Write();
         pu50s30[bias_label].first->Write();
         
         curr[bias_label].second->Write();
         pu0[bias_label].second->Write();
+        pu0_newavg[bias_label].second->Write();
         pu50s2[bias_label].second->Write();
         pu50s30[bias_label].second->Write();
     }
