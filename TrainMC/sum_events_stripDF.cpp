@@ -196,7 +196,7 @@ int main(int argc, char** argv){
                     auto filt_df = input_dfs.at(idf);
 
                     filt_df.Filter([bx,pu,s](int BX0, int nPU, double ET)
-                                    {return BX0==bx && nPU == pu && ET == s;}, 
+                                    {return BX0==bx && nPU == pu && ET >= s-0.001 && ET <= s+0.001;}, 
                                     {"BX0", "nPU", "ET_strip"})
                         .Foreach(sumEvents, {"BX0", "nPU", "ET", "signalTruth",
                                          "amplitudeTruth", "digis"});
