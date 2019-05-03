@@ -1,0 +1,31 @@
+[
+    {   
+        "outputdir": "/eos/user/d/dvalsecc/ECAL/ECAL_Weights/Plots/1D_26_28_48b7e",
+        "title": " eta rings 26_28",
+        "output_rootfile":  "/eos/user/d/dvalsecc/ECAL/ECAL_Weights/Plots/1D_26_28_48b7e/output.root",
+        "ets": ["2-3", "25-35", "0-100"],
+        "PU" : "50",
+        "samples": {
+            "curr" : "/eos/project/e/ecaltrg/Valsecchi/generation7_48b7e/bias_current_rings/bias_rings_26_28.root",
+            "pu0" : "/eos/project/e/ecaltrg/Valsecchi/generation7_48b7e/bias_pu0_rings/bias_rings_26_28.root",
+            "pu0_newavg" : "/eos/project/e/ecaltrg/Valsecchi/generation7_48b7e/bias_pu0_newavg_rings/bias_rings_26_28.root",
+            "pu50s2" : "/eos/project/e/ecaltrg/Valsecchi/generation7_48b7e/bias_pu_opt_rings/bias_rings_26_28_PU50_S2.root",
+            "pu50s30" : "/eos/project/e/ecaltrg/Valsecchi/generation7_48b7e/bias_pu_opt_rings/bias_rings_26_28_PU50_S30.root"
+        }
+    },
+    {   
+        "outputdir": "/eos/user/d/dvalsecc/ECAL/ECAL_Weights/Plots/1D_26_28_8b4e",
+        "title": " eta rings 26_28",
+        "output_rootfile":  "/eos/user/d/dvalsecc/ECAL/ECAL_Weights/Plots/1D_26_28_8b4e/output.root",
+        "ets": ["2-3", "25-35", "0-100"],
+        "PU" : "50",
+        "samples": {
+            "curr" : "/eos/project/e/ecaltrg/Valsecchi/generation7_8b4e/bias_current_rings/bias_rings_26_28.root",
+            "pu0" : "/eos/project/e/ecaltrg/Valsecchi/generation7_8b4e/bias_pu0_rings/bias_rings_26_28.root",
+            "pu0_newavg" : "/eos/project/e/ecaltrg/Valsecchi/generation7_8b4e/bias_pu0_newavg_rings/bias_rings_26_28.root",
+            "pu50s2" : "/eos/project/e/ecaltrg/Valsecchi/generation7_8b4e/bias_pu_opt_rings/bias_rings_26_28_PU50_S2.root",
+            "pu50s30" : "/eos/project/e/ecaltrg/Valsecchi/generation7_8b4e/bias_pu_opt_rings/bias_rings_26_28_PU50_S30.root"
+        }
+    }
+]
+

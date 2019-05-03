@@ -127,8 +127,8 @@ int main(int argc, char** argv){
                 recoA_std_pu[S]  = s_df.StdDev("recoA");
                 bias_mean_pu[S]  = s_df.Mean("bias");
                 bias_std_pu[S]   = s_df.StdDev("bias");
-                intimeA_mean_pu[S] = s_df.Mean("amplitudeTruth");
-                intimeA_std_pu[S]  = s_df.StdDev("amplitudeTruth");
+                intimeA_mean_pu[S] = s_df.Mean("trueA");
+                intimeA_std_pu[S]  = s_df.StdDev("trueA");
                 Epu_mean_pu[S]     = s_df.Mean("E_pu");
                 Epu_std_pu[S]      = s_df.StdDev("E_pu");
             }

@@ -41,7 +41,7 @@ for b in bias_label:
 
     gr1 = file.Get("curr_" + train+"_" + b+"_mean")
     gr2 = file.Get("pu0_" + train+"_" + b+"_mean")
-    gr3 = file.Get("pu0_newavg" + train+"_" + b+"_mean")
+    gr3 = file.Get("pu0_newavg_" + train+"_" + b+"_mean")
     gr4 = file.Get("pu50s2_" + train+"_" + b+"_mean")
     gr5 = file.Get("pu50s30_" + train+"_" + b+"_mean")
 

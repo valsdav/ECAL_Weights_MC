@@ -1,0 +1,13 @@
+[
+    {   
+    "outputdir": "/eos/user/d/dvalsecc/ECAL/ECAL_Weights/Plots/1D_26_28_encoded",
+    "title": " eta rings 26_28",
+    "output_rootfile":  "/eos/user/d/dvalsecc/ECAL/ECAL_Weights/Plots/1D_26_28_encoded/output.root",
+    "ets": ["2-3", "25-35", "0-100"],
+    "PU" : "50",
+    "samples": {
+        "pu50s2_notenc" : "/eos/project/e/ecaltrg/Valsecchi/generation7_48b7e/bias_pu_opt_notenc_rings/bias_rings_26_28_PU50_S2.root",
+        "pu50s2" : "/eos/project/e/ecaltrg/Valsecchi/generation7_48b7e/bias_pu_opt_rings/bias_rings_26_28_PU50_S2.root"
+    }
+}
+]
