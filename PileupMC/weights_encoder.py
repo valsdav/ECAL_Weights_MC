@@ -63,19 +63,22 @@ def correction(enc_weights_not_corrected, back_weights):
     
     return enc_weights_not_corrected
 
-def get_decimal_after_correction(weights):
+
+def get_encoded_corrected_weights(weights):
+    #Encodes the decimal weights
     enc_weights_not_corrected = decimal_to_encoded(weights)
-    #Calculates the decimal weights from the encoded ones - result will be one of the 1/64 allowed weights
+    
+    #Calculates the decimal weights from the encoded ones - result will be one of the 1/64 allowable weights
     back_weights = encoded_to_decimal(enc_weights_not_corrected)
-    #Check if encoded weights sum =256. If not, correction is performed on the weight(s) that are furthest 
-    #from the perfect weights they correspond to.
+    
+    #Check if sum =256, if not correction is performed on the weight(s) that are furthest from the weights they were originally describing
     if sum(enc_weights_not_corrected) != 256:
         enc_weights_corrected = correction(enc_weights_not_corrected, back_weights)
     else:
         enc_weights_corrected = enc_weights_not_corrected
-    
-    backtodecimal = encoded_to_decimal(enc_weights_corrected)
-    return backtodecimal
+
+    return enc_weights_corrected
+
 
 if __name__ == "__main__":
     dof = pd.read_csv(args.input , sep=",")
@@ -83,14 +86,21 @@ if __name__ == "__main__":
     for i, row in dof.iterrows():
         weights = [row.w1, row.w2, row.w3, row.w4,  row.w5]
         print(weights)
-        encoded = get_decimal_after_correction(weights)
+        encoded = get_encoded_corrected_weights(weights)
 
-        dof.at[i, 'w1c'] = encoded[0]
-        dof.at[i, 'w2c'] = encoded[1]
-        dof.at[i, 'w3c'] = encoded[2]
-        dof.at[i, 'w4c'] = encoded[3]
-        dof.at[i, 'w5c'] = encoded[4]
+        backtodecimal = encoded_to_decimal(encoded)
 
-    dof.to_csv(args.output, index=False, sep=",", float_format="%.6f")
+        dof.at[i, 'w1c'] = backtodecimal[0]
+        dof.at[i, 'w2c'] = backtodecimal[1]
+        dof.at[i, 'w3c'] = backtodecimal[2]
+        dof.at[i, 'w4c'] = backtodecimal[3]
+        dof.at[i, 'w5c'] = backtodecimal[4]
+        dof.at[i, 'encw1'] = encoded[0]
+        dof.at[i, 'encw2'] = encoded[1]
+        dof.at[i, 'encw3'] = encoded[2]
+        dof.at[i, 'encw4'] = encoded[3]
+        dof.at[i, 'encw5'] = encoded[4]
+
+    dof.to_csv(args.output, index=False, sep=",", float_format='%g')
     
     print("Done")
