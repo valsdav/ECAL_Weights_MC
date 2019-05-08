@@ -5,7 +5,7 @@
 #include <time.h>
 #include <cmath>
 #include <string>
-
+#include <numeric>
 #include <iostream>
 
 PileupMC::PileupMC(int NSamples, std::string puEFile, std::string puBXFile ):
@@ -61,6 +61,7 @@ TTree* PileupMC::simulateStrip(int stripID, std::vector<Pulse*> xtals_pulses, st
     std::vector<double> signal_samples;
     std::vector<double> pileup_samples;
     std::vector<double> energyPU;
+    double E_pu;  // Mean PU energy in each event
     // Transverse energy 
     double signalA_strip;
     double signalA_T_strip;
@@ -77,7 +78,7 @@ TTree* PileupMC::simulateStrip(int stripID, std::vector<Pulse*> xtals_pulses, st
     treeOut->Branch("signalA",      &signalA_strip,     "signalA/D");
     treeOut->Branch("signalA_T",    &signalA_T_strip,   "signalA_T/D");
     treeOut->Branch("digis",        &digis);
-    treeOut->Branch("energyPU",     &energyPU);
+    treeOut->Branch("E_pu",     &E_pu);  // Save the mean of energyPU per event per strip
     // If debug save the entire BX train
     if (debug){
         // treeOut->Branch("pedestal",     &pedestal, "pedestal/D");
@@ -85,6 +86,7 @@ TTree* PileupMC::simulateStrip(int stripID, std::vector<Pulse*> xtals_pulses, st
         // treeOut->Branch("eta_ring", &eta_ring, "eta_ring/I");
         treeOut->Branch("ID",           &stripID, "ID/I");
         treeOut->Branch("nMinBias",       nPU_bx);
+        treeOut->Branch("energyPU",       &energyPU);
         treeOut->Branch("samples",        &samples);
         treeOut->Branch("signal_samples", &signal_samples);
         treeOut->Branch("pileup_samples", &pileup_samples);
@@ -128,6 +130,7 @@ TTree* PileupMC::simulateStrip(int stripID, std::vector<Pulse*> xtals_pulses, st
             signal_samples.clear();
             pileup_samples.clear();
             energyPU.clear();
+            E_pu = 0.;
             signalA_strip = 0.;
             trueA_strip  = 0.;
             trueA_T_strip = 0.;
@@ -167,6 +170,7 @@ TTree* PileupMC::simulateStrip(int stripID, std::vector<Pulse*> xtals_pulses, st
                         }
                     }
                 }
+                E_pu = std::accumulate(energyPU.begin(), energyPU.end(), 0.0)/energyPU.size();
                 signalA_strip += event.signalA;
                 trueA_strip += event.trueA;
                 trueA_T_strip += event.trueA_T;
@@ -228,8 +232,9 @@ EventMC PileupMC::simulateEvent(Pulse* pulse, TH1D* PU_pdf, std::vector<int> nPU
             // If the PU train is finished we had 0. PU energy
             event.energyPU.push_back(0.);
         }
-       
     }
+    // Switch off in-time PU
+    //event.energyPU.at(BX0) == 0.
 
     // Initialize samples
     event.samples.clear();
@@ -256,9 +261,10 @@ EventMC PileupMC::simulateEvent(Pulse* pulse, TH1D* PU_pdf, std::vector<int> nPU
 
     // Add PU pulse for each BX
     for (int ibx = 0; ibx < nBX; ibx ++){
-        // Add the pulse amplitude on pulseLength following BXs
+        // If no PU event skim bx
+        if (event.energyPU.at(ibx) == 0.) continue;    
+        // Propagate the pulse amplitude on pulseLength following BXs
         for (int ipul = 0; ipul < (pulseLength - 2); ipul++){   
-            if (event.energyPU.at(ibx) == 0.) continue;                
             if ((ibx + ipul) < nBX){
                 // Starting from BX2 when the pulse start
                 event.pileup_samples.at(ibx + ipul) += event.energyPU.at(ibx)*pulse->sample(ipul+2);

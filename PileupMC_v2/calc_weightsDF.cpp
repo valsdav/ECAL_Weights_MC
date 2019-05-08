@@ -65,8 +65,7 @@ int main(int argc, char** argv){
                    .Define("w2", "weights[1]")
                    .Define("w3", "weights[2]")
                    .Define("w4", "weights[3]")
-                   .Define("w5", "weights[4]")
-                   .Define("E_pu", "Mean(energyPU)");
+                   .Define("w5", "weights[4]");
 
     if (complete){
         // Save also digis for debug purposes
@@ -74,9 +73,9 @@ int main(int argc, char** argv){
                 "digis", "w1","w2","w3","w4","w5"});
     }else{
         // Save only weights, not digis
-        _dfw.Snapshot("weights", outputfile, {"nPU", "E_pu", "trueA", "trueA_T","signalA", "signalA_T",
+        _dfw.Snapshot("weights", outputfile, {"BX0", "nPU", "E_pu", "trueA", "trueA_T","signalA", "signalA_T",
                 "w1","w2","w3","w4","w5"});
     }
           
-    std::cout << "ok" << std::endl;
+    std::cout << "Done" << std::endl;
 }
