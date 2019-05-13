@@ -75,8 +75,8 @@ TTree* PileupMC::simulateStrip(int stripID, std::vector<Pulse*> xtals_pulses, st
     treeOut->Branch("nPU",          &nPU,         "nPU/I");
     treeOut->Branch("trueA",        &trueA_strip,       "trueA/D");
     treeOut->Branch("trueA_T",      &trueA_T_strip,     "trueA_T/D");
-    treeOut->Branch("signalA",      &signalA_strip,     "signalA/D");
-    treeOut->Branch("signalA_T",    &signalA_T_strip,   "signalA_T/D");
+    //treeOut->Branch("signalA",      &signalA_strip,     "signalA/D");
+    //treeOut->Branch("signalA_T",    &signalA_T_strip,   "signalA_T/D");
     treeOut->Branch("digis",        &digis);
     treeOut->Branch("E_pu",     &E_pu);  // Save the mean of energyPU per event per strip
     // If debug save the entire BX train
@@ -131,7 +131,6 @@ TTree* PileupMC::simulateStrip(int stripID, std::vector<Pulse*> xtals_pulses, st
             pileup_samples.clear();
             energyPU.clear();
             E_pu = 0.;
-            signalA_strip = 0.;
             trueA_strip  = 0.;
             trueA_T_strip = 0.;
             
@@ -171,11 +170,11 @@ TTree* PileupMC::simulateStrip(int stripID, std::vector<Pulse*> xtals_pulses, st
                     }
                 }
                 E_pu = std::accumulate(energyPU.begin(), energyPU.end(), 0.0)/energyPU.size();
-                signalA_strip += event.signalA;
+                // Accumulate true Amplitude 
                 trueA_strip += event.trueA;
                 trueA_T_strip += event.trueA_T;
-            } // End of loop on events per xtals
-
+            } // End of loop on events per xtal
+            
             treeOut->Fill();
         }  // end of loop on events
         std::cout << std::endl;
@@ -234,7 +233,7 @@ EventMC PileupMC::simulateEvent(Pulse* pulse, TH1D* PU_pdf, std::vector<int> nPU
         }
     }
     // Switch off in-time PU
-    //event.energyPU.at(BX0) == 0.
+    event.energyPU.at(BX0) = 0.; 
 
     // Initialize samples
     event.samples.clear();
@@ -325,7 +324,7 @@ EventMC PileupMC::simulateEvent(Pulse* pulse, TH1D* PU_pdf, std::vector<int> nPU
     }
     
     // Adding energyPU to the true amplitude
-    event.trueA = event.signalA +  event.energyPU.at(BX0);
+    event.trueA = event.signalA +  event.energyPU.at(BX0); //BX0 PU energy should be zero
     event.trueA_T = event.trueA / cosh(eta);
 
     return event;

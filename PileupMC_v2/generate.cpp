@@ -6,7 +6,6 @@
 #include <TTreeReader.h>
 #include <cmath>
 #include <iostream>
-#include <functional>
 
 using namespace std;
 

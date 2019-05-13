@@ -69,12 +69,12 @@ int main(int argc, char** argv){
 
     if (complete){
         // Save also digis for debug purposes
-        _dfw.Snapshot("samples", outputfile, {"BX0", "nPU", "E_pu", "trueA", "trueA_T","signalA", "signalA_T",
+        _dfw.Snapshot("samples", outputfile, {"BX0", "nPU", "E_pu", "trueA", "trueA_T",
                 "digis", "w1","w2","w3","w4","w5"});
     }else{
         // Save only weights, not digis
-        _dfw.Snapshot("weights", outputfile, {"BX0", "nPU", "E_pu", "trueA", "trueA_T","signalA", "signalA_T",
-                "w1","w2","w3","w4","w5"});
+        _dfw.Snapshot("weights", outputfile, {"BX0", "nPU", "E_pu", "trueA", "trueA_T",
+                 "w1","w2","w3","w4","w5"});
     }
           
     std::cout << "Done" << std::endl;
