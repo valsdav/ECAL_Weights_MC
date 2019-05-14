@@ -64,7 +64,7 @@ condor = condor.replace("{PU_train_BX_file}", args.train_file)
 
 script='''#!/bin/sh -e
 
-source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-centos7-gcc7-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/views/LCG_95apython3/x86_64-centos7-gcc7-opt/setup.sh
 
 outputdir=$1; shift; 
 

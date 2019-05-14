@@ -40,12 +40,12 @@ vector<T> parseArg(string arg, string delimiter=","){
     return result;
 }
 
-auto recoA(double* weights, int offset = 0){
+auto recoAmpl(double* weights, int offset){
     /*
     The offset parameters controls the BX windows 
     on which the amplitude is extracted
     */
-    return [=](RVec<double> digis){
+    return [weights,offset](RVec<double> digis){
         double  A_ = 0.;
         for(int j = 0; j< 5; j++){
             A_ += weights[j] * digis.at(2 + j + offset);
@@ -65,6 +65,7 @@ double emulateFIRprecision(double rA){
     return rA_round;   
 }
 
+
 int main(int argc, char** argv){
 
     if (argc < 11){
@@ -82,13 +83,9 @@ int main(int argc, char** argv){
     double eta_strip = atof(argv[5]);
     double weights [5] = {atof(argv[6]),atof(argv[7]),
             atof(argv[8]), atof(argv[9]), atof(argv[10])};
-
-    // Get PUs and Signals from strings with comma delimiters
-    //vector<int> PUs = parseArg<int>(argv[3]);
-    //vector<float> Ss = parseArg<float>(argv[4]);
     
     // Control if the amplitude is reconstructed also in BX -1 and +1
-    bool bxwindow = bool(argv[11]);
+    bool bxwindow = atoi(argv[11]);
 
     //Enabling multithread
     ROOT::EnableImplicitMT(nthreads);
@@ -97,33 +94,36 @@ int main(int argc, char** argv){
 
     auto dftotal = RDataFrame("samples", inputfile);
 
+    auto toTransverse =  [&eta_strip](double A){return A/cosh(eta_strip);};
+
 
     cout << "Dataframe processing starting..." <<endl;
     auto df_reco = 
-            dftotal.Define("recoA", recoA(weights) , {"digis"})
-                .Define("recoA_T",
-                        [&eta_strip](double recoA){return recoA/cosh(eta_strip);},{"recoA"})    
-                .Define("recoA_T_round", emulateFIRprecision ,{"recoA_T"})
-                .Define("bias", [](double trueA_T, double recoA_T)
-                        {return ((recoA_T / trueA_T) -1)*100;}, {"trueA_T", "recoA_T"})
-                // bias rounded
-                .Define("bias_round", [](double trueA_T, double recoA_T_round)
-                        {return ((recoA_T_round/trueA_T) -1)*100;}, {"trueA_T", "recoA_T_round"});
+            dftotal.Define("recoA", recoAmpl(weights, 0) , {"digis"})
+                    .Define("recoA_T", toTransverse ,{"recoA"})    
+                    .Define("recoA_T_round", emulateFIRprecision ,{"recoA_T"})
+                    .Define("bias", [](double trueA_T, double recoA_T)
+                            {return ((recoA_T / trueA_T) -1)*100;}, {"trueA_T", "recoA_T"})
+                    // bias rounded
+                    .Define("bias_round", [](double trueA_T, double recoA_T_round)
+                            {return ((recoA_T_round/trueA_T) -1)*100;}, {"trueA_T", "recoA_T_round"});
 
     if (bxwindow){
-        df_reco = df_reco.Define("recoA_m1", recoA(weights, -1), {"digis"})
-                         .Define("recoA_p1", recoA(weights, +1), {"digis"});
+        df_reco = df_reco.Define("recoA_m1", recoAmpl(weights, -1), {"digis"})
+                         .Define("recoA_p1", recoAmpl(weights, +1), {"digis"})
+                         .Define("recoA_T_m1", toTransverse, {"recoA_m1"})
+                         .Define("recoA_T_p1", toTransverse, {"recoA_p1"});
     }
         
     
     if (mode == 1){
         if (bxwindow){
             df_reco.Snapshot("bias", outputfile, 
-                        {"BX0", "nPU", "recoA", "recoA_T", "trueA", "trueA_T", 
-                        "bias", "bias_round", "recoA_m1", "recoA_p1"});
+                        {"BX0", "nPU", "recoA", "recoA_T", "recoA_T_round", "trueA", "trueA_T", 
+                        "bias", "bias_round", "recoA_T_m1", "recoA_T_p1"});
         }else{
             df_reco.Snapshot("bias", outputfile, 
-                        {"BX0", "nPU", "recoA", "recoA_T", "trueA", "trueA_T", 
+                        {"BX0", "nPU", "recoA", "recoA_T", "recoA_T_round", "trueA", "trueA_T", 
                         "bias", "bias_round"});
         }
         
@@ -131,9 +131,7 @@ int main(int argc, char** argv){
     else if(mode ==2 ){
 
         // TO BE MODIFIED
-        // Add binning on trueA
-
-
+        // Add binning on true
         // // Map of results over PU and signal
         // map<int, map<float, Rptr>> recoA_mean;
         // map<int, map<float, Rptr>> recoA_std;

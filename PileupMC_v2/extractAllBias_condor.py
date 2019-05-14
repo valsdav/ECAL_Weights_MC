@@ -16,7 +16,7 @@ parser.add_argument("-m", "--mode", type=int, help="1=rootfile, 2=stats", requir
 parser.add_argument("-nt", "--nthreads", type=int, help="Number of threads", required=False, default=4)
 parser.add_argument("-ws", "--weights-signal", nargs='+', type=float, help="Select signal in weights set", required=False)
 parser.add_argument("-wp", "--weights-pu", nargs='+', type=int, help="Select PU in weights set", required=False)
-parser.add_argument("-bw", "--bx-window", action="store_true", default=False, help="Reconstruct also BX -1/+1 windows")
+parser.add_argument("-bxw", "--bx-window", action="store_true", default=False, help="Reconstruct also BX -1/+1 windows", required=False)
 parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
 parser.add_argument("-er","--eta-rings", type=int, nargs="+", help="etarings", required=False)
 parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)

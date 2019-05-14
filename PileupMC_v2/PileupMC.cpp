@@ -255,7 +255,6 @@ EventMC PileupMC::simulateEvent(Pulse* pulse, TH1D* PU_pdf, std::vector<int> nPU
             // BX in the pulse window
             event.signal_samples.at(BX0 + ipul) = event.signalA * pulse->sample(ipul+2);
         }
-        
     }
 
     // Add PU pulse for each BX
