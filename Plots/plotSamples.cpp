@@ -34,7 +34,7 @@ int main(int argc, char** argv){
     tree->SetBranchAddress("signal_digis", &signal_digis);
     tree->SetBranchAddress("pileup_digis", &pileup_digis);
     tree->SetBranchAddress("digis", &digis);
-    tree->SetBranchAddress("digis_noise", &digis_noise);
+    tree->SetBranchAddress("noise_digis", &digis_noise);
     tree->GetEntry(event);
     
     TCanvas c;
@@ -47,7 +47,7 @@ int main(int argc, char** argv){
     g.SetMarkerSize(2);
     g.SetMarkerColor(kRed);
     g.SetTitle("Digis; ns; GeV");
-    g.GetYaxis()->SetRangeUser(-1., 55.);
+    //g.GetYaxis()->SetRangeUser(-1., .);
     c.Draw();
 
     TCanvas c2;
