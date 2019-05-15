@@ -34,6 +34,11 @@ map<string , vector<float>> ETbins {
     { "8b4e",  {0.,1.,2.,3.,5.,8.,12.,128.}}
 };
 
+map<string, pair<int,int>> trainsBXs {
+    {"48b7e", std::make_pair(56, 104)},
+    {"8b4e", std::make_pair(12, 20)},
+};
+
 auto getETbin(string train){
     vector<float> bins = ETbins[train];
     return [bins](double ET){
@@ -64,7 +69,16 @@ auto getBXSF(string train){
     };
 }
 
+double getTrueASF(double trueA_T){
+    return trueA_SF_histo->GetBinContent(trueA_SF_histo->FindBin(trueA_T));
+    }
+
 bool emulatePickFinder(double recoA, double recoA_m1, double recoA_p1){
+    // In the frontend there are not negative amplitudes
+    if (recoA < 0) recoA = 0;
+    if (recoA_m1 < 0 ) recoA_m1 = 0;
+    if (recoA_p1 < 0 ) recoA_p1 = 0;
+
     if ((recoA > recoA_m1) && (recoA > recoA_p1)){
         return true;
     }else{
@@ -92,48 +106,108 @@ pair<TGraph*,TGraph*> produceGraphs(string id, RResultPtr<TProfile> prof, int nb
     return std::make_pair(gmean, gstd);
 }
 
-map<string, pair<TGraph*, TGraph*>> analyseBias(RNode rdf, string name, string train){
-
-
+void analyseBias(RNode rdf, string name, string train){
     auto et_bins = ETbins[train]; 
     
-             // Filter events where the TP is not assigned to the center BX
+             // Filter out problematic events
     auto df = rdf.Filter("trueA_T>0.05")
-                .Filter(emulatePickFinder, {"recoA_T", "recoA_T_m1", "recoA_T_p1"})
                 // Define the ET bin on trueA_T, the e-rec
                 .Define("ET_bin", getETbin(train), {"trueA_T"})
-                //======!!!!!===========
-                // Temperary correction for wrong BX0 position in simulation!
-                // =====!!!!!==========
+                // Temperary correction for shifted (wrong) BX0 position in simulation!
                 .Define("correctBX0", "BX0+1")
                 // Get the BX scale factor from BX0 and ET_bin true
                 .Define("BXsf", getBXSF(train), {"correctBX0", "ET_bin"})
                 //Get trueA_T spectrum scale factors
-                .Define("trueA_sf",[](double trueA_T)
-                    {return trueA_SF_histo->GetBinContent(trueA_SF_histo->FindBin(trueA_T));}, {"trueA_T"})
+                .Define("trueA_sf",getTrueASF, {"trueA_T"})
                 .Define("totalSF", "BXsf*trueA_sf");
-                
+    
+    // Filter events where the TP is not assigned to the center BX or TP==0 for fenix precision
+    auto df_nonzero = df.Filter(emulatePickFinder, {"recoA_T", "recoA_T_m1", "recoA_T_p1"})
+                        .Filter("recoA_T_round > 0.");
+
+    // Get only events that doesn't pass the previous cut
+    auto df_zero = df.Filter([](double recoA_T, double recoA_T_m1, double recoA_T_p1, double recoA_T_round)
+                        {return (!emulatePickFinder(recoA_T, recoA_T_m1, recoA_T_p1)) || (recoA_T_round == 0.) ; },
+                        {"recoA_T", "recoA_T_m1", "recoA_T_p1", "recoA_T_round"});
+
+
     //Bias profile using "s" option so that the error on the bin is the std of the distribution
     auto pf_bias = df.Profile1D({ ("pf_bias_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
                     "ET_bin", "bias_round");
-    auto pf_bias_sf = df.Profile1D({ ("pf_bias_sf_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
-                    "ET_bin", "bias_round", "totalSF");
-
-    // Now filtering out recoA_T == 0. entries
-    auto zdf = df.Filter("recoA_T_round > 0.");
-    auto pf_bias_nonzero = zdf.Profile1D({ ("pf_bias_nonzero_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
-                    "ET_bin", "bias_round");
-    auto pf_bias_nonzero_sf = zdf.Profile1D({ ("pf_bias_nonzero_sf_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
+    auto pf_bias_Asf = df.Profile1D({ ("pf_bias_Asf_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
+                    "ET_bin", "bias_round", "trueA_sf");
+    auto pf_bias_BXsf = df.Profile1D({ ("pf_bias_BXsf_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
+                    "ET_bin", "bias_round", "BXsf");
+    auto pf_bias_totsf = df.Profile1D({ ("pf_bias_totsf_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
                     "ET_bin", "bias_round", "totalSF");
 
     
+    // Now filtering out recoA_T == 0. entries and events removed by pick not in the center BX (pick finder simulation)
+    auto pf_bias_nonzero = df_nonzero.Profile1D({ ("pf_bias_nonzero_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
+                    "ET_bin", "bias_round");
+    auto pf_bias_nonzero_Asf = df_nonzero.Profile1D({ ("pf_bias_nonzero_Asf_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
+                    "ET_bin", "bias_round", "trueA_sf");
+    auto pf_bias_nonzero_BXsf = df_nonzero.Profile1D({ ("pf_bias_nonzero_BXsf_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
+                    "ET_bin", "bias_round", "BXsf");
+    auto pf_bias_nonzero_totsf = df_nonzero.Profile1D({ ("pf_bias_nonzero_totsf_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
+                    "ET_bin", "bias_round", "totalSF");
 
-    map<string, pair<TGraph*, TGraph*>> graphs; 
-    graphs["gr_bias"]            =   produceGraphs(name + "_" + train + "_gr_bias", pf_bias, et_bins.size()-1);
-    graphs["gr_bias_sf"]       =     produceGraphs(name + "_" + train + "_gr_bias_sf", pf_bias_sf, et_bins.size()-1);
-    graphs["gr_bias_rmzero"]      =  produceGraphs(name + "_" + train + "_gr_bias_rmzero", pf_bias_nonzero, et_bins.size()-1);
-    graphs["gr_bias_rmzero_sf"] =    produceGraphs(name + "_" + train + "_gr_bias_rmzero_sf", pf_bias_nonzero_sf, et_bins.size()-1);
-    return graphs;    
+    // Check properties of TP removed by pick finder or zeroes by precision
+    auto h_trueA_zero = df_zero.Histo1D({(name + "_" + train + + "_h_trueA_zero").c_str(), "", 256, 0, 128}, "trueA_T");
+    auto h_trueA_zero_BXsf = df_zero.Histo1D({(name + "_" + train + + "_h_trueA_zero_BXsf").c_str(), "", 256, 0, 128}, "trueA_T", "BXsf");
+    auto h_trueA_zero_Asf = df_zero.Histo1D({(name + "_" + train + + "_h_trueA_zero_Asf").c_str(), "", 256, 0, 128}, "trueA_T", "trueA_sf");
+    auto h_trueA_zero_totsf = df_zero.Histo1D({(name + "_" + train + + "_h_trueA_zero_totsf").c_str(), "", 256, 0, 128}, "trueA_T", "totalSF");
+    auto h_recoA_zero = df_zero.Histo1D({(name + "_" + train + + "_h_recoA_zero").c_str(), "", 256, 0, 128}, "recoA_T_round");
+    auto h_recoA_zero_BXsf = df_zero.Histo1D({(name + "_" + train + + "_h_recoA_zero_BXsf").c_str(), "", 256, 0, 128}, "recoA_T_round", "BXsf");
+    auto h_recoA_zero_Asf = df_zero.Histo1D({(name + "_" + train + + "_h_recoA_zero_Asf").c_str(), "", 256, 0, 128}, "recoA_T_round", "trueA_sf");
+    auto h_recoA_zero_totsf = df_zero.Histo1D({(name + "_" + train + + "_h_recoA_zero_totsf").c_str(), "", 256, 0, 128}, "recoA_T_round", "totalSF");
+
+    // Train profile
+    int nbxtrain; 
+    if (train == "48b7e"){
+        nbxtrain = 48;
+    }
+    if (train == "8b4e"){
+        nbxtrain = 8;
+    }
+    auto pf_train = df_nonzero.Profile1D({ ("pf_train_"+name).c_str(), "", nbxtrain, trainsBXs[train].first, 
+                                                 trainsBXs[train].second, "s"},  "correctBX0", "bias_round");
+    auto pf_train_Asf = df_nonzero.Profile1D({ ("pf_train_Asf_"+name).c_str(), "", nbxtrain, trainsBXs[train].first, 
+                                                 trainsBXs[train].second, "s"},  "correctBX0", "bias_round", "trueA_sf");
+    auto pf_train_BXsf = df_nonzero.Profile1D({ ("pf_train_BXsf_"+name).c_str(), "", nbxtrain, trainsBXs[train].first, 
+                                                 trainsBXs[train].second, "s"},  "correctBX0", "bias_round", "BXsf");
+    auto pf_train_totsf = df_nonzero.Profile1D({ ("pf_train_totsf_"+name).c_str(), "", nbxtrain, trainsBXs[train].first, 
+                                                 trainsBXs["48b7e"].second, "s"},  "correctBX0", "bias_round", "totalSF");
+
+    vector<pair<TGraph*, TGraph*>> graphs; 
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_bias", pf_bias, et_bins.size()-1));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_bias_Asf", pf_bias_Asf, et_bins.size()-1));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_bias_BXsf", pf_bias_BXsf, et_bins.size()-1));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_bias_totsf", pf_bias_totsf, et_bins.size()-1));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_bias_nonzero", pf_bias_nonzero, et_bins.size()-1));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_bias_nonzero_Asf", pf_bias_nonzero_Asf, et_bins.size()-1));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_bias_nonzero_BXsf", pf_bias_nonzero_BXsf, et_bins.size()-1));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_bias_nonzero_totsf", pf_bias_nonzero_totsf, et_bins.size()-1));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_train", pf_train, nbxtrain));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_train_Asf", pf_train_Asf, nbxtrain));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_train_BXsf", pf_train_BXsf, nbxtrain));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_train_totsf", pf_train_totsf, nbxtrain));
+    
+    for (auto const & grs : graphs ){
+        grs.first->Write();
+        grs.second->Write();
+    }
+
+    h_trueA_zero->Write();
+    h_trueA_zero_BXsf->Write();
+    h_trueA_zero_Asf->Write();
+    h_trueA_zero_totsf->Write();
+    h_recoA_zero->Write();
+    h_recoA_zero_BXsf->Write();
+    h_recoA_zero_Asf->Write();
+    h_recoA_zero_totsf->Write();
+    
+
 }
 
 
@@ -143,7 +217,7 @@ int main(int argc, char** argv){
         std::cout << "Please insert: BXSF_file trueA_SF basedir train ring outputfile" <<std::endl;
         return 1;
     }
-
+    
     string basedir {argv[3]};
     string train {argv[4]};
     string ring {argv[5]};
@@ -171,32 +245,15 @@ int main(int argc, char** argv){
     RDataFrame df_pu50_s2 ("bias", basedir +"/bias_puopt_rings/bias_rings_"+ ring + "_PU50_S2.root");
     RDataFrame df_pu50_s30 ("bias", basedir +"/bias_puopt_rings/bias_rings_"+ ring + "_PU50_S30.root");
 
-    map<string, pair<TGraph*, TGraph*>> curr         = analyseBias(df_curr, "curr", train);
-    map<string, pair<TGraph*, TGraph*>> pu0          = analyseBias(df_pu0, "pu0", train);
-    map<string, pair<TGraph*, TGraph*>> pu0_newavg   = analyseBias(df_pu0_newavg, "pu0_newavg", train);
-    map<string, pair<TGraph*, TGraph*>> pu50s2       = analyseBias(df_pu50_s2, "pu50s2", train);
-    map<string, pair<TGraph*, TGraph*>> pu50s30      = analyseBias(df_pu50_s30, "pu50s30", train);
-
-    auto et_bins = ETbins[train];
-
     TFile output (outputfile.c_str(), "recreate");
+    
+    analyseBias(df_curr, "curr", train);
+    analyseBias(df_pu0, "pu0", train);
+    analyseBias(df_pu0_newavg, "pu0_newavg", train);
+    analyseBias(df_pu50_s2, "pu50s2", train);
+    analyseBias(df_pu50_s30, "pu50s30", train);
 
-    for (auto const& biaselem : curr){
-        string bias_label = biaselem.first;
-        cout << "Working on: " << bias_label << endl;
-
-        curr[bias_label].first->Write();
-        pu0[bias_label].first->Write();
-        pu0_newavg[bias_label].first->Write();
-        pu50s2[bias_label].first->Write();
-        pu50s30[bias_label].first->Write();
-        
-        curr[bias_label].second->Write();
-        pu0[bias_label].second->Write();
-        pu0_newavg[bias_label].second->Write();
-        pu50s2[bias_label].second->Write();
-        pu50s30[bias_label].second->Write();
-    }
     output.Close();
+    cout << "Done!" << endl;
    
 }   

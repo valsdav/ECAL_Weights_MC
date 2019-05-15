@@ -119,7 +119,7 @@ int main(int argc, char** argv){
     BXSF_histo = (TH1F*) BXSF_file->Get(("bxsf_" + ring).c_str());
     trueA_SF_file = new TFile(argv[3], "read");
     trueA_SF_histo = (TH1F*) trueA_SF_file->Get(("trueA_SF_" + ring).c_str());
-    
+
     ROOT::EnableImplicitMT();
     int poolsize = ROOT::GetImplicitMTPoolSize();
     std::cout << "Multi-threading pool: "<< poolsize << std::endl;

@@ -23,14 +23,8 @@ ring = args.rings
 if not os.path.exists(args.outputdir):
     os.makedirs(args.outputdir)
 
-ETbins = {
-     "48b7e": [0.,1.,2.,3.,5.,8.,12.,25.,45.,1000.],
-     "8b4e": [0.,1.,2.,3.,5.,8.,12.,1000.]
-}
-et_bins = ETbins[train]
 
-bias_label= ["gr_bias","gr_bias_Asf","gr_bias_BXsf","gr_bias_totsf",
-         "gr_bias_nonzero", "gr_bias_nonzero_Asf",  "gr_bias_nonzero_BXsf", "gr_bias_nonzero_totsf"]
+bias_label= ["gr_train", "gr_train_Asf", "gr_train_BXsf", "gr_train_totsf"]
 
 
 file = r.TFile(args.inputfile)
@@ -81,7 +75,7 @@ for b in bias_label:
 
     mg.Draw("APL")
 
-    mg.SetTitle("Bias by ET, eta rings {}, {} train, PU=50;ET true (GeV);Bias %".format(ring, train))
+    mg.SetTitle("Bias by BX in train, eta rings {}, {} train, PU=50;BX of signal;Bias %".format(ring, train))
 
 
     leg = r.TLegend(0.75, 0.65, 0.87, 0.85)
@@ -92,12 +86,6 @@ for b in bias_label:
     leg.AddEntry(gr5, "PU50 S30", "lp")
     leg.Draw("same")
     
-
-    for j in range(len(et_bins)-2):
-        mg.GetXaxis().ChangeLabel(j+1,-1,-1,-1,-1,-1, "{:.0f}<E<={:.0f}".format(et_bins[j],et_bins[j+1]))
-    
-    mg.GetXaxis().ChangeLabel(len(et_bins)-1,-1,-1,-1,-1,-1, "E>{:.0f}".format(et_bins[-2]))
-    mg.GetXaxis().SetTitleOffset(1.3)
 
     label = r.TText()
     label.SetNDC()
@@ -160,7 +148,7 @@ for b in bias_label:
 
     mg2.Draw("APL")
 
-    mg2.SetTitle("Bias spread by ET, eta rings {}, {} train, PU=50;ET true (GeV);Bias % spread".format(ring, train))
+    mg2.SetTitle("Bias spread by BX in train, eta rings {}, {} train, PU=50;BX of signal; Bias % spread".format(ring, train))
 
 
     leg2 = r.TLegend(0.75, 0.65, 0.87, 0.85)
@@ -171,12 +159,6 @@ for b in bias_label:
     leg2.AddEntry(gr5b, "PU50 S30", "lp")
     leg2.Draw("same")
     
-
-    for j in range(len(et_bins)-2):
-        mg2.GetXaxis().ChangeLabel(j+1,-1,-1,-1,-1,-1, "{:.0f}<E<={:.0f}".format(et_bins[j],et_bins[j+1]))
-    
-    mg2.GetXaxis().ChangeLabel(len(et_bins)-1,-1,-1,-1,-1,-1, "E>{:.0f}".format(et_bins[-2]))
-    mg2.GetXaxis().SetTitleOffset(1.3)
 
     label2 = r.TText()
     label2.SetNDC()
