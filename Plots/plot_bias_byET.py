@@ -29,7 +29,7 @@ ETbins = {
 }
 et_bins = ETbins[train]
 
-bias_label= ["gr_bias", "gr_bias_sf", "gr_bias_rmzero", "gr_bias_rmzero_sf"]
+bias_label= ["gr_bias", "gr_bias_sf", "gr_bias_rmzero",  "gr_bias_rmzero_sf"]
 
 
 file = r.TFile(args.inputfile)
