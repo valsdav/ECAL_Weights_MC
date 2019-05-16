@@ -91,4 +91,4 @@ for b in histo_label:
     c1.SetTicks()
     c1.SetLogy()
     #c1.Draw()
-    c1.SaveAs(args.outputdir +"/" + b + "_"+ train +"_"+ring+ "_mean.png")
+    c1.SaveAs(args.outputdir +"/" + b + "_"+ train +"_"+ring+ ".png")

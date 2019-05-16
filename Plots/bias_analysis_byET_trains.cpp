@@ -36,7 +36,7 @@ map<string , vector<float>> ETbins {
 
 map<string, pair<int,int>> trainsBXs {
     {"48b7e", std::make_pair(56, 104)},
-    {"8b4e", std::make_pair(12, 20)},
+    {"8b4e", std::make_pair(13, 21)},
 };
 
 auto getETbin(string train){
@@ -163,21 +163,16 @@ void analyseBias(RNode rdf, string name, string train){
     auto h_recoA_zero_totsf = df_zero.Histo1D({(name + "_" + train + + "_h_recoA_zero_totsf").c_str(), "", 256, 0, 128}, "recoA_T_round", "totalSF");
 
     // Train profile
-    int nbxtrain; 
-    if (train == "48b7e"){
-        nbxtrain = 48;
-    }
-    if (train == "8b4e"){
-        nbxtrain = 8;
-    }
-    auto pf_train = df_nonzero.Profile1D({ ("pf_train_"+name).c_str(), "", nbxtrain, trainsBXs[train].first, 
-                                                 trainsBXs[train].second, "s"},  "correctBX0", "bias_round");
-    auto pf_train_Asf = df_nonzero.Profile1D({ ("pf_train_Asf_"+name).c_str(), "", nbxtrain, trainsBXs[train].first, 
-                                                 trainsBXs[train].second, "s"},  "correctBX0", "bias_round", "trueA_sf");
-    auto pf_train_BXsf = df_nonzero.Profile1D({ ("pf_train_BXsf_"+name).c_str(), "", nbxtrain, trainsBXs[train].first, 
-                                                 trainsBXs[train].second, "s"},  "correctBX0", "bias_round", "BXsf");
-    auto pf_train_totsf = df_nonzero.Profile1D({ ("pf_train_totsf_"+name).c_str(), "", nbxtrain, trainsBXs[train].first, 
-                                                 trainsBXs["48b7e"].second, "s"},  "correctBX0", "bias_round", "totalSF");
+    auto trainBXs = trainsBXs[train];
+    int nbxbin = trainBXs.second - trainBXs.first;
+    auto pf_train = df_nonzero.Profile1D({ ("pf_train_"+name).c_str(), "", nbxbin, trainBXs.first, 
+                                                 trainBXs.second, "s"},  "correctBX0", "bias_round");
+    auto pf_train_Asf = df_nonzero.Profile1D({ ("pf_train_Asf_"+name).c_str(), "", nbxbin, trainBXs.first, 
+                                                 trainBXs.second, "s"},  "correctBX0", "bias_round", "trueA_sf");
+    auto pf_train_BXsf = df_nonzero.Profile1D({ ("pf_train_BXsf_"+name).c_str(), "", nbxbin, trainBXs.first, 
+                                                 trainBXs.second, "s"},  "correctBX0", "bias_round", "BXsf");
+    auto pf_train_totsf = df_nonzero.Profile1D({ ("pf_train_totsf_"+name).c_str(), "", nbxbin, trainBXs.first, 
+                                                 trainBXs.second, "s"},  "correctBX0", "bias_round", "totalSF");
 
     vector<pair<TGraph*, TGraph*>> graphs; 
     graphs.push_back(produceGraphs(name + "_" + train + "_gr_bias", pf_bias, et_bins.size()-1));
@@ -188,10 +183,10 @@ void analyseBias(RNode rdf, string name, string train){
     graphs.push_back(produceGraphs(name + "_" + train + "_gr_bias_nonzero_Asf", pf_bias_nonzero_Asf, et_bins.size()-1));
     graphs.push_back(produceGraphs(name + "_" + train + "_gr_bias_nonzero_BXsf", pf_bias_nonzero_BXsf, et_bins.size()-1));
     graphs.push_back(produceGraphs(name + "_" + train + "_gr_bias_nonzero_totsf", pf_bias_nonzero_totsf, et_bins.size()-1));
-    graphs.push_back(produceGraphs(name + "_" + train + "_gr_train", pf_train, nbxtrain));
-    graphs.push_back(produceGraphs(name + "_" + train + "_gr_train_Asf", pf_train_Asf, nbxtrain));
-    graphs.push_back(produceGraphs(name + "_" + train + "_gr_train_BXsf", pf_train_BXsf, nbxtrain));
-    graphs.push_back(produceGraphs(name + "_" + train + "_gr_train_totsf", pf_train_totsf, nbxtrain));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_train", pf_train, nbxbin));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_train_Asf", pf_train_Asf, nbxbin));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_train_BXsf", pf_train_BXsf, nbxbin));
+    graphs.push_back(produceGraphs(name + "_" + train + "_gr_train_totsf", pf_train_totsf, nbxbin));
     
     for (auto const & grs : graphs ){
         grs.first->Write();

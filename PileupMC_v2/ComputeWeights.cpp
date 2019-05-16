@@ -188,6 +188,19 @@ bool ComputeWeights::compute(const std::vector<double>& pulseShape,
   CLHEP::HepSymMatrix  invCov(size, 1); // If no noise correlation, set it to identity (1)
   invCov = 1.0*invCov; 
 
+  //  std::vector<double> values = {1.00000, 0.71073, 0.55721, 0.46089, 0.40449, 0.35931, 0.33924, 0.32439, 0.31581, 0.30481}; // EB noise correlation for gain 12, measured in 2015 
+  // //vector<double> values = {1.00000, 0.70946, 0.58021, 0.49846, 0.45006, 0.41366, 0.39699, 0.38478, 0.37847, 0.37055}; // EB noise correlation for gain 6, measured in 2015 
+  // //vector<double> values = {1.00000, 0.73354, 0.64442, 0.58851, 0.55425,0.53082, 0.51916, 0.51097, 0.50732, 0.50409}; // EB noise correlation for gain 1, measured in 2015 
+  // int diff = 0;
+
+	// for (int iColumn = 0; iColumn < size; iColumn++) {
+  //   for (int iRow = 0; iRow < size; iRow++) {
+  //     diff = abs(iColumn - iRow);
+  //     invCov[iRow][iColumn] = values[diff];
+  //   }
+  // }
+
+
   // Want to simulate different expoential fall offs of noise correlation, and plot different average amplitudes
   // This corresponds to expected noise.
 

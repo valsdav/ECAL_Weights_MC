@@ -51,10 +51,18 @@ for ibin in range(1,256):
     mcvalue = mcspectrum.GetBinContent( mcspectrum.FindBin(ibin*0.5))
 
     print(ibin, mcvalue)
-    sf_region1.SetBinContent(ibin,  data_region1.GetBinContent(ibin)/ mcvalue )
-    sf_region2.SetBinContent(ibin,  data_region2.GetBinContent(ibin)/ mcvalue )
-    sf_region3.SetBinContent(ibin,  data_region3.GetBinContent(ibin)/ mcvalue )
-    sf_region4.SetBinContent(ibin,  data_region4.GetBinContent(ibin)/ mcvalue )
+    if mcvalue > 0:
+        sf_region1.SetBinContent(ibin,  data_region1.GetBinContent(ibin)/ mcvalue )
+        sf_region2.SetBinContent(ibin,  data_region2.GetBinContent(ibin)/ mcvalue )
+        sf_region3.SetBinContent(ibin,  data_region3.GetBinContent(ibin)/ mcvalue )
+        sf_region4.SetBinContent(ibin,  data_region4.GetBinContent(ibin)/ mcvalue )
+    else:
+        print ("Problem! 0 MC event in bin: {}".format(ibin))
+        sf_region1.SetBinContent(ibin,  0.)
+        sf_region2.SetBinContent(ibin,  0.)
+        sf_region3.SetBinContent(ibin,  0.)
+        sf_region4.SetBinContent(ibin,  0.)
+
 
 outputfile.Write()
 outputfile.Close()
