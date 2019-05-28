@@ -103,10 +103,10 @@ int main(int argc, char** argv){
                     .Define("recoA_T", toTransverse ,{"recoA"})    
                     .Define("recoA_T_round", emulateFIRprecision ,{"recoA_T"})
                     .Define("bias", [](double trueA_T, double recoA_T)
-                            {return ((recoA_T / trueA_T) -1)*100;}, {"trueA_T", "recoA_T"})
+                            {return ((recoA_T / trueA_T) -1);}, {"trueA_T", "recoA_T"})
                     // bias rounded
                     .Define("bias_round", [](double trueA_T, double recoA_T_round)
-                            {return ((recoA_T_round/trueA_T) -1)*100;}, {"trueA_T", "recoA_T_round"});
+                            {return ((recoA_T_round/trueA_T) -1);}, {"trueA_T", "recoA_T_round"});
 
     if (bxwindow){
         df_reco = df_reco.Define("recoA_m1", recoAmpl(weights, -1), {"digis"})

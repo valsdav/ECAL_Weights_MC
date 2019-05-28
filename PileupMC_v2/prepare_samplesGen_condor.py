@@ -6,7 +6,7 @@ import argparse
 
 #save command line
 with open("command", "w") as cmd:
-    cmd.write(" ".join(sys.argv))
+    cmd.write("python " + " ".join(sys.argv))
 
 # This script prepares arguments for condor jobs 
 # to run generate.x and calc_weightsDF.x for each crystal parameter
@@ -25,6 +25,8 @@ parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", req
 parser.add_argument("-er","--eta-rings", type=int, nargs="+", help="etarings", required=False)
 parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
 parser.add_argument("-cw","--calculate-weights", action="store_true", default=False, help="Activate debug output", required=False)
+parser.add_argument("-nw", "--nweights", type=int, help="Number of weights",default=5, required=False)
+parser.add_argument("-wfs", "--weights-first-sample", type=int, help="First sample for weights calculation (position from 1)", default=3, required=False)
 parser.add_argument("--debug", action="store_true", default=False, help="Activate debug output", required=False)
 args = parser.parse_args()
 
@@ -86,7 +88,7 @@ echo -e "DONE!";
 
 calc_weights_code = '''
 echo -e "Calc weights...";
-./calc_weightsDF.x all_pulses_ID$1.root final_output.root  1
+./calc_weightsDF.x all_pulses_ID$1.root final_output.root  1  {nweights} {weights_first_sample}
 
 echo -e "Copying on EOS...";
 xrdcp --nopbar final_output.root  root://eos{eosinstance}.cern.ch/${outputdir}/samples_ID$1.root
@@ -98,6 +100,8 @@ xrdcp --nopbar all_pulses_ID$1.root  root://eos{eosinstance}.cern.ch/${outputdir
 '''
 
 if args.calculate_weights:
+    calc_weights_code = calc_weights_code.replace("{nweights}", str(args.nweights))
+    calc_weights_code = calc_weights_code.replace("{weights_first_sample}", str(args.weights_first_sample))
     script = script.replace("{calc_weights_code}", calc_weights_code)
 else:
     script = script.replace("{calc_weights_code}", no_calc_weights_code)
@@ -170,4 +174,7 @@ for n in range(n_cluster):
                 out.write(params[n*njobspercluster + i] +"\n")
 
 
-
+    if not os.path.exists("log{}".format(n+1)):
+        os.mkdir("log{}".format(n+1))
+        os.mkdir("output{}".format(n+1))
+        os.mkdir("error{}".format(n+1))
