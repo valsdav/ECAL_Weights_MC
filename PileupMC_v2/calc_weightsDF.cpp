@@ -31,6 +31,7 @@ std::vector<double> calculateWeights(unsigned int slot, std::vector<double> digi
     std::vector<double> weights (nPulseSamples);
     cws[slot]->compute(digis, pulse_deriv, firstSample);
     for (int iw = 0; iw< nPulseSamples; iw++){
+        // firstSample - 1 is used to get the first index
         weights[iw] = amplitude * cws[slot]->getAmpWeight(iw + firstSample -1);
     }
     return weights;
@@ -38,15 +39,21 @@ std::vector<double> calculateWeights(unsigned int slot, std::vector<double> digi
 
 int main(int argc, char** argv){
 
-    if (argc <4){
-        std::cout << "Please insert: inputfile | outputfile | complete_info" <<std::endl;
+    if (argc <6){
+        std::cout << "Please insert: inputfile | outputfile | complete_info | nweights | firstsample" <<std::endl;
         return 1;
     }
     string inputfile {argv[1]};
     string outputfile {argv[2]};
     bool complete = atoi(argv[3]);
+    // Number of weights to calculate
+    nPulseSamples = atoi(argv[4]);
+    // First sample used to calculate weights, starting from 1
+    firstSample = atoi(argv[5]);
     
-    std::cout << "Calculating weights for: "<< argv[1] << std::endl;
+    std::cout << "Calculating weights for: "<< argv[1] << std::endl 
+              << "Number of weights: " << nPulseSamples  <<std::endl
+              << "Starting from " << firstSample << "th sample" <<std::endl;
 
     ROOT::EnableImplicitMT();
     int poolsize = ROOT::GetImplicitMTPoolSize();
@@ -61,20 +68,22 @@ int main(int argc, char** argv){
     auto df = RDataFrame("samples", inputfile);
 
     auto dfw = df.DefineSlot("weights", calculateWeights, {"digis", "trueA"});
-    auto _dfw = dfw.Define("w1", "weights[0]")
-                   .Define("w2", "weights[1]")
-                   .Define("w3", "weights[2]")
-                   .Define("w4", "weights[3]")
-                   .Define("w5", "weights[4]");
+    
+    // Variable number of weights
+    vector<std::string> columns_names = {"BX0", "nPU", "E_pu", "trueA", "trueA_T"};
+    for (int nw =0; nw< nPulseSamples; nw++){
+        dfw = dfw.Define("w"+to_string(nw), "weights["+to_string(nw)+ "]");
+        columns_names.push_back("w"+to_string(nw));
+    }
+    
 
     if (complete){
         // Save also digis for debug purposes
-        _dfw.Snapshot("samples", outputfile, {"BX0", "nPU", "E_pu", "trueA", "trueA_T",
-                "digis", "w1","w2","w3","w4","w5"});
+        columns_names.push_back("digis");
+        dfw.Snapshot("samples", outputfile, columns_names);
     }else{
         // Save only weights, not digis
-        _dfw.Snapshot("weights", outputfile, {"BX0", "nPU", "E_pu", "trueA", "trueA_T",
-                 "w1","w2","w3","w4","w5"});
+        dfw.Snapshot("weights", outputfile, columns_names);
     }
           
     std::cout << "Done" << std::endl;
