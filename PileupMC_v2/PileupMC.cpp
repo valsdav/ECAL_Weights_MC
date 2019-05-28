@@ -184,13 +184,19 @@ TTree* PileupMC::simulateStrip(int stripID, std::vector<Pulse*> xtals_pulses, st
 
 }
 
+/*
+*
+*   The BX0 is the 4th sample (index 3) in the 10 samples windows.
+*   The 5 weights are applied starting from 3rd samples (index 2).
+*
+*/
 
 
 // This functions returns a tree containing the simulated samples
 EventMC PileupMC::simulateEvent(Pulse* pulse, TH1D* PU_pdf, std::vector<int> nPU_bx, int BX0,
                                 double signalA_T, float eta){
-    // Set the nBX to BX0+8 to avoid the simulation of useless BXs.
-    int nBX = BX0 +8;
+    // Set the nBX to BX0+7 to avoid the simulation of useless BXs.
+    int nBX = BX0 +7;
 
     // fixed value for noise
     float sigmaNoise = 0.044;
@@ -239,7 +245,7 @@ EventMC PileupMC::simulateEvent(Pulse* pulse, TH1D* PU_pdf, std::vector<int> nPU
     event.samples.clear();
     event.signal_samples.clear();
     event.pileup_samples.clear();
-    // N.B.: nBX is already BX0 + 8 to save time
+    // N.B.: nBX is already BX0 + 7 to save time
     // we are already able to save all the bx also if the BX0 is at the end of the
     // train.
     for (int ibx = 0; ibx < nBX ; ibx ++) {
@@ -248,12 +254,13 @@ EventMC PileupMC::simulateEvent(Pulse* pulse, TH1D* PU_pdf, std::vector<int> nPU
         event.pileup_samples.push_back(0.);
     }
 
-    // Signal samples
-    for (int ipul = 0; ipul < (pulseLength -2); ipul++){
+    // Signal samples. 
+    // 
+    for (int ipul = 0; ipul < (pulseLength -3); ipul++){
         if ((BX0 + ipul) < nBX){
-            // Align BX0 to the start of the pulse so at the second
-            // BX in the pulse window
-            event.signal_samples.at(BX0 + ipul) = event.signalA * pulse->sample(ipul+2);
+            // Align BX0 to the start of the pulse so at the 4th BX (index 3)
+            // in the pulse window
+            event.signal_samples.at(BX0 + ipul) = event.signalA * pulse->sample(ipul+3);
         }
     }
 
@@ -262,10 +269,10 @@ EventMC PileupMC::simulateEvent(Pulse* pulse, TH1D* PU_pdf, std::vector<int> nPU
         // If no PU event skim bx
         if (event.energyPU.at(ibx) == 0.) continue;    
         // Propagate the pulse amplitude on pulseLength following BXs
-        for (int ipul = 0; ipul < (pulseLength - 2); ipul++){   
+        for (int ipul = 0; ipul < (pulseLength - 3); ipul++){   
             if ((ibx + ipul) < nBX){
-                // Starting from BX2 when the pulse start
-                event.pileup_samples.at(ibx + ipul) += event.energyPU.at(ibx)*pulse->sample(ipul+2);
+                // Starting from 4th BX (index 3) when the pulse start
+                event.pileup_samples.at(ibx + ipul) += event.energyPU.at(ibx)*pulse->sample(ipul+3);
             }
         }
     }
@@ -280,26 +287,26 @@ EventMC PileupMC::simulateEvent(Pulse* pulse, TH1D* PU_pdf, std::vector<int> nPU
     event.digis.clear();
     event.signal_digis.clear();
     event.pileup_digis.clear();
-    // We have to check if the BX0 is in the first two BXs
+    // We have to check if the BX0 is in the first three BXs
     // In that case the first two (or one) samples in the window are put to 0
     int removeBXwindows = 0;
-    if (BX0 < 2){
-        // Add the first or the first two samples of the
+    if (BX0 < 3){
+        // Add the first or the first three samples of the
         // window to 0.
-        for(int bj = BX0; bj < 2; bj++){
+        for(int bj = BX0; bj < 3; bj++){
             event.digis.push_back(0.0);
             event.signal_digis.push_back(0.0);
             event.pileup_digis.push_back(0.0);
         }
-        removeBXwindows = 2 - BX0;
+        removeBXwindows = 3 - BX0;
     }
     
-    for (int j = 0; j< NSamples -removeBXwindows; j++){
-        // Since we have starting from BX2 when the pulse start
-        // in the window we have to go back of 2 BX from BX0
-        event.digis.push_back(event.samples.at(BX0 + j - 2 + removeBXwindows));
-        event.signal_digis.push_back(event.signal_samples.at(BX0 + j - 2 + removeBXwindows));
-        event.pileup_digis.push_back(event.pileup_samples.at(BX0 + j - 2 + removeBXwindows));
+    for (int j = 0; j< NSamples - removeBXwindows; j++){
+        // Since we have starting from BX3 (4th X) when the pulse start
+        // in the window we have to go back of 3 BX from BX0
+        event.digis.push_back(event.samples.at(BX0 + j - 3 + removeBXwindows));
+        event.signal_digis.push_back(event.signal_samples.at(BX0 + j - 3 + removeBXwindows));
+        event.pileup_digis.push_back(event.pileup_samples.at(BX0 + j - 3 + removeBXwindows));
     }   
 
     // Random gaussian noise in each sample
