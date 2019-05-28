@@ -92,3 +92,70 @@ for b in histo_label:
     c1.SetLogy()
     #c1.Draw()
     c1.SaveAs(args.outputdir +"/" + b + "_"+ train +"_"+ring+ ".png")
+
+
+#######################
+# Cumulative plots
+
+for b in histo_label:
+
+    c2 = r.TCanvas("c2", "c2", 1000, 700)
+
+    h1 = file.Get("curr_" + train+"_" + b)
+    h2 = file.Get("pu0_" + train+"_" + b)
+    h3 = file.Get("pu0_newavg_" + train+"_" + b)
+    h4 = file.Get("pu50s2_" + train+"_" + b)
+    h5 = file.Get("pu50s30_" + train+"_" + b)
+
+    # cumulative
+    h1 = h1.GetCumulative(False)
+    h2 = h2.GetCumulative(False)
+    h3 = h3.GetCumulative(False)
+    h4 = h4.GetCumulative(False)
+    h5 = h5.GetCumulative(False)
+
+    h1.SetLineColor(r.kOrange+1)
+    h2.SetLineColor(r.kRed+1)
+    h3.SetLineColor(r.kCyan+1)
+    h4.SetLineColor(r.kGreen+1)
+    h5.SetLineColor(r.kBlue+1)
+    h1.SetLineWidth(2)
+    h2.SetLineWidth(2)
+    h3.SetLineWidth(2)
+    h4.SetLineWidth(2)
+    h5.SetLineWidth(2)
+
+    h1.Draw("hist")
+    h2.Draw("hist same")
+    h3.Draw("hist same")
+    h4.Draw("hist same")
+    h5.Draw("hist same")
+
+
+    h1.SetTitle("True ET of missing TPs, eta rings {}, {} train, PU=50;ET true (GeV);#missing TP > ET".format(ring, train))
+
+
+    leg = r.TLegend(0.73, 0.64, 0.87, 0.85)
+    leg.AddEntry(h1, "Current", "lp")
+    leg.AddEntry(h2, "PU=0", "lp")
+    leg.AddEntry(h3, "PU0 new avg", "lp")
+    leg.AddEntry(h4, "PU50 S2", "lp")
+    leg.AddEntry(h5, "PU50 S30", "lp")
+    leg.Draw("same")
+    
+
+    label = r.TText()
+    label.SetNDC()
+    label.SetTextFont(42)
+    label.SetTextColor(13)
+    label.SetTextSize(0.04)
+    label.SetTextAlign(22)
+    label.DrawText(0.49, 0.83, "PU 50")
+
+    h1.GetXaxis().SetRangeUser(0, 50)
+    c2.SetGridy()
+    c2.Update()
+    c2.SetLogy()
+    c2.SetTicks()
+    #c1.Draw()
+    c2.SaveAs(args.outputdir +"/" + b + "_"+ train +"_"+ring+ "_cumul.png")

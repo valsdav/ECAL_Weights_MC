@@ -95,7 +95,9 @@ pair<TGraph*,TGraph*> produceGraphs(string id, RResultPtr<TProfile> prof, int nb
     for(int i =0; i<nbins;i++){
         xbins[i] = i+1;
         means[i] = prof->GetBinContent(i+1);
-        stds[i] = prof->GetBinError(i+1);
+        // The spread is given as std / (E/Etrue)
+        // since we have bias % as ((E/Etrue) -1) we have to invert the formula
+        stds[i] = prof->GetBinError(i+1) / (means[i] +1) ;
         //cout << xbins[i] << " " << means[i] << " " << stds[i] << endl;
     }    
 
@@ -119,7 +121,9 @@ void analyseBias(RNode rdf, string name, string train){
                 .Define("BXsf", getBXSF(train), {"correctBX0", "ET_bin"})
                 //Get trueA_T spectrum scale factors
                 .Define("trueA_sf",getTrueASF, {"trueA_T"})
-                .Define("totalSF", "BXsf*trueA_sf");
+                .Define("totalSF", "BXsf*trueA_sf")
+                // Bias without 100%
+                .Define("BIAS", [](double recoA, double trueA){ return (recoA-trueA)/trueA;}, {"recoA_T_round", "trueA_T"});
     
     // Filter events where the TP is not assigned to the center BX or TP==0 for fenix precision
     auto df_nonzero = df.Filter(emulatePickFinder, {"recoA_T", "recoA_T_m1", "recoA_T_p1"})
@@ -133,24 +137,24 @@ void analyseBias(RNode rdf, string name, string train){
 
     //Bias profile using "s" option so that the error on the bin is the std of the distribution
     auto pf_bias = df.Profile1D({ ("pf_bias_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
-                    "ET_bin", "bias_round");
+                    "ET_bin", "BIAS");
     auto pf_bias_Asf = df.Profile1D({ ("pf_bias_Asf_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
-                    "ET_bin", "bias_round", "trueA_sf");
+                    "ET_bin", "BIAS", "trueA_sf");
     auto pf_bias_BXsf = df.Profile1D({ ("pf_bias_BXsf_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
-                    "ET_bin", "bias_round", "BXsf");
+                    "ET_bin", "BIAS", "BXsf");
     auto pf_bias_totsf = df.Profile1D({ ("pf_bias_totsf_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
-                    "ET_bin", "bias_round", "totalSF");
+                    "ET_bin", "BIAS", "totalSF");
 
     
     // Now filtering out recoA_T == 0. entries and events removed by pick not in the center BX (pick finder simulation)
     auto pf_bias_nonzero = df_nonzero.Profile1D({ ("pf_bias_nonzero_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
-                    "ET_bin", "bias_round");
+                    "ET_bin", "BIAS");
     auto pf_bias_nonzero_Asf = df_nonzero.Profile1D({ ("pf_bias_nonzero_Asf_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
-                    "ET_bin", "bias_round", "trueA_sf");
+                    "ET_bin", "BIAS", "trueA_sf");
     auto pf_bias_nonzero_BXsf = df_nonzero.Profile1D({ ("pf_bias_nonzero_BXsf_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
-                    "ET_bin", "bias_round", "BXsf");
+                    "ET_bin", "BIAS", "BXsf");
     auto pf_bias_nonzero_totsf = df_nonzero.Profile1D({ ("pf_bias_nonzero_totsf_"+name).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
-                    "ET_bin", "bias_round", "totalSF");
+                    "ET_bin", "BIAS", "totalSF");
 
     // Check properties of TP removed by pick finder or zeroes by precision
     auto h_trueA_zero = df_zero.Histo1D({(name + "_" + train + + "_h_trueA_zero").c_str(), "", 256, 0, 128}, "trueA_T");
@@ -166,13 +170,13 @@ void analyseBias(RNode rdf, string name, string train){
     auto trainBXs = trainsBXs[train];
     int nbxbin = trainBXs.second - trainBXs.first;
     auto pf_train = df_nonzero.Profile1D({ ("pf_train_"+name).c_str(), "", nbxbin, trainBXs.first, 
-                                                 trainBXs.second, "s"},  "correctBX0", "bias_round");
+                                                 trainBXs.second, "s"},  "correctBX0", "BIAS");
     auto pf_train_Asf = df_nonzero.Profile1D({ ("pf_train_Asf_"+name).c_str(), "", nbxbin, trainBXs.first, 
-                                                 trainBXs.second, "s"},  "correctBX0", "bias_round", "trueA_sf");
+                                                 trainBXs.second, "s"},  "correctBX0", "BIAS", "trueA_sf");
     auto pf_train_BXsf = df_nonzero.Profile1D({ ("pf_train_BXsf_"+name).c_str(), "", nbxbin, trainBXs.first, 
-                                                 trainBXs.second, "s"},  "correctBX0", "bias_round", "BXsf");
+                                                 trainBXs.second, "s"},  "correctBX0", "BIAS", "BXsf");
     auto pf_train_totsf = df_nonzero.Profile1D({ ("pf_train_totsf_"+name).c_str(), "", nbxbin, trainBXs.first, 
-                                                 trainBXs.second, "s"},  "correctBX0", "bias_round", "totalSF");
+                                                 trainBXs.second, "s"},  "correctBX0", "BIAS", "totalSF");
 
     vector<pair<TGraph*, TGraph*>> graphs; 
     graphs.push_back(produceGraphs(name + "_" + train + "_gr_bias", pf_bias, et_bins.size()-1));
