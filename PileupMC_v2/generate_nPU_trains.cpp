@@ -88,7 +88,7 @@ int main(int argc, char** argv){
         tree->Fill();
     }
     
-    tree->Write();
+    outfile->Write();
     outfile->Close();
     cout << endl<< "DONE"<<endl;
 }

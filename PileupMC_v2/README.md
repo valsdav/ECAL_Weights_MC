@@ -1,4 +1,8 @@
 # Compile all scripts
+Environment for lxplus7
+```
+source /cvmfs/sft.cern.ch/lcg/views/LCG_95apython3/x86_64-centos7-gcc7-opt/setup.sh
+```
 
 Just run the **build.sh** script on lxplus7. 
 
@@ -11,11 +15,11 @@ The script **generate_nPU_train.x** prepare a root file containing the number of
 specified train:
 
 ```
-./generate_nPU_train.x  nPU-list| number of events | output_file | nBXs | train_mask 
+./generate_nPU_trains.x  nPU-list| number of events | output_file | nBXs | train_mask 
 ```
 For example:
 ```
-./generate_nPU_train.x  10,20,40  1000000  output_nPU.root 20  11111111000011111111
+./generate_nPU_trains.x  10,20,40  1000000  output_nPU.root 20  11111111000011111111
 ```
 This will prepare a root file for 8b4e train simulation, including the gap, for nPU 10, 20, 40.  The *train mask* parameter can be used to prepare whatever LHC schema one wants to simulate. 
 
@@ -34,7 +38,7 @@ optional arguments:
 ```
 Example:
 ```
-python generate_ET_spectrum.py  -o spectrum.root --et-vubs  0-2.5 4-10 12.5-13
+python generate_ET_spectrum.py  -o spectrum.root --et-bins  1-2.5 4-10 12.5-13
 ```
 This will generate a spectrum of energy with uniform probability between the requested bins. 
 
@@ -55,30 +59,6 @@ To generate pulses for each strip in ECAL you can use the script **preparare_sam
  A *DOF* (Degree Of Freedom) file is used to get the parameters for each crystal of ECAL. 
 
 ```
-python prepare_weightsGen_condor.py [-h] -d DOF -o OUTPUTDIR -s
-                                    SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...]
-                                    -p PU [PU ...] [-n NEVENTS]
-                                    [-st STRIPS [STRIPS ...]]
-                                    [-er ETA_RINGS [ETA_RINGS ...]] [-e EOS]
-                                    [--debug]
-
-arguments:
-  -h, --help            show this help message and exit
-  -d DOF, --dof DOF     DOF file
-  -o OUTPUTDIR, --outputdir OUTPUTDIR
-                        output_dir
-  -s SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...], --signal-amplitudes SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...]
-                        Signal amplitudes
-  -p PU [PU ...], --pu PU [PU ...]
-                        Pileups
-  -n NEVENTS, --nevents NEVENTS
-                        Number of events
-  -st STRIPS [STRIPS ...], --strips STRIPS [STRIPS ...]
-                        Strips ID
-  -er ETA_RINGS [ETA_RINGS ...], --eta-rings ETA_RINGS [ETA_RINGS ...]
-                        etarings
-  -e EOS, --eos EOS     EOS instance user/cms
-  --debug               Activate debug output
 
 ```
 
