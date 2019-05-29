@@ -26,10 +26,10 @@ vector<T> parseArg(string arg, string delimiter=","){
     return result;
 }
 
-'''
+/*
 This scrpt is used to produce the number of PU interaction for each BX 
 in different train configurations. 
-''' 
+*/
 
 int main(int argc, char** argv){
 
