@@ -18,13 +18,13 @@ parser.add_argument("-o", "--outputdir", type=str, help="output_dir", required=T
 parser.add_argument("-s", "--signal-amplitudes-file", type=str, help="Signal amplitudes file", required=True)
 parser.add_argument("-t", "--train", type=str, help="Train structure (48-7)", required=True)
 parser.add_argument("-tf", "--train-file", type=str, help="Train PU file", required=True)
-parser.add_argument("-bx", "--fixed-bx", type=int, help="Optinal fixed BX for signal", required=False)
+parser.add_argument("-bx", "--fixed-bx", type=int, help="Fixed BX for signal", required=False)
 parser.add_argument("-p", "--pu", nargs='+', type=int, help="Pileup values", required=True)
 parser.add_argument("-n", "--nevents", type=int, help="Number of events for each signal position", required=False, default=2000)
 parser.add_argument("-st","--strips", type=int, nargs="+", help="Strips ID", required=False)
 parser.add_argument("-er","--eta-rings", type=int, nargs="+", help="etarings", required=False)
 parser.add_argument("-e", "--eos", type=str, default="user", help="EOS instance user/cms", required=False)
-parser.add_argument("-cw","--calculate-weights", action="store_true", default=False, help="Activate debug output", required=False)
+parser.add_argument("-cw","--calculate-weights", action="store_true", default=False, help="Activate weights calculation", required=False)
 parser.add_argument("-nw", "--nweights", type=int, help="Number of weights",default=5, required=False)
 parser.add_argument("-wfs", "--weights-first-sample", type=int, help="First sample for weights calculation (position from 1)", default=3, required=False)
 parser.add_argument("--debug", action="store_true", default=False, help="Activate debug output", required=False)
@@ -88,7 +88,8 @@ echo -e "DONE!";
 
 calc_weights_code = '''
 echo -e "Calc weights...";
-./calc_weightsDF.x all_pulses_ID$1.root final_output.root  1  {nweights} {weights_first_sample}
+# Only amplitude weights from here (last arg 0)
+./calc_weightsDF.x all_pulses_ID$1.root final_output.root  1  {nweights} {weights_first_sample} 0
 
 echo -e "Copying on EOS...";
 xrdcp --nopbar final_output.root  root://eos{eosinstance}.cern.ch/${outputdir}/samples_ID$1.root

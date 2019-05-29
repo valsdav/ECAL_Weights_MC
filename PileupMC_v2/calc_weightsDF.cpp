@@ -39,8 +39,8 @@ std::vector<double> calculateWeights(unsigned int slot, std::vector<double> digi
 
 int main(int argc, char** argv){
 
-    if (argc <6){
-        std::cout << "Please insert: inputfile | outputfile | complete_info | nweights | firstsample" <<std::endl;
+    if (argc < 7){
+        std::cout << "Please insert: inputfile | outputfile | complete_info | nweights | firstsample | timing-weights" <<std::endl;
         return 1;
     }
     string inputfile {argv[1]};
@@ -51,9 +51,15 @@ int main(int argc, char** argv){
     // First sample used to calculate weights, starting from 1
     firstSample = atoi(argv[5]);
     
+    // Check if amplitude (0) of timing (1) weights to be calculated
+    dofittime = atoi(argv[6]);
+    
     std::cout << "Calculating weights for: "<< argv[1] << std::endl 
               << "Number of weights: " << nPulseSamples  <<std::endl
               << "Starting from " << firstSample << "th sample" <<std::endl;
+    
+    if (dofittime) std::cout << "Timing Weights" << std::endl;
+    else std::cout << "Amplitude Weights" << std::endl;
 
     ROOT::EnableImplicitMT();
     int poolsize = ROOT::GetImplicitMTPoolSize();
