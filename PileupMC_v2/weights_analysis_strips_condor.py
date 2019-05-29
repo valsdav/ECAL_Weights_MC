@@ -78,7 +78,8 @@ script = script.replace("{eosinstance}", args.eos)
 
 if args.fix:
     outputfiles = [args.outputdir +"/" + s for s in os.listdir(args.outputdir)]
-    inputfiles = [s for s in os.listdir(args.inputdir)]
+
+inputfiles = [s for s in os.listdir(args.inputdir)]
 
 arguments= []
 
