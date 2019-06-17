@@ -35,8 +35,8 @@ map<string , vector<float>> ETbins {
 };
 
 map<string, pair<int,int>> trainsBXs {
-    {"48b7e", std::make_pair(56, 104)},
-    {"8b4e", std::make_pair(13, 21)},
+    {"48b7e", std::make_pair(55, 103)},
+    {"8b4e", std::make_pair(24, 32)}, // double train before BX0
 };
 
 auto getETbin(string train){
@@ -60,11 +60,13 @@ auto getETbin(string train){
 auto getBXSF(string train){
     return [train](int BX0, int ET_bin){
         if (train=="48b7e"){
-            // The 54 is because in MC the BX0 starts from 55
+            // Removing 54  because in MC the BX0 starts from 55
+            // And the first bin of the histo is 1
             return BXSF_histo->GetBinContent(BX0-54, ET_bin);
         }
         else if (train == "8b4e"){
-            return BXSF_histo->GetBinContent(BX0-11, ET_bin);
+            // -23 because two train 8-4-8-4 have been used before signal
+            return BXSF_histo->GetBinContent(BX0-23, ET_bin);
         }
     };
 }
@@ -116,15 +118,17 @@ void analyseBias(RNode rdf, string name, string train){
                 // Define the ET bin on trueA_T, the e-rec
                 .Define("ET_bin", getETbin(train), {"trueA_T"})
                 // Temperary correction for shifted (wrong) BX0 position in simulation!
-                .Define("correctBX0", "BX0+1")
+                //.Define("correctBX0", "BX0+1")
+                .Alias("correctBX0", "BX0") // now it's correct
                 // Get the BX scale factor from BX0 and ET_bin true
                 .Define("BXsf", getBXSF(train), {"correctBX0", "ET_bin"})
                 //Get trueA_T spectrum scale factors
                 .Define("trueA_sf",getTrueASF, {"trueA_T"})
                 .Define("totalSF", "BXsf*trueA_sf")
                 // Bias without 100%
-                .Define("BIAS", [](double recoA, double trueA){ return (recoA-trueA)/trueA;}, {"recoA_T_round", "trueA_T"});
-    
+                //.Define("BIAS", [](double recoA, double trueA){ return (recoA-trueA)/trueA;}, {"recoA_T_round", "trueA_T"});
+                .Alias("BIAS", "bias_round"); // now it's fixed in extractBias script
+
     // Filter events where the TP is not assigned to the center BX or TP==0 for fenix precision
     auto df_nonzero = df.Filter(emulatePickFinder, {"recoA_T", "recoA_T_m1", "recoA_T_p1"})
                         .Filter("recoA_T_round > 0.");

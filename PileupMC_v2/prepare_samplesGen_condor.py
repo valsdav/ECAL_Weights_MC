@@ -17,6 +17,7 @@ parser.add_argument("-d", "--dof", type=str, help="DOF file", required=True)
 parser.add_argument("-o", "--outputdir", type=str, help="output_dir", required=True)
 parser.add_argument("-s", "--signal-amplitudes-file", type=str, help="Signal amplitudes file", required=True)
 parser.add_argument("-t", "--train", type=str, help="Train structure (48-7)", required=True)
+parser.add_argument("-nt", "--ntrains", type=int, help="Number of train repetition", default=1, required=True)
 parser.add_argument("-tf", "--train-file", type=str, help="Train PU file", required=True)
 parser.add_argument("-bx", "--fixed-bx", type=int, help="Fixed BX for signal", required=False)
 parser.add_argument("-p", "--pu", nargs='+', type=int, help="Pileup values", required=True)
@@ -34,14 +35,16 @@ args = parser.parse_args()
 # parse train #nbunches-#nempty
 full = int(args.train.split("-")[0])
 empty = int(args.train.split("-")[1])
-train = "1"*full + "0"*empty + "1"*full
+train = ("1"*full + "0"*empty)*args.ntrains + "1"*full
+BX0_start = (full+empty)*args.ntrains
+
 print("train: ", train)
 
 if args.fixed_bx == None:
     BX0s = []
-    for bx,i in enumerate(train[full+empty:]):
+    for bx,i in enumerate(train[BX0_start:]):
         if i=="1":
-            BX0s.append(str(full+empty+bx))
+            BX0s.append(str(BX0_start+bx))
     BX0string = ",".join(BX0s)
     print("BX0: ", BX0string)
 else:

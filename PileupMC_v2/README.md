@@ -170,42 +170,6 @@ arguments:
                         etarings
 ```
 
-# Join digis by strip
-Until now events are calculated and stored by xtal. The events must be merged before calculating the bias on a strip basis. 
-
-The scrpt **sum_events_stripDF.cpp** aggregates the digis of each xtal in a strip and sum their amplitudes to construct the strip event. The event is then saved in a new file. The PU contribution for each xtal are considered completely uncorrelated. 
-
-A python script is used to prepare condor jobs to work on each strip: 
-
-```bash
-source /cvmfs/sft.cern.ch/lcg/views/dev3python3/latest/x86_64-centos7-gcc7-opt/setup.sh
-g++ -o sum_events_stripDF.x sum_events_stripDF.cpp  `root-config --libs --cflags`
-
-python  sum_events_strips_condor.py [-h] -d DOF -i INPUTDIR -o OUTPUTDIR -s
-                                   SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...]
-                                   -p PU [PU ...] [-st STRIPS [STRIPS ...]]
-                                   [-er ETA_RINGS [ETA_RINGS ...]] [-e EOS]
-                                   [--fix]
-arguments:
-  -h, --help           
-  -d DOF, --dof DOF     DOF file
-  -i INPUTDIR, --inputdir INPUTDIR
-                        Inputdir
-  -o OUTPUTDIR, --outputdir OUTPUTDIR
-                        Outputdir
-  -s SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...], --signal-amplitudes SIGNAL_AMPLITUDES [SIGNAL_AMPLITUDES ...]
-                        Signal amplitudes
-  -p PU [PU ...], --pu PU [PU ...]
-                        Pileups
-  -st STRIPS [STRIPS ...], --strips STRIPS [STRIPS ...]
-                        Strips ID
-  -er ETA_RINGS [ETA_RINGS ...], --eta-rings ETA_RINGS [ETA_RINGS ...]
-                        etarings
-  -e EOS, --eos EOS     EOS instance user/cms
-  --fix                 Check missing outputfiles
-```
-
-
 # Extract bias 
 At this point we have a weights dataset with the optimized weights for each strip, each PU and each signal amplitude. 
 For each different set of weights based on different strip, PU and signal amplitudes, the reconstructed amplitude can be simulated using the digis saved for each event. This calculation is done on strip base using the aggregated events. 

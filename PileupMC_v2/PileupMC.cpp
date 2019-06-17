@@ -29,8 +29,8 @@ PileupMC::~PileupMC(){
     PUfile->Close();
 }
 
-TTree* PileupMC::simulateStrip(int stripID, std::vector<Pulse*> xtals_pulses, std::vector<float> etas, TH1D * signalA_T_distr,
-                         std::vector<int> BX0s , int nPU, int nevents, bool debug=false){
+TTree* PileupMC::simulateStrip(int stripID, std::vector<Pulse*> xtals_pulses, std::vector<float> etas,
+                    TH1D * signalA_T_distr, std::vector<int> BX0s , int nPU, int nevents, bool debug=false){
 
 
     std::vector<int>* nPU_bx = new std::vector<int>();
@@ -196,7 +196,7 @@ TTree* PileupMC::simulateStrip(int stripID, std::vector<Pulse*> xtals_pulses, st
 EventMC PileupMC::simulateEvent(Pulse* pulse, TH1D* PU_pdf, std::vector<int> nPU_bx, int BX0,
                                 double signalA_T, float eta){
     // Set the nBX to BX0+7 to avoid the simulation of useless BXs.
-    int nBX = BX0 +7;
+    int nBX = BX0 + 7;
 
     // fixed value for noise
     float sigmaNoise = 0.044;

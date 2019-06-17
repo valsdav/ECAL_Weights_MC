@@ -68,7 +68,7 @@ for region, data in sf_regions.items():
         for bx,sf in enumerate(sfs):
             bn = sfhisto.GetBin(bx+1, et)
             sfhisto.SetBinContent(bn, sf)
-            print(et,bx ,sf)
+            print(et,bx,sf)
     sfhisto.Write()
     
 output.Close()
