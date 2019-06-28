@@ -123,7 +123,7 @@ void analyseBias(RNode rdf, string name, string train){
                 // Get the BX scale factor from BX0 and ET_bin true
                 .Define("BXsf", getBXSF(train), {"correctBX0", "ET_bin"})
                 //Get trueA_T spectrum scale factors
-                .Define("trueA_sf",getTrueASF, {"trueA_T"})
+                .Define("trueA_sf", getTrueASF, {"trueA_T"})
                 .Define("totalSF", "BXsf*trueA_sf")
                 // Bias without 100%
                 //.Define("BIAS", [](double recoA, double trueA){ return (recoA-trueA)/trueA;}, {"recoA_T_round", "trueA_T"});

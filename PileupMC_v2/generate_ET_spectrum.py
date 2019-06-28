@@ -19,7 +19,7 @@ h = r.TH1D("signalA_T", "",258, 0, 129)
 bins = [ list(map(float,b.split("-")))  for b in args.et_bins]
 print(bins)
 
-nbins = len(bins)-1
+nbins = len(bins)
 pbcont = 1/ nbins
 density  = []
 for i in range(nbins):
