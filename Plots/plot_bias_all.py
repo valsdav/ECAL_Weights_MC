@@ -69,8 +69,8 @@ def set_maximum(mg):
                 if y> maximum:
                     maximum = y
     #print(maximum, maxmax)
-    if maximum > 0.3*maxmax:
-        mg.GetYaxis().SetRangeUser(minimum-0.1, maxmax*3.5)
+    if maximum > 0.2*maxmax:
+        mg.GetYaxis().SetRangeUser(minimum-0.1, maxmax*3.3)
         
 
 #######################
@@ -208,8 +208,8 @@ for b in bias_label:
 
     mg2.Draw("APL")
     set_maximum(mg2)
-    #mg2.SetTitle("Spread % ET, eta rings {}, {} train, PU=50;ET (GeV);Fraction spread %".format(ring, train))
-    mg2.SetTitle(";ET (GeV);Fraction spread".format(ring, train))
+    #mg2.SetTitle("Spread % ET, eta rings {}, {} train, PU=50;ET (GeV);Fractional spread %".format(ring, train))
+    mg2.SetTitle(";ET (GeV);Fractional spread".format(ring, train))
 
     leg = r.TLegend(0.67, 0.5, 0.95, 0.93)
     leg.AddEntry(gr1, "Current", "lp")
@@ -297,11 +297,11 @@ for b in bias_label:
     mg.Add(gr4)
     mg.Add(gr5)
 
-
+    mg.SetTitle(";BX of signal;Fractional bias".format(ring, train))
     mg.Draw("APL")
     set_maximum(mg)
     #mg.SetTitle("Bias by BX in train, eta rings {}, {} train, PU=50;BX of signal;Fractional bias %".format(ring, train))
-    mg.SetTitle(";BX of signal;Fractional bias".format(ring, train))
+    
 
     leg = r.TLegend(0.67, 0.5, 0.95, 0.93)
     leg.AddEntry(gr1, "Current", "lp")
@@ -375,7 +375,7 @@ for b in bias_label:
     mg2.Add(gr5b)
 
     mg2.Draw("APL")
-    mg2.SetTitle(";BX of signal;Fraction spread".format(ring, train))
+    mg2.SetTitle(";BX of signal;Fractional spread".format(ring, train))
     set_maximum(mg2)
 
     leg = r.TLegend(0.67, 0.5, 0.95, 0.93)
