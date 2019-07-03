@@ -2,29 +2,29 @@
     {   
         "outputdir": "/eos/user/d/dvalsecc/ECAL/ECAL_Weights/Plots/1D_26_28_48b7e",
         "title": " eta rings 26_28",
-        "output_rootfile":  "/eos/user/d/dvalsecc/ECAL/ECAL_Weights/Plots/1D_26_28_48b7e/output.root",
+        "output_rootfile":  "/eos/user/d/dvalsecc/ECAL/ECAL_Weights/Plots/1D_26_28_48b7e/output_bis.root",
         "ets": ["0-2", "2-5", "20-50"],
         "PU" : "50",
         "samples": {
-            "curr" : "/eos/project/e/ecaltrg/Valsecchi/generation8_48b7e/bias_current_rings/bias_rings_26_28.root",
-            "pu0" : "/eos/project/e/ecaltrg/Valsecchi/generation8_48b7e/bias_pu0_rings/bias_rings_26_28.root",
-            "pu0_newavg" : "/eos/project/e/ecaltrg/Valsecchi/generation8_48b7e/bias_pu0_newavg_rings/bias_rings_26_28.root",
-            "pu50s2" : "/eos/project/e/ecaltrg/Valsecchi/generation8_48b7e/bias_puopt_rings/bias_rings_26_28_PU50_S2.root",
-            "pu50s30" : "/eos/project/e/ecaltrg/Valsecchi/generation8_48b7e/bias_puopt_rings/bias_rings_26_28_PU50_S30.root"
+            "curr" : "/eos/user/r/rdfexp/ecal/generation8_bis/bias_48b7e/bias_curr_rings/bias_rings_26_28.root",
+            "pu0" : "/eos/user/r/rdfexp/ecal/generation8_bis/bias_48b7e/bias_pu0_rings/bias_rings_26_28.root",
+            "pu0_newavg" : "/eos/user/r/rdfexp/ecal/generation8_bis/bias_48b7e/bias_pu0_newavg_rings/bias_rings_26_28.root",
+            "pu50s2" : "/eos/user/r/rdfexp/ecal/generation8_bis/bias_48b7e/bias_puopt_rings/bias_rings_26_28_PU50_S2.root",
+            "pu50s30" : "/eos/user/r/rdfexp/ecal/generation8_bis/bias_48b7e/bias_puopt_rings/bias_rings_26_28_PU50_S30.root"
         }
     },
     {   
         "outputdir": "/eos/user/d/dvalsecc/ECAL/ECAL_Weights/Plots/1D_26_28_8b4e",
         "title": " eta rings 26_28",
-        "output_rootfile":  "/eos/user/d/dvalsecc/ECAL/ECAL_Weights/Plots/1D_26_28_8b4e/output.root",
+        "output_rootfile":  "/eos/user/d/dvalsecc/ECAL/ECAL_Weights/Plots/1D_26_28_8b4e/output_bis.root",
         "ets": ["0-2", "2-5", "10-30"],
         "PU" : "50",
         "samples": {
-            "curr" : "/eos/project/e/ecaltrg/Valsecchi/generation8_8b4e/bias_current_rings/bias_rings_26_28.root",
-            "pu0" : "/eos/project/e/ecaltrg/Valsecchi/generation8_8b4e/bias_pu0_rings/bias_rings_26_28.root",
-            "pu0_newavg" : "/eos/project/e/ecaltrg/Valsecchi/generation8_8b4e/bias_pu0_newavg_rings/bias_rings_26_28.root",
-            "pu50s2" : "/eos/project/e/ecaltrg/Valsecchi/generation8_8b4e/bias_puopt_rings/bias_rings_26_28_PU50_S2.root",
-            "pu50s30" : "/eos/project/e/ecaltrg/Valsecchi/generation8_8b4e/bias_puopt_rings/bias_rings_26_28_PU50_S30.root"
+            "curr" : "/eos/user/r/rdfexp/ecal/generation8_bis/bias_8b4e/bias_curr_rings/bias_rings_26_28.root",
+            "pu0" : "/eos/user/r/rdfexp/ecal/generation8_bis/bias_8b4e/bias_pu0_rings/bias_rings_26_28.root",
+            "pu0_newavg" : "/eos/user/r/rdfexp/ecal/generation8_bis/bias_8b4e/bias_pu0_newavg_rings/bias_rings_26_28.root",
+            "pu50s2" : "/eos/user/r/rdfexp/ecal/generation8_bis/bias_8b4e/bias_puopt_rings/bias_rings_26_28_PU50_S2.root",
+            "pu50s30" : "/eos/user/r/rdfexp/ecal/generation8_bis/bias_8b4e/bias_puopt_rings/bias_rings_26_28_PU50_S30.root"
         }
     }
 ]

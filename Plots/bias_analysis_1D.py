@@ -59,9 +59,7 @@ def do_histos(args):
 
     for label, file in args["samples"].items():
         rdfs[label] = RDF("bias", file)  \
-            .Define("Bias", "(bias-1)*100") \
-            .Define("recoA_T_round", "roundET(recoA_T)") \
-            .Define("Bias_round", "((recoA_T_round/trueA_T) -1)*100")
+           
 
     labels = list(args["samples"].keys())
     histos_et = defaultdict(list)
@@ -69,7 +67,7 @@ def do_histos(args):
     for label, df in rdfs.items():
         for (etmin, etmax), et in zip(ets, args["ets"]):
             h = df.Filter("nPU== {} && trueA_T>{:.1f} && trueA_T<={:.1f}".format(args["PU"], etmin, etmax)) \
-                .Histo1D(("{}_{:.1f}_{:.1f}".format(label, etmin, etmax), "", 500, -200, 200), "Bias")
+                .Histo1D(("{}_{:.1f}_{:.1f}".format(label, etmin, etmax), "", 200, -10, 10), "bias_round")
             histos_et[et].append(h)
 
     print(histos_et)
@@ -87,8 +85,8 @@ def do_histos(args):
         histos[0].Scale(1/histos[0].Integral())
         histos[0].Draw("hist")
 
-        xrange = [ histos[0].GetMean()- histos[0].GetRMS()*3,
-                histos[0].GetMean()+ histos[0].GetRMS()*3]
+        xrange = [ histos[0].GetMean()- histos[0].GetRMS()*4,
+                histos[0].GetMean()+ histos[0].GetRMS()*4]
 
         maxh = histos[0].GetMaximum()
         for i in range(1, len(histos)):
