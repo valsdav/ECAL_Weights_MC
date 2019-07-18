@@ -24,10 +24,19 @@ args = parser.parse_args()
 conf = json.load(open(args.cfg))
 pprint(conf)
 
+
 code = '''
-#include <cmath>
-double roundET(const double rA){
-    return round(rA*2)/2. ;
+bool emulatePickFinder(double recoA, double recoA_m1, double recoA_p1){
+    // In the frontend there are not negative amplitudes
+    if (recoA < 0) recoA = 0;
+    if (recoA_m1 < 0 ) recoA_m1 = 0;
+    if (recoA_p1 < 0 ) recoA_p1 = 0;
+
+    if ((recoA > recoA_m1) && (recoA > recoA_p1)){
+        return true;
+    }else{
+        return false;
+    }
 }
 '''
 
@@ -63,55 +72,25 @@ def do_histos(args):
 
     labels = list(args["samples"].keys())
     histos_et = defaultdict(list)
-        
+    
+
     for label, df in rdfs.items():
+        print("Working on sample: ", label)
+        df2 = df.Filter("nPU == {}".format(args["PU"])).Filter("trueA_T>0.05")\
+            .Filter("emulatePickFinder(recoA_T,recoA_T_m1,recoA_T_p1)") \
+            .Filter("recoA_T_round > 0.")
         for (etmin, etmax), et in zip(ets, args["ets"]):
-            h = df.Filter("nPU== {} && trueA_T>{:.1f} && trueA_T<={:.1f}".format(args["PU"], etmin, etmax)) \
-                .Histo1D(("{}_{:.1f}_{:.1f}".format(label, etmin, etmax), "", 200, -10, 10), "bias_round")
+            h = df2.Filter("trueA_T>{:.1f} && trueA_T<={:.1f}".format(etmin, etmax))  \
+                    .Histo1D(("{}_{:.1f}_{:.1f}".format(label, etmin, etmax), "", 600, -2, 2), "bias_round")
             histos_et[et].append(h)
 
-    print(histos_et)
-
-    for et, histos in histos_et.items():
-
-        c = r.TCanvas("c_{}".format(et), "", 800, 600)
-        leg = r.TLegend(0.75, 0.65, 0.87, 0.85)
-        leg.AddEntry(histos[0].GetValue(), labels[0], "l")
-
-        histos[0].Write()
-        histos[0].SetLineWidth(2)
-        histos[0].SetLineColor(colors[labels[0]])
-        histos[0].SetTitle("Bias % for ET={} {};Bias %".format(et, args["title"]))
-        histos[0].Scale(1/histos[0].Integral())
-        histos[0].Draw("hist")
-
-        xrange = [ histos[0].GetMean()- histos[0].GetRMS()*4,
-                histos[0].GetMean()+ histos[0].GetRMS()*4]
-
-        maxh = histos[0].GetMaximum()
-        for i in range(1, len(histos)):
-            histos[i].Write()
-            histos[i].Draw("hist same")
-            histos[i].SetLineWidth(2)
-            histos[i].SetLineColor(colors[labels[i]])
-            histos[i].Scale(1/histos[i].Integral())
-            m = histos[i].GetMaximum()
-            if m> maxh: maxh = m
-            leg.AddEntry(histos[i].GetValue(), labels[i], "l")
-
-            xrangei = [ histos[i].GetMean()- histos[i].GetRMS()*3,
-                histos[i].GetMean()+ histos[i].GetRMS()*3]
-            xrange[0] = min(xrange[0], xrangei[0])
-            xrange[1] = max(xrange[1], xrangei[1])
-
-        
-        leg.Draw("same")
-
-        histos[0].GetYaxis().SetRangeUser(0., 1.3*maxh)    
-        histos[0].GetXaxis().SetRangeUser(xrange[0]*1.2, xrange[1]*1.2)
-
-        c.SaveAs("{}/bias_ET{}.png".format(args["outputdir"], et))
-        c.Write()
+    for hs in histos_et.values():
+        for h in hs:
+            h.Draw()
+    
+    for hs in histos_et.values():
+        for h in hs:
+            h.Write()
     
     output_rootfile.Close()
 

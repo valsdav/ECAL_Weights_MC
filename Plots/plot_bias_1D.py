@@ -58,14 +58,14 @@ trees = defaultdict(dict)
 for s in args.samples:
     for e in ets:
         es = "-".join(map(str,e))
-        f = r.TFile(args.inputdir+"/output_{}_{:.6f}_{:.6f}.root".format(s, *e))
+        f = r.TFile(args.inputdir+"/output_noround_{}_{:.6f}_{:.6f}.root".format(s, *e))
         files.append(f)
         trees[s][es] = f.Get("bias")
 
 bins = {
-    "0.0-2.0": [200, -1, 4],
-    "2.5-3.5": [200, -0.7, 0.7],
-    "25.0-35.0": [200, -0.2, 0.4]
+    "0.0-2.0": [60, -0.9, 1.2],
+    "2.5-3.5": [60, -0.9, 1.2],
+    "25.0-35.0": [150, -0.1, 0.3]
 }
 
 def fixlastbin(h):
@@ -82,9 +82,8 @@ for etmin, etmax in ets:
     for label in args.samples:
         
         h = r.TH1F("h_"+label+"_"+et, "",*bins[et])
-        trees[label][et].Draw("BIAS>>"+"h_"+label+"_"+et,
-                     "trueA_sf")
-        fixlastbin(h)
+        trees[label][et].Draw("bias>>"+"h_"+label+"_"+et, "trueA_sf")
+        #fixlastbin(h)
         print(label, et, h.GetMean(), h.GetRMS())
         histos.append(h)
         h.SetLineWidth(2)
@@ -136,10 +135,10 @@ for etmin, etmax in ets:
     label = r.TPaveText(0.17, 0.7, 0.47, 0.90, "NB NDC" )
     ll = []
     ll.append(label.AddText("PU=50"))
-    ll.append(label.AddText("{:.1f}<|#eta|<{:.1f}".format(etmin, etmax))) 
+    ll.append(label.AddText("2.3<|#eta|<3".format(etmin, etmax))) 
     ll.append(label.AddText("LHC filling "))
     ll.append(label.AddText("schema: 48b7e"))
-    ll.append(label.AddText("{:.1f} < Et < {:.1f} GeV".format(etmin, etmax)))
+    ll.append(label.AddText("{:.1f} < ET < {:.1f} GeV".format(etmin, etmax)))
     for l in ll:
         l.SetLineColor(r.kBlack)
     label.SetFillColor(r.kWhite)

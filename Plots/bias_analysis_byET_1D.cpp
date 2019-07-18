@@ -124,14 +124,10 @@ void analyseBias(RNode rdf, string name, string train, vector<pair<float,float>>
                 .Define("BXsf", getBXSF(train), {"BX0", "ET_bin"})
                 //Get trueA_T spectrum scale factors
                 .Define("trueA_sf", getTrueASF, {"trueA_T"})
-                .Define("totalSF", "BXsf*trueA_sf")
-                // Bias without 100%
-                //.Define("BIAS", [](double recoA, double trueA){ return (recoA-trueA)/trueA;}, {"recoA_T_round", "trueA_T"});
-                .Alias("BIAS", "bias_round"); // now it's fixed in extractBias script
+                .Define("totalSF", "BXsf*trueA_sf");
 
     // Filter events where the TP is not assigned to the center BX or TP==0 for fenix precision
-    auto df_nonzero = df.Filter(emulatePickFinder, {"recoA_T", "recoA_T_m1", "recoA_T_p1"})
-                        .Filter("recoA_T_round > 0.");
+    auto df_nonzero = df.Filter(emulatePickFinder, {"recoA_T", "recoA_T_m1", "recoA_T_p1"});
 
     // Get only events that doesn't pass the previous cut
     // auto df_zero = df.Filter([](double recoA_T, double recoA_T_m1, double recoA_T_p1, double recoA_T_round)
@@ -140,9 +136,14 @@ void analyseBias(RNode rdf, string name, string train, vector<pair<float,float>>
 
 
     for (auto const & bin : bins){
-        df_nonzero.Filter("trueA_T>" +to_string(bin.first) + "&& trueA_T<=" + to_string(bin.second))
-                .Snapshot("bias", outputdir + "/output_"+name+"_"+to_string(bin.first) +"_"+to_string(bin.second)+".root",
-                {"BIAS", "trueA_sf", "BXsf", "9"});
+        // df_nonzero.Filter("recoA_T_round>0")
+        //           .Filter("trueA_T>" +to_string(bin.first) + "&& trueA_T<=" + to_string(bin.second))
+        //           .Snapshot("bias", outputdir + "/output_"+name+"_"+to_string(bin.first) +"_"+to_string(bin.second)+".root",
+        //                {"bias_round","bias", "trueA_sf", "BXsf", "totalSF"});
+	    df_nonzero.Filter("recoA_T>0")
+                  .Filter("trueA_T>" +to_string(bin.first) + "&& trueA_T<=" + to_string(bin.second))
+                  .Snapshot("bias", outputdir + "/output_noround_"+name+"_"+to_string(bin.first) +"_"+to_string(bin.second)+".root",
+                {"bias_round","bias", "trueA_sf", "BXsf", "totalSF"});
     }
     
 }
