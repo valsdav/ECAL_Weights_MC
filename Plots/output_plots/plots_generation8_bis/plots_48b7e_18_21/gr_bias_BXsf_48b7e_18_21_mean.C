@@ -1,0 +1,469 @@
+void gr_bias_BXsf_48b7e_18_21_mean()
+{
+//=========Macro generated from canvas: c1/c1
+//=========  (Wed Jul  3 00:08:44 2019) by ROOT version 6.16/00
+   TCanvas *c1 = new TCanvas("c1", "c1",0,0,800,600);
+   gStyle->SetOptFit(1);
+   gStyle->SetOptStat(0);
+   gStyle->SetOptTitle(0);
+   c1->SetHighLightColor(2);
+   c1->Range(-0.9903614,-0.3224944,9.612048,0.1411161);
+   c1->SetFillColor(0);
+   c1->SetBorderMode(0);
+   c1->SetBorderSize(2);
+   c1->SetGridy();
+   c1->SetTickx(1);
+   c1->SetTicky(1);
+   c1->SetLeftMargin(0.15);
+   c1->SetRightMargin(0.02);
+   c1->SetTopMargin(0.05);
+   c1->SetBottomMargin(0.13);
+   c1->SetFrameFillStyle(0);
+   c1->SetFrameBorderMode(0);
+   c1->SetFrameFillStyle(0);
+   c1->SetFrameBorderMode(0);
+   
+   TMultiGraph *multigraph = new TMultiGraph();
+   multigraph->SetName("");
+   multigraph->SetTitle(";ET (GeV);Fractional bias");
+   
+   Double_t curr_48b7e_gr_bias_BXsf_mean_fx21[9] = {
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9};
+   Double_t curr_48b7e_gr_bias_BXsf_mean_fy21[9] = {
+   -0.1476125,
+   -0.02226022,
+   -0.007656611,
+   -5.880863e-05,
+   0.00466015,
+   0.007533006,
+   0.00932504,
+   0.01079288,
+   0.01138821};
+   TGraph *graph = new TGraph(9,curr_48b7e_gr_bias_BXsf_mean_fx21,curr_48b7e_gr_bias_BXsf_mean_fy21);
+   graph->SetName("curr_48b7e_gr_bias_BXsf_mean");
+   graph->SetTitle("Graph");
+   graph->SetFillStyle(1000);
+
+   Int_t ci;      // for color index setting
+   TColor *color; // for color definition with alpha
+   ci = TColor::GetColor("#ff9933");
+   graph->SetLineColor(ci);
+
+   ci = TColor::GetColor("#ff9933");
+   graph->SetMarkerColor(ci);
+   graph->SetMarkerStyle(20);
+   graph->SetMarkerSize(0.6);
+   
+   TH1F *Graph_curr_48b7e_gr_bias_BXsf_mean21 = new TH1F("Graph_curr_48b7e_gr_bias_BXsf_mean21","Graph",100,0.2,9.8);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->SetMinimum(-0.1635126);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->SetMaximum(0.02728828);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->SetDirectory(0);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->SetStats(0);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->SetLineStyle(0);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->SetMarkerStyle(20);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetXaxis()->SetLabelFont(42);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetXaxis()->SetLabelOffset(0.007);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetXaxis()->SetLabelSize(0.05);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetXaxis()->SetTitleSize(0.06);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetXaxis()->SetTitleOffset(1);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetXaxis()->SetTitleFont(42);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetYaxis()->SetLabelFont(42);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetYaxis()->SetLabelOffset(0.007);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetYaxis()->SetLabelSize(0.05);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetYaxis()->SetTitleSize(0.06);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetYaxis()->SetTitleOffset(1.1);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetYaxis()->SetTitleFont(42);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetZaxis()->SetLabelFont(42);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetZaxis()->SetLabelOffset(0.007);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetZaxis()->SetLabelSize(0.05);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetZaxis()->SetTitleSize(0.06);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetZaxis()->SetTitleOffset(1);
+   Graph_curr_48b7e_gr_bias_BXsf_mean21->GetZaxis()->SetTitleFont(42);
+   graph->SetHistogram(Graph_curr_48b7e_gr_bias_BXsf_mean21);
+   
+   multigraph->Add(graph,"");
+   
+   Double_t pu0_48b7e_gr_bias_BXsf_mean_fx22[9] = {
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9};
+   Double_t pu0_48b7e_gr_bias_BXsf_mean_fy22[9] = {
+   -0.162225,
+   -0.03467632,
+   -0.02027503,
+   -0.01270325,
+   -0.008044393,
+   -0.005279992,
+   -0.003462596,
+   -0.001991984,
+   -0.001230121};
+   graph = new TGraph(9,pu0_48b7e_gr_bias_BXsf_mean_fx22,pu0_48b7e_gr_bias_BXsf_mean_fy22);
+   graph->SetName("pu0_48b7e_gr_bias_BXsf_mean");
+   graph->SetTitle("Graph");
+   graph->SetFillStyle(1000);
+
+   ci = TColor::GetColor("#cc0000");
+   graph->SetLineColor(ci);
+
+   ci = TColor::GetColor("#cc0000");
+   graph->SetMarkerColor(ci);
+   graph->SetMarkerStyle(20);
+   graph->SetMarkerSize(0.6);
+   
+   TH1F *Graph_pu0_48b7e_gr_bias_BXsf_mean22 = new TH1F("Graph_pu0_48b7e_gr_bias_BXsf_mean22","Graph",100,0.2,9.8);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->SetMinimum(-0.1783245);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->SetMaximum(0.01486937);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->SetDirectory(0);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->SetStats(0);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->SetLineStyle(0);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->SetMarkerStyle(20);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetXaxis()->SetLabelFont(42);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetXaxis()->SetLabelOffset(0.007);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetXaxis()->SetLabelSize(0.05);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetXaxis()->SetTitleSize(0.06);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetXaxis()->SetTitleOffset(1);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetXaxis()->SetTitleFont(42);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetYaxis()->SetLabelFont(42);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetYaxis()->SetLabelOffset(0.007);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetYaxis()->SetLabelSize(0.05);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetYaxis()->SetTitleSize(0.06);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetYaxis()->SetTitleOffset(1.1);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetYaxis()->SetTitleFont(42);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetZaxis()->SetLabelFont(42);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetZaxis()->SetLabelOffset(0.007);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetZaxis()->SetLabelSize(0.05);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetZaxis()->SetTitleSize(0.06);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetZaxis()->SetTitleOffset(1);
+   Graph_pu0_48b7e_gr_bias_BXsf_mean22->GetZaxis()->SetTitleFont(42);
+   graph->SetHistogram(Graph_pu0_48b7e_gr_bias_BXsf_mean22);
+   
+   multigraph->Add(graph,"");
+   
+   Double_t pu0_newavg_48b7e_gr_bias_BXsf_mean_fx23[9] = {
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9};
+   Double_t pu0_newavg_48b7e_gr_bias_BXsf_mean_fy23[9] = {
+   -0.1265283,
+   0.001457417,
+   0.01662879,
+   0.02441524,
+   0.02947648,
+   0.03254291,
+   0.03423019,
+   0.03573804,
+   0.03546018};
+   graph = new TGraph(9,pu0_newavg_48b7e_gr_bias_BXsf_mean_fx23,pu0_newavg_48b7e_gr_bias_BXsf_mean_fy23);
+   graph->SetName("pu0_newavg_48b7e_gr_bias_BXsf_mean");
+   graph->SetTitle("Graph");
+   graph->SetFillStyle(1000);
+
+   ci = TColor::GetColor("#00cccc");
+   graph->SetLineColor(ci);
+
+   ci = TColor::GetColor("#00cccc");
+   graph->SetMarkerColor(ci);
+   graph->SetMarkerStyle(20);
+   graph->SetMarkerSize(0.6);
+   
+   TH1F *Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23 = new TH1F("Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23","Graph",100,0.2,9.8);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->SetMinimum(-0.1427549);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->SetMaximum(0.05196468);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->SetDirectory(0);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->SetStats(0);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->SetLineStyle(0);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->SetMarkerStyle(20);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetXaxis()->SetLabelFont(42);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetXaxis()->SetLabelOffset(0.007);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetXaxis()->SetLabelSize(0.05);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetXaxis()->SetTitleSize(0.06);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetXaxis()->SetTitleOffset(1);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetXaxis()->SetTitleFont(42);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetYaxis()->SetLabelFont(42);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetYaxis()->SetLabelOffset(0.007);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetYaxis()->SetLabelSize(0.05);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetYaxis()->SetTitleSize(0.06);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetYaxis()->SetTitleOffset(1.1);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetYaxis()->SetTitleFont(42);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetZaxis()->SetLabelFont(42);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetZaxis()->SetLabelOffset(0.007);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetZaxis()->SetLabelSize(0.05);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetZaxis()->SetTitleSize(0.06);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetZaxis()->SetTitleOffset(1);
+   Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23->GetZaxis()->SetTitleFont(42);
+   graph->SetHistogram(Graph_pu0_newavg_48b7e_gr_bias_BXsf_mean23);
+   
+   multigraph->Add(graph,"");
+   
+   Double_t pu50s2_48b7e_gr_bias_BXsf_mean_fx24[9] = {
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9};
+   Double_t pu50s2_48b7e_gr_bias_BXsf_mean_fy24[9] = {
+   -0.1335125,
+   -0.006146953,
+   0.008917604,
+   0.01661019,
+   0.0215126,
+   0.02455248,
+   0.02633372,
+   0.0278232,
+   0.02789835};
+   graph = new TGraph(9,pu50s2_48b7e_gr_bias_BXsf_mean_fx24,pu50s2_48b7e_gr_bias_BXsf_mean_fy24);
+   graph->SetName("pu50s2_48b7e_gr_bias_BXsf_mean");
+   graph->SetTitle("Graph");
+   graph->SetFillStyle(1000);
+
+   ci = TColor::GetColor("#00cc00");
+   graph->SetLineColor(ci);
+
+   ci = TColor::GetColor("#00cc00");
+   graph->SetMarkerColor(ci);
+   graph->SetMarkerStyle(20);
+   graph->SetMarkerSize(0.6);
+   
+   TH1F *Graph_pu50s2_48b7e_gr_bias_BXsf_mean24 = new TH1F("Graph_pu50s2_48b7e_gr_bias_BXsf_mean24","Graph",100,0.2,9.8);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->SetMinimum(-0.1496536);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->SetMaximum(0.04403943);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->SetDirectory(0);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->SetStats(0);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->SetLineStyle(0);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->SetMarkerStyle(20);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetXaxis()->SetLabelFont(42);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetXaxis()->SetLabelOffset(0.007);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetXaxis()->SetLabelSize(0.05);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetXaxis()->SetTitleSize(0.06);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetXaxis()->SetTitleOffset(1);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetXaxis()->SetTitleFont(42);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetYaxis()->SetLabelFont(42);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetYaxis()->SetLabelOffset(0.007);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetYaxis()->SetLabelSize(0.05);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetYaxis()->SetTitleSize(0.06);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetYaxis()->SetTitleOffset(1.1);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetYaxis()->SetTitleFont(42);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetZaxis()->SetLabelFont(42);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetZaxis()->SetLabelOffset(0.007);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetZaxis()->SetLabelSize(0.05);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetZaxis()->SetTitleSize(0.06);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetZaxis()->SetTitleOffset(1);
+   Graph_pu50s2_48b7e_gr_bias_BXsf_mean24->GetZaxis()->SetTitleFont(42);
+   graph->SetHistogram(Graph_pu50s2_48b7e_gr_bias_BXsf_mean24);
+   
+   multigraph->Add(graph,"");
+   
+   Double_t pu50s30_48b7e_gr_bias_BXsf_mean_fx25[9] = {
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9};
+   Double_t pu50s30_48b7e_gr_bias_BXsf_mean_fy25[9] = {
+   -0.1597781,
+   -0.03235667,
+   -0.0178859,
+   -0.01031602,
+   -0.005663629,
+   -0.002870099,
+   -0.001068361,
+   0.000409931,
+   0.001160233};
+   graph = new TGraph(9,pu50s30_48b7e_gr_bias_BXsf_mean_fx25,pu50s30_48b7e_gr_bias_BXsf_mean_fy25);
+   graph->SetName("pu50s30_48b7e_gr_bias_BXsf_mean");
+   graph->SetTitle("Graph");
+   graph->SetFillStyle(1000);
+
+   ci = TColor::GetColor("#0000cc");
+   graph->SetLineColor(ci);
+
+   ci = TColor::GetColor("#0000cc");
+   graph->SetMarkerColor(ci);
+   graph->SetMarkerStyle(20);
+   graph->SetMarkerSize(0.6);
+   
+   TH1F *Graph_pu50s30_48b7e_gr_bias_BXsf_mean25 = new TH1F("Graph_pu50s30_48b7e_gr_bias_BXsf_mean25","Graph",100,0.2,9.8);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->SetMinimum(-0.175872);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->SetMaximum(0.01725407);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->SetDirectory(0);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->SetStats(0);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->SetLineStyle(0);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->SetMarkerStyle(20);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetXaxis()->SetLabelFont(42);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetXaxis()->SetLabelOffset(0.007);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetXaxis()->SetLabelSize(0.05);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetXaxis()->SetTitleSize(0.06);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetXaxis()->SetTitleOffset(1);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetXaxis()->SetTitleFont(42);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetYaxis()->SetLabelFont(42);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetYaxis()->SetLabelOffset(0.007);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetYaxis()->SetLabelSize(0.05);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetYaxis()->SetTitleSize(0.06);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetYaxis()->SetTitleOffset(1.1);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetYaxis()->SetTitleFont(42);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetZaxis()->SetLabelFont(42);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetZaxis()->SetLabelOffset(0.007);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetZaxis()->SetLabelSize(0.05);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetZaxis()->SetTitleSize(0.06);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetZaxis()->SetTitleOffset(1);
+   Graph_pu50s30_48b7e_gr_bias_BXsf_mean25->GetZaxis()->SetTitleFont(42);
+   graph->SetHistogram(Graph_pu50s30_48b7e_gr_bias_BXsf_mean25);
+   
+   multigraph->Add(graph,"");
+   multigraph->Draw("APL");
+   multigraph->GetXaxis()->SetLabelFont(42);
+   multigraph->GetXaxis()->SetLabelOffset(0.007);
+   multigraph->GetXaxis()->SetLabelSize(0.05);
+   multigraph->GetXaxis()->SetTitleSize(0.06);
+   multigraph->GetXaxis()->SetTitleOffset(1);
+   multigraph->GetXaxis()->SetTitleFont(42);
+   multigraph->GetYaxis()->SetLabelFont(42);
+   multigraph->GetYaxis()->SetLabelOffset(0.007);
+   multigraph->GetYaxis()->SetLabelSize(0.05);
+   multigraph->GetYaxis()->SetTitleSize(0.06);
+   multigraph->GetYaxis()->SetTitleOffset(1.1);
+   multigraph->GetYaxis()->SetTitleFont(42);
+   
+   TLegend *leg = new TLegend(0.67,0.5,0.95,0.93,NULL,"brNDC");
+   leg->SetTextFont(62);
+   leg->SetLineColor(1);
+   leg->SetLineStyle(1);
+   leg->SetLineWidth(1);
+   leg->SetFillColor(0);
+   leg->SetFillStyle(1001);
+   TLegendEntry *entry=leg->AddEntry("curr_48b7e_gr_bias_BXsf_mean","Current","lp");
+
+   ci = TColor::GetColor("#ff9933");
+   entry->SetLineColor(ci);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(1);
+
+   ci = TColor::GetColor("#ff9933");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(20);
+   entry->SetMarkerSize(0.6);
+   entry->SetTextFont(62);
+   entry=leg->AddEntry("pu0_newavg_48b7e_gr_bias_BXsf_mean","New (avg)","lp");
+
+   ci = TColor::GetColor("#00cccc");
+   entry->SetLineColor(ci);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(1);
+
+   ci = TColor::GetColor("#00cccc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(20);
+   entry->SetMarkerSize(0.6);
+   entry->SetTextFont(62);
+   entry=leg->AddEntry("pu0_48b7e_gr_bias_BXsf_mean","Per strip (PU=0)","lp");
+
+   ci = TColor::GetColor("#cc0000");
+   entry->SetLineColor(ci);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(1);
+
+   ci = TColor::GetColor("#cc0000");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(20);
+   entry->SetMarkerSize(0.6);
+   entry->SetTextFont(62);
+   entry=leg->AddEntry("pu50s2_48b7e_gr_bias_BXsf_mean","PU optimized","lp");
+
+   ci = TColor::GetColor("#00cc00");
+   entry->SetLineColor(ci);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(1);
+
+   ci = TColor::GetColor("#00cc00");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(20);
+   entry->SetMarkerSize(0.6);
+   entry->SetTextFont(62);
+   entry=leg->AddEntry("NULL","PU=50, ET=2GeV","lpf");
+   entry->SetLineColor(1);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(1);
+   entry->SetMarkerColor(1);
+   entry->SetMarkerStyle(21);
+   entry->SetMarkerSize(1);
+   entry->SetTextFont(62);
+   entry=leg->AddEntry("pu50s30_48b7e_gr_bias_BXsf_mean","PU optimized","lp");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(1);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(20);
+   entry->SetMarkerSize(0.6);
+   entry->SetTextFont(62);
+   entry=leg->AddEntry("NULL","PU=50, ET=30GeV","lpf");
+   entry->SetLineColor(1);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(1);
+   entry->SetMarkerColor(1);
+   entry->SetMarkerStyle(21);
+   entry->SetMarkerSize(1);
+   entry->SetTextFont(62);
+   leg->Draw();
+   
+   TPaveText *pt = new TPaveText(0.35,0.68,0.65,0.88,"NB NDC");
+   pt->SetFillColor(0);
+   TText *pt_LaTex = pt->AddText("PU=50");
+   pt_LaTex = pt->AddText("1.5<|#eta|<1.8");
+   pt_LaTex = pt->AddText("LHC filling ");
+   pt_LaTex = pt->AddText("schema: 48b7e");
+   pt->Draw();
+   TLatex *   tex = new TLatex(0.98,0.96,"(13 TeV)");
+tex->SetNDC();
+   tex->SetTextAlign(31);
+   tex->SetTextFont(42);
+   tex->SetTextSize(0.035);
+   tex->SetLineWidth(2);
+   tex->Draw();
+      tex = new TLatex(0.15,0.96,"CMS");
+tex->SetNDC();
+   tex->SetTextFont(61);
+   tex->SetTextSize(0.04);
+   tex->SetLineWidth(2);
+   tex->Draw();
+      tex = new TLatex(0.2164,0.96,"Simulation Preliminary");
+tex->SetNDC();
+   tex->SetTextFont(52);
+   tex->SetTextSize(0.0304);
+   tex->SetLineWidth(2);
+   tex->Draw();
+   c1->Modified();
+   c1->cd();
+   c1->SetSelected(c1);
+}

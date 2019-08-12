@@ -12,3 +12,4 @@ ParamReco/bin/
 ParamReco/extra/*
 ECALgeometry/
 *.out
+.directory

@@ -1,0 +1,1853 @@
+void bias_vs_bxposition_48b7e_mean()
+{
+//=========Macro generated from canvas: c5/c5
+//=========  (Wed Jul  3 11:05:09 2019) by ROOT version 6.16/00
+   TCanvas *c5 = new TCanvas("c5", "c5",0,0,800,600);
+   gStyle->SetOptFit(1);
+   gStyle->SetOptStat(0);
+   gStyle->SetOptTitle(0);
+   c5->SetHighLightColor(2);
+   c5->Range(-9.524096,-0.9597561,53.96988,2.576829);
+   c5->SetFillColor(0);
+   c5->SetBorderMode(0);
+   c5->SetBorderSize(2);
+   c5->SetGridy();
+   c5->SetTickx(1);
+   c5->SetTicky(1);
+   c5->SetLeftMargin(0.15);
+   c5->SetRightMargin(0.02);
+   c5->SetTopMargin(0.05);
+   c5->SetBottomMargin(0.13);
+   c5->SetFrameFillStyle(0);
+   c5->SetFrameBorderMode(0);
+   c5->SetFrameFillStyle(0);
+   c5->SetFrameBorderMode(0);
+   
+   Double_t Graph0_fx1029[48] = {
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47,
+   48};
+   Double_t Graph0_fy1029[48] = {
+   1.275788,
+   1.51345,
+   1.455219,
+   1.402227,
+   1.181331,
+   1.236537,
+   1.060017,
+   0.9838474,
+   0.9549076,
+   0.8197842,
+   0.7985387,
+   0.8876931,
+   0.8258181,
+   0.8548934,
+   0.8533325,
+   0.8908399,
+   0.8521115,
+   0.8724343,
+   0.8053241,
+   0.825301,
+   0.8619387,
+   0.7731454,
+   0.7325639,
+   0.753559,
+   0.7986655,
+   0.786607,
+   0.8015812,
+   0.8363225,
+   0.8450712,
+   0.8201256,
+   0.8711306,
+   0.7899636,
+   0.8054813,
+   0.7581381,
+   0.7975203,
+   0.8329932,
+   0.8363976,
+   0.8518626,
+   0.8476809,
+   0.8533251,
+   0.8892702,
+   0.9014071,
+   0.8751177,
+   0.8077869,
+   0.8609981,
+   0.8167756,
+   0.7652519,
+   0.1995255};
+   Double_t Graph0_fex1029[48] = {
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0};
+   Double_t Graph0_fey1029[48] = {
+   0.8144057,
+   0.796649,
+   0.8062282,
+   0.832557,
+   0.8532077,
+   0.8703313,
+   0.8851812,
+   0.9178665,
+   0.9165984,
+   0.9620247,
+   0.9518741,
+   0.9423637,
+   0.9254396,
+   0.9282467,
+   0.9410263,
+   0.9509343,
+   0.9543855,
+   0.9485857,
+   0.9520239,
+   0.9502167,
+   0.945854,
+   0.9592332,
+   0.9502562,
+   0.9502692,
+   0.9757182,
+   0.9844165,
+   0.9892376,
+   0.9535585,
+   0.938479,
+   0.9472321,
+   0.9473768,
+   0.9492126,
+   0.9370411,
+   0.9399077,
+   0.9623024,
+   0.9528244,
+   0.9438471,
+   0.9335467,
+   0.9302024,
+   0.9307694,
+   0.93346,
+   0.9487817,
+   0.9510944,
+   0.9399303,
+   0.9571438,
+   0.9357973,
+   0.984873,
+   0.9081433};
+   TGraphErrors *gre = new TGraphErrors(48,Graph0_fx1029,Graph0_fy1029,Graph0_fex1029,Graph0_fey1029);
+   gre->SetName("Graph0");
+   gre->SetTitle(";BX position;Fractional bias");
+
+   Int_t ci;      // for color index setting
+   TColor *color; // for color definition with alpha
+   ci = 1180;
+   color = new TColor(ci, 1, 0.6, 0.2, " ", 0.2);
+   gre->SetFillColor(ci);
+   gre->SetFillStyle(1000);
+
+   ci = TColor::GetColor("#ff9933");
+   gre->SetLineColor(ci);
+
+   ci = TColor::GetColor("#ff9933");
+   gre->SetMarkerColor(ci);
+   gre->SetMarkerStyle(20);
+   gre->SetMarkerSize(0.6);
+   
+   TH1F *Graph_Graph_Graph_Graph_Graph01001101510221029 = new TH1F("Graph_Graph_Graph_Graph_Graph01001101510221029","",100,0,52.7);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->SetMinimum(-0.5);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->SetMaximum(2.4);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->SetDirectory(0);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->SetStats(0);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->SetLineStyle(0);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->SetMarkerStyle(20);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetXaxis()->SetTitle("BX position");
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetXaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetXaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetXaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetXaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetXaxis()->SetTitleOffset(1);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetXaxis()->SetTitleFont(42);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetYaxis()->SetTitle("Fractional bias");
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetYaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetYaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetYaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetYaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetYaxis()->SetTitleOffset(1.1);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetYaxis()->SetTitleFont(42);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetZaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetZaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetZaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetZaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetZaxis()->SetTitleOffset(1);
+   Graph_Graph_Graph_Graph_Graph01001101510221029->GetZaxis()->SetTitleFont(42);
+   gre->SetHistogram(Graph_Graph_Graph_Graph_Graph01001101510221029);
+   
+   gre->Draw("aplx");
+   
+   Double_t Graph1_fx1030[48] = {
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47,
+   48};
+   Double_t Graph1_fy1030[48] = {
+   0.1579158,
+   0.3320422,
+   0.2630136,
+   0.2172967,
+   0.09021565,
+   0.09465857,
+   -0.01426752,
+   -0.04433427,
+   -0.02312222,
+   -0.09944002,
+   -0.1053434,
+   -0.07052419,
+   -0.07501845,
+   -0.07417105,
+   -0.07020571,
+   -0.07468823,
+   -0.09039102,
+   -0.08047462,
+   -0.1167866,
+   -0.1044603,
+   -0.09696212,
+   -0.1407658,
+   -0.1135222,
+   -0.1239305,
+   -0.1172837,
+   -0.1137338,
+   -0.1048899,
+   -0.1064662,
+   -0.07634242,
+   -0.09660227,
+   -0.08062293,
+   -0.1243129,
+   -0.09012633,
+   -0.1197948,
+   -0.1212779,
+   -0.09833492,
+   -0.08251542,
+   -0.1002108,
+   -0.08568222,
+   -0.06241788,
+   -0.06319115,
+   -0.09467886,
+   -0.06513227,
+   -0.09139764,
+   -0.08921123,
+   -0.1184118,
+   -0.1148326,
+   -0.3071655};
+   Double_t Graph1_fex1030[48] = {
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0};
+   Double_t Graph1_fey1030[48] = {
+   0.7962704,
+   0.8035424,
+   0.8341697,
+   0.8484523,
+   0.8634477,
+   0.8968446,
+   0.8522217,
+   0.8881484,
+   0.9741789,
+   0.9204734,
+   0.869763,
+   0.9366376,
+   0.9267649,
+   0.8846363,
+   0.9508317,
+   0.8909787,
+   0.9284783,
+   0.9368165,
+   0.887409,
+   0.9066358,
+   0.9098951,
+   0.8653973,
+   0.921743,
+   0.9504507,
+   0.9116744,
+   0.9125156,
+   0.9369059,
+   0.8189304,
+   0.9148518,
+   0.890075,
+   0.8510605,
+   0.9143175,
+   0.8862043,
+   0.8778541,
+   0.8937595,
+   0.8695977,
+   0.9474493,
+   0.8511601,
+   0.8529246,
+   0.9535773,
+   0.9047476,
+   0.8629091,
+   0.9458448,
+   0.8927838,
+   0.8988748,
+   0.8361225,
+   1.000337,
+   0.6225825};
+   gre = new TGraphErrors(48,Graph1_fx1030,Graph1_fy1030,Graph1_fex1030,Graph1_fey1030);
+   gre->SetName("Graph1");
+   gre->SetTitle("Updated: TP - eRec vs BXposition for EE; BX position;TP - eRec [GeV]");
+
+   ci = 1179;
+   color = new TColor(ci, 0, 0, 0, " ", 0.2);
+   gre->SetFillColor(ci);
+   gre->SetFillStyle(1000);
+
+   ci = TColor::GetColor("#00cccc");
+   gre->SetLineColor(ci);
+
+   ci = TColor::GetColor("#00cccc");
+   gre->SetMarkerColor(ci);
+   gre->SetMarkerStyle(20);
+   gre->SetMarkerSize(0.6);
+   
+   TH1F *Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030 = new TH1F("Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030","Updated: TP - eRec vs BXposition for EE",100,0,52.7);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->SetMinimum(-1.340245);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->SetMaximum(1.36066);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->SetDirectory(0);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->SetStats(0);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->SetLineStyle(0);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->SetMarkerStyle(20);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetXaxis()->SetTitle(" BX position");
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetXaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetXaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetXaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetXaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetXaxis()->SetTitleOffset(1);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetXaxis()->SetTitleFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetYaxis()->SetTitle("TP - eRec [GeV]");
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetYaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetYaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetYaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetYaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetYaxis()->SetTitleOffset(1.1);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetYaxis()->SetTitleFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetZaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetZaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetZaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetZaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetZaxis()->SetTitleOffset(1);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030->GetZaxis()->SetTitleFont(42);
+   gre->SetHistogram(Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph11002100310161017102310241030);
+   
+   gre->Draw("px ");
+   
+   Double_t Graph1_fx1031[48] = {
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47,
+   48};
+   Double_t Graph1_fy1031[48] = {
+   0.1579158,
+   0.3320422,
+   0.2630136,
+   0.2172967,
+   0.09021565,
+   0.09465857,
+   -0.01426752,
+   -0.04433427,
+   -0.02312222,
+   -0.09944002,
+   -0.1053434,
+   -0.07052419,
+   -0.07501845,
+   -0.07417105,
+   -0.07020571,
+   -0.07468823,
+   -0.09039102,
+   -0.08047462,
+   -0.1167866,
+   -0.1044603,
+   -0.09696212,
+   -0.1407658,
+   -0.1135222,
+   -0.1239305,
+   -0.1172837,
+   -0.1137338,
+   -0.1048899,
+   -0.1064662,
+   -0.07634242,
+   -0.09660227,
+   -0.08062293,
+   -0.1243129,
+   -0.09012633,
+   -0.1197948,
+   -0.1212779,
+   -0.09833492,
+   -0.08251542,
+   -0.1002108,
+   -0.08568222,
+   -0.06241788,
+   -0.06319115,
+   -0.09467886,
+   -0.06513227,
+   -0.09139764,
+   -0.08921123,
+   -0.1184118,
+   -0.1148326,
+   -0.3071655};
+   Double_t Graph1_fex1031[48] = {
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0};
+   Double_t Graph1_fey1031[48] = {
+   0.7962704,
+   0.8035424,
+   0.8341697,
+   0.8484523,
+   0.8634477,
+   0.8968446,
+   0.8522217,
+   0.8881484,
+   0.9741789,
+   0.9204734,
+   0.869763,
+   0.9366376,
+   0.9267649,
+   0.8846363,
+   0.9508317,
+   0.8909787,
+   0.9284783,
+   0.9368165,
+   0.887409,
+   0.9066358,
+   0.9098951,
+   0.8653973,
+   0.921743,
+   0.9504507,
+   0.9116744,
+   0.9125156,
+   0.9369059,
+   0.8189304,
+   0.9148518,
+   0.890075,
+   0.8510605,
+   0.9143175,
+   0.8862043,
+   0.8778541,
+   0.8937595,
+   0.8695977,
+   0.9474493,
+   0.8511601,
+   0.8529246,
+   0.9535773,
+   0.9047476,
+   0.8629091,
+   0.9458448,
+   0.8927838,
+   0.8988748,
+   0.8361225,
+   1.000337,
+   0.6225825};
+   gre = new TGraphErrors(48,Graph1_fx1031,Graph1_fy1031,Graph1_fex1031,Graph1_fey1031);
+   gre->SetName("Graph1");
+   gre->SetTitle("Updated: TP - eRec vs BXposition for EE; BX position;TP - eRec [GeV]");
+
+   ci = 1179;
+   color = new TColor(ci, 0, 0, 0, " ", 0.2);
+   gre->SetFillColor(ci);
+   gre->SetFillStyle(1000);
+
+   ci = TColor::GetColor("#00cccc");
+   gre->SetLineColor(ci);
+
+   ci = TColor::GetColor("#00cccc");
+   gre->SetMarkerColor(ci);
+   gre->SetMarkerStyle(20);
+   gre->SetMarkerSize(0.6);
+   
+   TH1F *Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031 = new TH1F("Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031","Updated: TP - eRec vs BXposition for EE",100,0,52.7);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->SetMinimum(-1.340245);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->SetMaximum(1.36066);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->SetDirectory(0);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->SetStats(0);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->SetLineStyle(0);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->SetMarkerStyle(20);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetXaxis()->SetTitle(" BX position");
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetXaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetXaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetXaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetXaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetXaxis()->SetTitleOffset(1);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetXaxis()->SetTitleFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetYaxis()->SetTitle("TP - eRec [GeV]");
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetYaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetYaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetYaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetYaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetYaxis()->SetTitleOffset(1.1);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetYaxis()->SetTitleFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetZaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetZaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetZaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetZaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetZaxis()->SetTitleOffset(1);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031->GetZaxis()->SetTitleFont(42);
+   gre->SetHistogram(Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph110021003101610171023102410301031);
+   
+   gre->Draw("pxll");
+   
+   Double_t Graph2_fx1032[48] = {
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47,
+   48};
+   Double_t Graph2_fy1032[48] = {
+   0.2161737,
+   0.4041392,
+   0.3397329,
+   0.2986316,
+   0.166241,
+   0.1748447,
+   0.05454621,
+   0.006748883,
+   0.03168839,
+   -0.04420362,
+   -0.04818824,
+   -0.01817939,
+   -0.009848768,
+   -0.01510876,
+   -0.006865466,
+   -0.008792886,
+   -0.02930864,
+   -0.01495213,
+   -0.06398071,
+   -0.02504615,
+   -0.03902419,
+   -0.06668445,
+   -0.05634356,
+   -0.06296685,
+   -0.06247516,
+   -0.06878076,
+   -0.05201976,
+   -0.03297024,
+   -0.02009219,
+   -0.04578346,
+   -0.01877585,
+   -0.06881639,
+   -0.02730978,
+   -0.05542111,
+   -0.07223653,
+   -0.02833007,
+   -0.02862103,
+   -0.02709662,
+   -0.020165,
+   -0.01027888,
+   -0.007203243,
+   -0.02751351,
+   -0.0001876185,
+   -0.03681745,
+   -0.031575,
+   -0.05665364,
+   -0.06916261,
+   -0.262035};
+   Double_t Graph2_fex1032[48] = {
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0};
+   Double_t Graph2_fey1032[48] = {
+   0.8070569,
+   0.7950141,
+   0.8196697,
+   0.8514515,
+   0.8587782,
+   0.9028959,
+   0.8423038,
+   0.8796356,
+   0.9767532,
+   0.8953243,
+   0.866214,
+   0.9153493,
+   0.9381611,
+   0.8839046,
+   0.9344,
+   0.8894712,
+   0.9137719,
+   0.9114197,
+   0.8514723,
+   0.9354329,
+   0.8976281,
+   0.8878789,
+   0.9088082,
+   0.9315463,
+   0.9053296,
+   0.860473,
+   0.9365489,
+   0.8799031,
+   0.8999467,
+   0.8744804,
+   0.8745427,
+   0.8758191,
+   0.9040118,
+   0.9062427,
+   0.8498232,
+   0.8787696,
+   0.9165503,
+   0.8532718,
+   0.8656518,
+   0.9367208,
+   0.8836662,
+   0.8899252,
+   0.947817,
+   0.9117872,
+   0.8923145,
+   0.8606027,
+   0.9442205,
+   0.595542};
+   gre = new TGraphErrors(48,Graph2_fx1032,Graph2_fy1032,Graph2_fex1032,Graph2_fey1032);
+   gre->SetName("Graph2");
+   gre->SetTitle("Per Strip: TP - eRec vs BXposition for EE; BX position;TP - eRec [GeV]");
+
+   ci = 1181;
+   color = new TColor(ci, 0.8, 0, 0, " ", 0.2);
+   gre->SetFillColor(ci);
+   gre->SetFillStyle(1000);
+
+   ci = TColor::GetColor("#cc0000");
+   gre->SetLineColor(ci);
+
+   ci = TColor::GetColor("#cc0000");
+   gre->SetMarkerColor(ci);
+   gre->SetMarkerStyle(20);
+   gre->SetMarkerSize(0.6);
+   
+   TH1F *Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032 = new TH1F("Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032","Per Strip: TP - eRec vs BXposition for EE",100,0,52.7);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->SetMinimum(-1.234637);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->SetMaximum(1.420407);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->SetDirectory(0);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->SetStats(0);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->SetLineStyle(0);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->SetMarkerStyle(20);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetXaxis()->SetTitle(" BX position");
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetXaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetXaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetXaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetXaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetXaxis()->SetTitleOffset(1);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetXaxis()->SetTitleFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetYaxis()->SetTitle("TP - eRec [GeV]");
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetYaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetYaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetYaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetYaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetYaxis()->SetTitleOffset(1.1);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetYaxis()->SetTitleFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetZaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetZaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetZaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetZaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetZaxis()->SetTitleOffset(1);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032->GetZaxis()->SetTitleFont(42);
+   gre->SetHistogram(Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph21004100510181019102510261032);
+   
+   gre->Draw("px ");
+   
+   Double_t Graph2_fx1033[48] = {
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47,
+   48};
+   Double_t Graph2_fy1033[48] = {
+   0.2161737,
+   0.4041392,
+   0.3397329,
+   0.2986316,
+   0.166241,
+   0.1748447,
+   0.05454621,
+   0.006748883,
+   0.03168839,
+   -0.04420362,
+   -0.04818824,
+   -0.01817939,
+   -0.009848768,
+   -0.01510876,
+   -0.006865466,
+   -0.008792886,
+   -0.02930864,
+   -0.01495213,
+   -0.06398071,
+   -0.02504615,
+   -0.03902419,
+   -0.06668445,
+   -0.05634356,
+   -0.06296685,
+   -0.06247516,
+   -0.06878076,
+   -0.05201976,
+   -0.03297024,
+   -0.02009219,
+   -0.04578346,
+   -0.01877585,
+   -0.06881639,
+   -0.02730978,
+   -0.05542111,
+   -0.07223653,
+   -0.02833007,
+   -0.02862103,
+   -0.02709662,
+   -0.020165,
+   -0.01027888,
+   -0.007203243,
+   -0.02751351,
+   -0.0001876185,
+   -0.03681745,
+   -0.031575,
+   -0.05665364,
+   -0.06916261,
+   -0.262035};
+   Double_t Graph2_fex1033[48] = {
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0};
+   Double_t Graph2_fey1033[48] = {
+   0.8070569,
+   0.7950141,
+   0.8196697,
+   0.8514515,
+   0.8587782,
+   0.9028959,
+   0.8423038,
+   0.8796356,
+   0.9767532,
+   0.8953243,
+   0.866214,
+   0.9153493,
+   0.9381611,
+   0.8839046,
+   0.9344,
+   0.8894712,
+   0.9137719,
+   0.9114197,
+   0.8514723,
+   0.9354329,
+   0.8976281,
+   0.8878789,
+   0.9088082,
+   0.9315463,
+   0.9053296,
+   0.860473,
+   0.9365489,
+   0.8799031,
+   0.8999467,
+   0.8744804,
+   0.8745427,
+   0.8758191,
+   0.9040118,
+   0.9062427,
+   0.8498232,
+   0.8787696,
+   0.9165503,
+   0.8532718,
+   0.8656518,
+   0.9367208,
+   0.8836662,
+   0.8899252,
+   0.947817,
+   0.9117872,
+   0.8923145,
+   0.8606027,
+   0.9442205,
+   0.595542};
+   gre = new TGraphErrors(48,Graph2_fx1033,Graph2_fy1033,Graph2_fex1033,Graph2_fey1033);
+   gre->SetName("Graph2");
+   gre->SetTitle("Per Strip: TP - eRec vs BXposition for EE; BX position;TP - eRec [GeV]");
+
+   ci = 1181;
+   color = new TColor(ci, 0.8, 0, 0, " ", 0.2);
+   gre->SetFillColor(ci);
+   gre->SetFillStyle(1000);
+
+   ci = TColor::GetColor("#cc0000");
+   gre->SetLineColor(ci);
+
+   ci = TColor::GetColor("#cc0000");
+   gre->SetMarkerColor(ci);
+   gre->SetMarkerStyle(20);
+   gre->SetMarkerSize(0.6);
+   
+   TH1F *Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033 = new TH1F("Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033","Per Strip: TP - eRec vs BXposition for EE",100,0,52.7);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->SetMinimum(-1.234637);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->SetMaximum(1.420407);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->SetDirectory(0);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->SetStats(0);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->SetLineStyle(0);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->SetMarkerStyle(20);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetXaxis()->SetTitle(" BX position");
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetXaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetXaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetXaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetXaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetXaxis()->SetTitleOffset(1);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetXaxis()->SetTitleFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetYaxis()->SetTitle("TP - eRec [GeV]");
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetYaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetYaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetYaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetYaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetYaxis()->SetTitleOffset(1.1);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetYaxis()->SetTitleFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetZaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetZaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetZaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetZaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetZaxis()->SetTitleOffset(1);
+   Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033->GetZaxis()->SetTitleFont(42);
+   gre->SetHistogram(Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph_Graph210041005101810191025102610321033);
+   
+   gre->Draw("pxll");
+   
+   Double_t Graph3_fx1034[48] = {
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47,
+   48};
+   Double_t Graph3_fy1034[48] = {
+   0.2196713,
+   0.4061859,
+   0.3403622,
+   0.2893504,
+   0.1656686,
+   0.1507954,
+   0.06104533,
+   0.03020917,
+   0.03119612,
+   -0.03658761,
+   -0.02095116,
+   -0.01444885,
+   -0.01276898,
+   -0.002980948,
+   -0.003398456,
+   -0.00416271,
+   -0.02033792,
+   -0.005134952,
+   -0.04601536,
+   -0.01295488,
+   -0.02095002,
+   -0.05046967,
+   -0.04901842,
+   -0.04621667,
+   -0.05021487,
+   -0.05068681,
+   -0.03014504,
+   -0.03577541,
+   -0.01535963,
+   -0.02998657,
+   0.01571052,
+   -0.04043025,
+   -0.01652959,
+   -0.03471195,
+   -0.06015261,
+   -0.01731704,
+   -0.01217152,
+   -0.01704015,
+   -0.003844062,
+   0.003783258,
+   -0.0009321763,
+   -0.001574791,
+   0.003271068,
+   -0.02392166,
+   -0.01498976,
+   -0.03365238,
+   -0.04827954,
+   -0.2056704};
+   Double_t Graph3_fex1034[48] = {
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0};
+   Double_t Graph3_fey1034[48] = {
+   0.7073936,
+   0.7222376,
+   0.7463902,
+   0.7711514,
+   0.763505,
+   0.8035565,
+   0.7601927,
+   0.8044524,
+   0.8758741,
+   0.7918644,
+   0.8168421,
+   0.8165771,
+   0.8157856,
+   0.8090642,
+   0.8226711,
+   0.8141857,
+   0.8323283,
+   0.800121,
+   0.7380323,
+   0.8154877,
+   0.8148065,
+   0.7873614,
+   0.7725528,
+   0.797166,
+   0.78282,
+   0.7873711,
+   0.8221831,
+   0.7456226,
+   0.785886,
+   0.7871877,
+   0.8244673,
+   0.7823289,
+   0.8146029,
+   0.8028653,
+   0.7414361,
+   0.7769569,
+   0.8023478,
+   0.739132,
+   0.766617,
+   0.8243029,
+   0.7787917,
+   0.8250902,
+   0.8204709,
+   0.7989661,
+   0.7976446,
+   0.8004192,
+   0.8197144,
+   0.5542672};
+   gre = new TGraphErrors(48,Graph3_fx1034,Graph3_fy1034,Graph3_fex1034,Graph3_fey1034);
+   gre->SetName("Graph3");
+   gre->SetTitle("PU 30 S40Per Strip: TP - eRec vs BXposition for EE; BX position;TP - eRec [GeV]");
+
+   ci = 1182;
+   color = new TColor(ci, 0, 0.8, 0, " ", 0.2);
+   gre->SetFillColor(ci);
+   gre->SetFillStyle(1000);
+
+   ci = TColor::GetColor("#00cc00");
+   gre->SetLineColor(ci);
+
+   ci = TColor::GetColor("#00cc00");
+   gre->SetMarkerColor(ci);
+   gre->SetMarkerStyle(20);
+   gre->SetMarkerSize(0.6);
+   
+   TH1F *Graph_Graph_Graph_Graph_Graph31006102010271034 = new TH1F("Graph_Graph_Graph_Graph_Graph31006102010271034","PU 30 S40Per Strip: TP - eRec vs BXposition for EE",100,0,52.7);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->SetMinimum(-1.067636);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->SetMaximum(1.328065);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->SetDirectory(0);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->SetStats(0);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->SetLineStyle(0);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->SetMarkerStyle(20);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetXaxis()->SetTitle(" BX position");
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetXaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetXaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetXaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetXaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetXaxis()->SetTitleOffset(1);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetXaxis()->SetTitleFont(42);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetYaxis()->SetTitle("TP - eRec [GeV]");
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetYaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetYaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetYaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetYaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetYaxis()->SetTitleOffset(1.1);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetYaxis()->SetTitleFont(42);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetZaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetZaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetZaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetZaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetZaxis()->SetTitleOffset(1);
+   Graph_Graph_Graph_Graph_Graph31006102010271034->GetZaxis()->SetTitleFont(42);
+   gre->SetHistogram(Graph_Graph_Graph_Graph_Graph31006102010271034);
+   
+   gre->Draw("pxl ");
+   
+   Double_t Graph4_fx1035[48] = {
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47,
+   48};
+   Double_t Graph4_fy1035[48] = {
+   0.2255396,
+   0.4231139,
+   0.3552209,
+   0.3087341,
+   0.1698364,
+   0.1707605,
+   0.06112745,
+   0.01145861,
+   0.03307678,
+   -0.03771985,
+   -0.04412052,
+   -0.02879156,
+   -0.01540777,
+   -0.02028093,
+   -0.004065818,
+   -0.006799991,
+   -0.02916615,
+   -0.01170266,
+   -0.05812921,
+   -0.02162402,
+   -0.03823344,
+   -0.06455296,
+   -0.0579931,
+   -0.05735631,
+   -0.06128755,
+   -0.06688875,
+   -0.04840228,
+   -0.0361612,
+   -0.01286054,
+   -0.04116485,
+   0.001748372,
+   -0.0672868,
+   -0.01837132,
+   -0.05079607,
+   -0.07522129,
+   -0.02319113,
+   -0.02591532,
+   -0.01981308,
+   -0.01629408,
+   -0.01475102,
+   -0.01188516,
+   -0.02635687,
+   0.007006945,
+   -0.0316854,
+   -0.02642147,
+   -0.04374925,
+   -0.06307438,
+   -0.2521771};
+   Double_t Graph4_fex1035[48] = {
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0};
+   Double_t Graph4_fey1035[48] = {
+   0.8076438,
+   0.7934194,
+   0.8168914,
+   0.8439464,
+   0.8445434,
+   0.8777389,
+   0.8419974,
+   0.8762677,
+   0.961815,
+   0.8740097,
+   0.863564,
+   0.877476,
+   0.9083024,
+   0.8712999,
+   0.9332411,
+   0.8802263,
+   0.8988265,
+   0.8997484,
+   0.8252611,
+   0.9213021,
+   0.8949115,
+   0.8741069,
+   0.8815549,
+   0.9189364,
+   0.8822947,
+   0.8697829,
+   0.9206593,
+   0.8671867,
+   0.9084209,
+   0.8656641,
+   0.8829558,
+   0.844895,
+   0.896951,
+   0.9133063,
+   0.8423939,
+   0.8691409,
+   0.8921464,
+   0.8515625,
+   0.8511105,
+   0.9045221,
+   0.8712462,
+   0.8763759,
+   0.9492242,
+   0.8897594,
+   0.8846154,
+   0.8908363,
+   0.943269,
+   0.5940456};
+   gre = new TGraphErrors(48,Graph4_fx1035,Graph4_fy1035,Graph4_fex1035,Graph4_fey1035);
+   gre->SetName("Graph4");
+   gre->SetTitle("PU 30 S40Per Strip: TP - eRec vs BXposition for EE; BX position;TP - eRec [GeV]");
+
+   ci = 1183;
+   color = new TColor(ci, 0, 0.8, 0, " ", 0.2);
+   gre->SetFillColor(ci);
+   gre->SetFillStyle(1000);
+
+   ci = TColor::GetColor("#0000cc");
+   gre->SetLineColor(ci);
+
+   ci = TColor::GetColor("#0000cc");
+   gre->SetMarkerColor(ci);
+   gre->SetMarkerStyle(20);
+   gre->SetMarkerSize(0.6);
+   
+   TH1F *Graph_Graph_Graph_Graph_Graph41007102110281035 = new TH1F("Graph_Graph_Graph_Graph_Graph41007102110281035","PU 30 S40Per Strip: TP - eRec vs BXposition for EE",100,0,52.7);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->SetMinimum(-1.228631);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->SetMaximum(1.438821);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->SetDirectory(0);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->SetStats(0);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->SetLineStyle(0);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->SetMarkerStyle(20);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetXaxis()->SetTitle(" BX position");
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetXaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetXaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetXaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetXaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetXaxis()->SetTitleOffset(1);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetXaxis()->SetTitleFont(42);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetYaxis()->SetTitle("TP - eRec [GeV]");
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetYaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetYaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetYaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetYaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetYaxis()->SetTitleOffset(1.1);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetYaxis()->SetTitleFont(42);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetZaxis()->SetLabelFont(42);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetZaxis()->SetLabelOffset(0.007);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetZaxis()->SetLabelSize(0.05);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetZaxis()->SetTitleSize(0.06);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetZaxis()->SetTitleOffset(1);
+   Graph_Graph_Graph_Graph_Graph41007102110281035->GetZaxis()->SetTitleFont(42);
+   gre->SetHistogram(Graph_Graph_Graph_Graph_Graph41007102110281035);
+   
+   gre->Draw("pxlll");
+   
+   TLegend *leg = new TLegend(0.69,0.54,0.95,0.92,NULL,"brNDC");
+   leg->SetTextFont(62);
+   leg->SetLineColor(1);
+   leg->SetLineStyle(1);
+   leg->SetLineWidth(1);
+   leg->SetFillColor(0);
+   leg->SetFillStyle(1001);
+   TLegendEntry *entry=leg->AddEntry("Graph0","Current","lp");
+
+   ci = TColor::GetColor("#ff9933");
+   entry->SetLineColor(ci);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(1);
+
+   ci = TColor::GetColor("#ff9933");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(20);
+   entry->SetMarkerSize(0.6);
+   entry->SetTextFont(62);
+   entry=leg->AddEntry("Graph1","New (avg)","lp");
+
+   ci = TColor::GetColor("#00cccc");
+   entry->SetLineColor(ci);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(1);
+
+   ci = TColor::GetColor("#00cccc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(20);
+   entry->SetMarkerSize(0.6);
+   entry->SetTextFont(62);
+   entry=leg->AddEntry("Graph2","Per strip (PU=0)","lp");
+
+   ci = TColor::GetColor("#cc0000");
+   entry->SetLineColor(ci);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(1);
+
+   ci = TColor::GetColor("#cc0000");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(20);
+   entry->SetMarkerSize(0.6);
+   entry->SetTextFont(62);
+   entry=leg->AddEntry("Graph3","PU optimized","lp");
+
+   ci = TColor::GetColor("#00cc00");
+   entry->SetLineColor(ci);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(1);
+
+   ci = TColor::GetColor("#00cc00");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(20);
+   entry->SetMarkerSize(0.6);
+   entry->SetTextFont(62);
+   entry=leg->AddEntry("NULL","PU=50, ET=2GeV","");
+   entry->SetLineColor(1);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(1);
+   entry->SetMarkerColor(1);
+   entry->SetMarkerStyle(21);
+   entry->SetMarkerSize(1);
+   entry->SetTextFont(62);
+   entry->SetTextSize(0.026);
+   entry=leg->AddEntry("Graph4","PU optimized","lp");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(1);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(20);
+   entry->SetMarkerSize(0.6);
+   entry->SetTextFont(62);
+   entry=leg->AddEntry("NULL","PU=50, ET=30GeV","");
+   entry->SetLineColor(1);
+   entry->SetLineStyle(1);
+   entry->SetLineWidth(1);
+   entry->SetMarkerColor(1);
+   entry->SetMarkerStyle(21);
+   entry->SetMarkerSize(1);
+   entry->SetTextFont(62);
+   entry->SetTextSize(0.026);
+   leg->Draw();
+   
+   TPaveText *pt = new TPaveText(0.35,0.68,0.65,0.88,"NB NDC");
+   pt->SetFillColor(0);
+   TText *pt_LaTex = pt->AddText("Run 320059");
+   pt_LaTex = pt->AddText("PU=50");
+   pt_LaTex = pt->AddText("2.3<|#eta|<3.0");
+   pt_LaTex = pt->AddText("LHC filling ");
+   pt_LaTex = pt->AddText("schema: 48b7e");
+   pt->Draw();
+   TLatex *   tex = new TLatex(0.98,0.96,"(13 TeV)");
+tex->SetNDC();
+   tex->SetTextAlign(31);
+   tex->SetTextFont(42);
+   tex->SetTextSize(0.035);
+   tex->SetLineWidth(2);
+   tex->Draw();
+      tex = new TLatex(0.15,0.96,"CMS");
+tex->SetNDC();
+   tex->SetTextFont(61);
+   tex->SetTextSize(0.04);
+   tex->SetLineWidth(2);
+   tex->Draw();
+      tex = new TLatex(0.2164,0.96,"Preliminary");
+tex->SetNDC();
+   tex->SetTextFont(52);
+   tex->SetTextSize(0.0304);
+   tex->SetLineWidth(2);
+   tex->Draw();
+   c5->Modified();
+   c5->cd();
+   c5->SetSelected(c5);
+}
