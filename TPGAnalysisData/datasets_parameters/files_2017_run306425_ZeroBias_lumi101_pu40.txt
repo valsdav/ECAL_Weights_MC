@@ -1,1 +1,8 @@
+#dasgoclient -query="file dataset=/ZeroBias2/Run2017F-05Apr2018-v1/RAW-RECO run=306425 lumi=101"
 /store/data/Run2017F/ZeroBias2/RAW-RECO/05Apr2018-v1/30000/341DAA9C-0339-E811-BC04-FA163EB534C5.root
+#dasgoclient -query="file dataset=/ZeroBias2/Run2017F-05Apr2018-v1/RAW-RECO run=306425 lumi=102"
+/store/data/Run2017F/ZeroBias2/RAW-RECO/05Apr2018-v1/30000/209657A3-0339-E811-A4D2-02163E019EAC.root
+#dasgoclient -query="file dataset=/ZeroBias2/Run2017F-05Apr2018-v1/RAW-RECO run=306425 lumi=103"
+/store/data/Run2017F/ZeroBias2/RAW-RECO/05Apr2018-v1/30000/582F0FA2-0339-E811-8CD2-FA163E8A2D90.root
+#dasgoclient -query="file dataset=/ZeroBias2/Run2017F-05Apr2018-v1/RAW-RECO run=306425 lumi=104"
+/store/data/Run2017F/ZeroBias2/RAW-RECO/05Apr2018-v1/30000/54EA14A9-0339-E811-90A4-02163E01A0CA.root
