@@ -6,7 +6,8 @@ inputdir = sys.argv[1]
 outputdir = sys.argv[2]
 
 
-labels = ["current", "2017_PU50_S30", "2017_PU50_S2", "Oct2017_PU0_perstrip", "Oct2017_PU0_newavg"]
+#labels = ["current", "2017_PU50_S30", "2017_PU50_S2", "Oct2017_PU0_perstrip", "Oct2017_PU0_newavg"]
+labels = ["2017_PU50_S30"]
 
 R.gInterpreter.ProcessLine(".L unfold_dump.C+")
 
