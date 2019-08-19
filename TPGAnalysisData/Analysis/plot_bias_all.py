@@ -40,7 +40,9 @@ if not os.path.exists(args.outputdir):
     # "8b4e": [0.,1.,2.,3.,5.,8.,12.,1000.]
 ETbins = {
     "48b7e": [0.5, 1.5, 2.5, 4, 6.5, 10, 18.5, 35],
-    "8b4e": [0.5, 1.5, 2.5, 4, 6.5, 10]
+    #"8b4e": [0.5, 1.5, 2.5, 4, 6.5, 10]
+    #"8b4e" : [0.,0.1,0.3,0.5,0.7,0.9,1.25,1.75,2]
+    "8b4e":[0.5,1.5,2.5,3.5,4.5,6,8,9.]
 }
 et_bins = ETbins[train]
 
@@ -66,33 +68,33 @@ def set_maximum(mg):
             if y < minimum:
                 minimum = y
             if b > (nbin)//2:
-                if y> maximum:
+                if y > maximum:
                     maximum = y
     #print(maximum, maxmax)
-    if maximum > 0.2*maxmax:
-        mg.GetYaxis().SetRangeUser(minimum-0.1, maxmax*3.3)
+    if maximum > 0.5*maxmax:
+        mg.GetYaxis().SetRangeUser(minimum-0.1, maxmax*2.8)
         
 
 #######################
 ### Bias by ET bins plots
 #######################
 
-bias_label= ["gr_bias","gr_bias_Asf","gr_bias_BXsf","gr_bias_totsf",
-         "gr_bias_nonzero", "gr_bias_nonzero_Asf",  "gr_bias_nonzero_BXsf", "gr_bias_nonzero_totsf"]
+bias_label= ["bias_etbin"]
 
 
 file = r.TFile(args.inputfile)
+#file.ls()
 
 for b in bias_label:
 
     c1 = r.TCanvas("c1", "c1", 800, 600)
     mg = r.TMultiGraph()
 
-    gr1 = file.Get("curr_" + train+"_" + b+"_mean")
-    gr2 = file.Get("pu0_" + train+"_" + b+"_mean")
-    gr3 = file.Get("pu0_newavg_" + train+"_" + b+"_mean")
-    gr4 = file.Get("pu50s2_" + train+"_" + b+"_mean")
-    gr5 = file.Get("pu50s30_" + train+"_" + b+"_mean")
+    gr1 = file.Get("gr_curr_" + train+"_"+ring+"_"+ b+"_mean")
+    gr2 = file.Get("gr_pu0_" + train+"_"+ring+"_"+ b+"_mean")
+    gr3 = file.Get("gr_pu0_newavg_" + train+"_"+ring+"_"+ b+"_mean")
+    gr4 = file.Get("gr_pu50s2_" + train+"_"+ring+"_"+ b+"_mean")
+    gr5 = file.Get("gr_pu50s30_" + train+"_"+ring+"_"+ b+"_mean")
 
     gr1.SetMarkerStyle(20)
     gr1.SetMarkerSize(0.6)
@@ -114,11 +116,11 @@ for b in bias_label:
     gr5.SetMarkerSize(0.6)
     gr5.SetMarkerColor(r.kBlue+1)
     gr5.SetLineColor(r.kBlue+1)
-    #gr1.SetLineWidth(2)
-    #gr2.SetLineWidth(2)
-    #gr3.SetLineWidth(2)
-    #gr4.SetLineWidth(2)
-    #gr5.SetLineWidth(2)
+    gr1.SetLineWidth(2)
+    gr2.SetLineWidth(2)
+    gr3.SetLineWidth(2)
+    gr4.SetLineWidth(2)
+    gr5.SetLineWidth(2)
 
     mg.Add(gr1)
     mg.Add(gr2)
@@ -128,7 +130,7 @@ for b in bias_label:
 
     mg.Draw("APL")
     set_maximum(mg)
-    mg.SetTitle(";ET (GeV);Fractional bias".format(ring, train))
+    mg.SetTitle(";ET (GeV);Fractional bias")
 
     leg = r.TLegend(0.67, 0.54, 0.95, 0.92)
     leg.AddEntry(gr1, "Current", "lp")
@@ -142,9 +144,9 @@ for b in bias_label:
     t2.SetTextSize(0.026)
     leg.Draw("same")
     
-    for j in range(len(et_bins)):
+    for j in range(len(et_bins)-1):
         mg.GetXaxis().ChangeLabel(j+1,-1,-1,-1,-1,-1, "{:.1f}".format(et_bins[j]) )
-    mg.GetXaxis().ChangeLabel(len(et_bins)+1,-1,-1,-1,-1,-1, ">{:.1f}".format(et_bins[-1]) )
+    mg.GetXaxis().ChangeLabel(len(et_bins),-1,-1,-1,-1,-1, ">{:.1f}".format(et_bins[-1]) )
 
     label = r.TPaveText(0.35, 0.68, 0.65, 0.88, "NB NDC" )
     ll = []
@@ -172,11 +174,11 @@ for b in bias_label:
     c2 = r.TCanvas("c2", "c2", 800, 600)
     mg2 = r.TMultiGraph()
 
-    gr1b = file.Get("curr_" + train+"_" + b+"_std")
-    gr2b = file.Get("pu0_" + train+"_" + b+"_std")
-    gr3b = file.Get("pu0_newavg_" + train+"_" + b+"_std")
-    gr4b = file.Get("pu50s2_" + train+"_" + b+"_std")
-    gr5b = file.Get("pu50s30_" + train+"_" + b+"_std")
+    gr1b = file.Get("gr_curr_" + train+"_"+ring+"_" + b+"_std")
+    gr2b = file.Get("gr_pu0_" + train+"_"+ring+"_" + b+"_std")
+    gr3b = file.Get("gr_pu0_newavg_" + train+"_"+ring+"_" + b+"_std")
+    gr4b = file.Get("gr_pu50s2_" + train+"_"+ring+"_" + b+"_std")
+    gr5b = file.Get("gr_pu50s30_" + train+"_"+ring+"_" + b+"_std")
 
     gr1b.SetMarkerStyle(20)
     gr1b.SetMarkerSize(0.6)
@@ -213,40 +215,42 @@ for b in bias_label:
     mg2.Draw("APL")
     set_maximum(mg2)
     #mg2.SetTitle("Spread % ET, eta rings {}, {} train, PU=50;ET (GeV);Fractional spread %".format(ring, train))
-    mg2.SetTitle(";ET (GeV);Fractional spread".format(ring, train))
+    mg2.GetXaxis().SetTitle("ET (GeV)")
+    mg2.GetYaxis().SetTitle("Fractional spread")
 
-    leg = r.TLegend(0.67, 0.54, 0.95, 0.92)
-    leg.AddEntry(gr1, "Current", "lp")
-    leg.AddEntry(gr3, "New (avg)", "lp")
-    leg.AddEntry(gr2, "Per strip (PU=0)", "lp")
-    leg.AddEntry(gr4, "PU optimized", "lp")
-    t1 = leg.AddEntry(None, "PU=50, ET=2GeV","")
-    leg.AddEntry(gr5, "PU optimized", "lp")
-    t2 = leg.AddEntry(None, "PU=50, ET=30GeV","")
-    t1.SetTextSize(0.026)
-    t2.SetTextSize(0.026)
-    leg.Draw("same")
+    leg2 = r.TLegend(0.67, 0.54, 0.95, 0.92)
+    leg2.AddEntry(gr1b, "Current", "lp")
+    leg2.AddEntry(gr3b, "New (avg)", "lp")
+    leg2.AddEntry(gr2b, "Per strip (PU=0)", "lp")
+    leg2.AddEntry(gr4b, "PU optimized", "lp")
+    t1_2 = leg2.AddEntry(None, "PU=50, ET=2GeV","")
+    leg2.AddEntry(gr5b, "PU optimized", "lp")
+    t2_2 = leg2.AddEntry(None, "PU=50, ET=30GeV","")
+    t1_2.SetTextSize(0.026)
+    t2_2.SetTextSize(0.026)
+    leg2.Draw("same")
     
-    for j in range(len(et_bins)):
+    for j in range(len(et_bins)-1):
         mg2.GetXaxis().ChangeLabel(j+1,-1,-1,-1,-1,-1, "{:.1f}".format(et_bins[j]) )
-    mg2.GetXaxis().ChangeLabel(len(et_bins)+1,-1,-1,-1,-1,-1, ">{:.1f}".format(et_bins[-1]) )
+    mg2.GetXaxis().ChangeLabel(len(et_bins),-1,-1,-1,-1,-1, ">{:.1f}".format(et_bins[-1]) )
 
-    label = r.TPaveText(0.35, 0.68, 0.65, 0.88, "NB NDC" )
-    ll = []
-    ll.append(label.AddText("PU=50"))
-    ll.append(label.AddText("{:.1f}<|#eta|<{:.1f}".format(etamin, etamax))) 
-    ll.append(label.AddText("LHC filling "))
-    ll.append(label.AddText("schema: "+ train))
-    for l in ll:
+    label2 = r.TPaveText(0.35, 0.68, 0.65, 0.88, "NB NDC" )
+    ll2 = []
+    ll2.append(label2.AddText("PU=50"))
+    ll2.append(label2.AddText("{:.1f}<|#eta|<{:.1f}".format(etamin, etamax))) 
+    ll2.append(label2.AddText("LHC filling "))
+    ll2.append(label2.AddText("schema: "+ train))
+    for l in ll2:
         l.SetLineColor(r.kBlack)
-    label.SetFillColor(r.kWhite)
-    label.Draw("same")
+    label2.SetFillColor(r.kWhite)
+    label2.Draw("same")
 
     c2.SetGridy()
     c2.Update()
     #draw the lumi text on the canvas
     CMS_lumi.CMS_lumi(c2, 0, 0)
     c2.SetTicks()
+    c2.Update()
     #c2.Draw()
     c2.SaveAs(args.outputdir +"/" + b + "_"+ train +"_"+ring+ "_std.png")
     c2.SaveAs(args.outputdir +"/" + b + "_"+ train +"_"+ring+ "_std.C")
@@ -260,18 +264,18 @@ for b in bias_label:
 #r.gStyle.SetPadBottomMargin(0.20)
 #r.gStyle.SetPadLeftMargin(0.40)
 
-bias_label= ["gr_train", "gr_train_Asf", "gr_train_BXsf", "gr_train_totsf"]
+bias_label= ["bias_train"]
 
 for b in bias_label:
 
     c1 = r.TCanvas("c1", "c1", 800, 600)
     mg = r.TMultiGraph()
 
-    gr1 = file.Get("curr_" + train+"_" + b+"_mean")
-    gr2 = file.Get("pu0_" + train+"_" + b+"_mean")
-    gr3 = file.Get("pu0_newavg_" + train+"_" + b+"_mean")
-    gr4 = file.Get("pu50s2_" + train+"_" + b+"_mean")
-    gr5 = file.Get("pu50s30_" + train+"_" + b+"_mean")
+    gr1 = file.Get("gr_curr_" + train+"_"+ring+"_" + b+"_mean")
+    gr2 = file.Get("gr_pu0_" + train+"_"+ring+"_" + b+"_mean")
+    gr3 = file.Get("gr_pu0_newavg_" + train+"_"+ring+"_" + b+"_mean")
+    gr4 = file.Get("gr_pu50s2_" + train+"_"+ring+"_" + b+"_mean")
+    gr5 = file.Get("gr_pu50s30_" + train+"_"+ring+"_" + b+"_mean")
 
     gr1.SetMarkerStyle(20)
     gr1.SetMarkerSize(0.6)
@@ -293,11 +297,11 @@ for b in bias_label:
     gr5.SetMarkerSize(0.6)
     gr5.SetMarkerColor(r.kBlue+1)
     gr5.SetLineColor(r.kBlue+1)
-    #gr1.SetLineWidth(2)
-    #gr2.SetLineWidth(2)
-    #gr3.SetLineWidth(2)
-    #gr4.SetLineWidth(2)
-    #gr5.SetLineWidth(2)
+    gr1.SetLineWidth(2)
+    gr2.SetLineWidth(2)
+    gr3.SetLineWidth(2)
+    gr4.SetLineWidth(2)
+    gr5.SetLineWidth(2)
 
     mg.Add(gr1)
     mg.Add(gr2)
@@ -348,11 +352,11 @@ for b in bias_label:
     c2 = r.TCanvas("c2", "c2", 800, 600)
     mg2 = r.TMultiGraph()
 
-    gr1b = file.Get("curr_" + train+"_" + b+"_std")
-    gr2b = file.Get("pu0_" + train+"_" + b+"_std")
-    gr3b = file.Get("pu0_newavg_" + train+"_" + b+"_std")
-    gr4b = file.Get("pu50s2_" + train+"_" + b+"_std")
-    gr5b = file.Get("pu50s30_" + train+"_" + b+"_std")
+    gr1b = file.Get("gr_curr_" + train+"_"+ring+"_" + b+"_std")
+    gr2b = file.Get("gr_pu0_" + train+"_"+ring+"_" + b+"_std")
+    gr3b = file.Get("gr_pu0_newavg_" + train+"_"+ring+"_" + b+"_std")
+    gr4b = file.Get("gr_pu50s2_" + train+"_"+ring+"_" + b+"_std")
+    gr5b = file.Get("gr_pu50s30_" + train+"_"+ring+"_" + b+"_std")
 
     gr1b.SetMarkerStyle(20)
     gr1b.SetMarkerSize(0.6)
@@ -390,28 +394,28 @@ for b in bias_label:
     mg2.SetTitle(";BX of signal;Fractional spread".format(ring, train))
     set_maximum(mg2)
 
-    leg = r.TLegend(0.67, 0.54, 0.95, 0.92)
-    leg.AddEntry(gr1, "Current", "lp")
-    leg.AddEntry(gr3, "New (avg)", "lp")
-    leg.AddEntry(gr2, "Per strip (PU=0)", "lp")
-    leg.AddEntry(gr4, "PU optimized", "lp")
-    t1 = leg.AddEntry(None, "PU=50, ET=2GeV","")
-    leg.AddEntry(gr5, "PU optimized", "lp")
-    t2 = leg.AddEntry(None, "PU=50, ET=30GeV","")
+    leg2 = r.TLegend(0.67, 0.54, 0.95, 0.92)
+    leg2.AddEntry(gr1b, "Current", "lp")
+    leg2.AddEntry(gr3b, "New (avg)", "lp")
+    leg2.AddEntry(gr2b, "Per strip (PU=0)", "lp")
+    leg2.AddEntry(gr4b, "PU optimized", "lp")
+    t1 = leg2.AddEntry(None, "PU=50, ET=2GeV","")
+    leg2.AddEntry(gr5b, "PU optimized", "lp")
+    t2 = leg2.AddEntry(None, "PU=50, ET=30GeV","")
     t1.SetTextSize(0.026)
     t2.SetTextSize(0.026)
-    leg.Draw("same")
+    leg2.Draw("same")
 
-    label = r.TPaveText(0.35, 0.68, 0.65, 0.88, "NB NDC" )
+    label2 = r.TPaveText(0.35, 0.68, 0.65, 0.88, "NB NDC" )
     ll = []
-    ll.append(label.AddText("PU=50"))
-    ll.append(label.AddText("{:.1f}<|#eta|<{:.1f}".format(etamin, etamax))) 
-    ll.append(label.AddText("LHC filling "))
-    ll.append(label.AddText("schema: "+ train))
+    ll.append(label2.AddText("PU=50"))
+    ll.append(label2.AddText("{:.1f}<|#eta|<{:.1f}".format(etamin, etamax))) 
+    ll.append(label2.AddText("LHC filling "))
+    ll.append(label2.AddText("schema: "+ train))
     for l in ll:
         l.SetLineColor(r.kBlack)
-    label.SetFillColor(r.kWhite)
-    label.Draw("same")
+    label2.SetFillColor(r.kWhite)
+    label2.Draw("same")
 
     c2.SetGridy()
     c2.Update()
@@ -435,8 +439,8 @@ for b in bias_label:
 #     h1 = file.Get("curr_" + train+"_" + b)
 #     h2 = file.Get("pu0_" + train+"_" + b)
 #     h3 = file.Get("pu0_newavg_" + train+"_" + b)
-#     h4 = file.Get("pu50s2_" + train+"_" + b)
-#     h5 = file.Get("pu50s30_" + train+"_" + b)
+#     h4 = file.Get("pu50_s2_" + train+"_" + b)
+#     h5 = file.Get("pu50_s30_" + train+"_" + b)
 
 #     h1.Scale(1/h1.Integral())
 #     h2.Scale(1/h2.Integral())
@@ -503,8 +507,8 @@ for b in bias_label:
 #     h1 = file.Get("curr_" + train+"_" + b)
 #     h2 = file.Get("pu0_" + train+"_" + b)
 #     h3 = file.Get("pu0_newavg_" + train+"_" + b)
-#     h4 = file.Get("pu50s2_" + train+"_" + b)
-#     h5 = file.Get("pu50s30_" + train+"_" + b)
+#     h4 = file.Get("pu50_s2_" + train+"_" + b)
+#     h5 = file.Get("pu50_s30_" + train+"_" + b)
 
 #     # cumulative
 #     h1 = h1.GetCumulative(False)

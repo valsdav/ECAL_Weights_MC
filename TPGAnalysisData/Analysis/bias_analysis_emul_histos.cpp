@@ -90,7 +90,7 @@ int getTrainBX(int bx){
 }
 
 
-pair<TGraph*,TGraph*> produceMeanRmsGraphs(string id, RResultPtr<TProfile> prof, int nbins){
+pair<TGraph*,TGraph*> produceGraphs(string id, RResultPtr<TProfile> prof, int nbins){
     float means [nbins];
     float stds [nbins];
     float xbins [nbins];
@@ -108,25 +108,7 @@ pair<TGraph*,TGraph*> produceMeanRmsGraphs(string id, RResultPtr<TProfile> prof,
     gmean->SetName((id + "_mean").c_str());
     TGraph* gstd = new TGraph(nbins, xbins, stds);
     gstd->SetName((id + "_std").c_str());
-    return make_pair(gmean, gstd);
-}
-
-pair<TGraph*,TGraph*> countEntriesGraph(string id, RResultPtr<TProfile> prof, int nbins){
-    float entries [nbins];
-    float staterr [nbins];
-    float xbins [nbins];
-
-    for(int i =0; i<nbins;i++){
-        xbins[i] = i+1;
-        entries[i] = prof->GetBinEffectiveEntries(i+1);
-        staterr[i] = 1 / sqrt(entries[i]);
-    }    
-
-    TGraph* gentries = new TGraph(nbins, xbins, entries);
-    gentries->SetName((id + "_entries").c_str());
-    TGraph* gerr = new TGraph(nbins, xbins, staterr);
-    gerr->SetName((id + "_staterr").c_str());
-    return make_pair(gentries, gerr);
+    return std::make_pair(gmean, gstd);
 }
 
 
@@ -141,7 +123,6 @@ void analyseBias(RNode rdf, string name, string train, vector<pair<int,int>> eta
                 .Define("BX0", getTrainBX, {"bxNb"}) 
                 .Filter("BX0 !=-1")
                 // Define the ET bin on trueA_T, the e-rec
-                .Define("xtalET", "eRec/crystNb")
                 .Define("ET_bin", getETbin(train), {"eRec"})
                 .Define("TP", "emulTP[2]")
                 // Calculate bias
@@ -165,45 +146,24 @@ void analyseBias(RNode rdf, string name, string train, vector<pair<int,int>> eta
         // Add a Filter for ieta
         auto df_nonzero_etar = df_nonzero.Filter([eta1,eta2](int ieta){return abs(ieta)>=eta1 && abs(ieta)<=eta2;}, {"ieta"});
         auto df_zero_etar    =    df_zero.Filter([eta1,eta2](int ieta){return abs(ieta)>=eta1 && abs(ieta)<=eta2;}, {"ieta"});
-               
-        auto pf_bias_nonzero = df_nonzero_etar.Profile1D({ ("pf_bias_nonzero_"+id).c_str(), "", et_bins.size()-1, 1., et_bins.size(), "s"},
-                        "ET_bin", "BIAS");
-                        // Train profile
-        auto pf_train = df_nonzero_etar.Profile1D({ ("pf_train_"+id).c_str(), "", train_nbx, 0, train_nbx, "s"},  "BX0", "BIAS");
-    
-        // Check properties of TP removed by pick finder or zeroes by precision
-        auto h_trueA_zero = df_zero_etar.Histo1D({("h_" + id + "_trueA_zero").c_str(), "", 256, 0, 128}, "eRec");
-        // ET and TP spectrum
-        auto h_trueA_spectrum = df_nonzero_etar.Histo1D({("h_" + id +"_trueA_spectrum").c_str(), "", 256,0,128}, "eRec");
-        auto h_recoA_spectrum = df_nonzero_etar.Histo1D({("h_" + id +"_recoA_spectrum").c_str(), "", 256,0,128}, "TP");
-
-        auto h_BX_etbin_spectrum = df_nonzero_etar.Histo2D({("h_" + id +"_BX_etbin_spectrum").c_str(), "", 
-                            train_nbx,0,train_nbx,et_bins.size()-1, 1., et_bins.size()}, "BX0", "ET_bin");
         
-        histos["h_"+id+"_trueA_zero"] =  h_trueA_zero;
-        histos["h_"+id+"_trueA_spectrum"] =  h_trueA_spectrum;
-        histos["h_"+id+"_recoA_spectrum"] =  h_trueA_spectrum;
-        histos2D["h_"+id+"_BX_etbin_spectrum"] = h_BX_etbin_spectrum;
-        profiles[id+"_bias_etbin"] = make_pair(pf_bias_nonzero, et_bins.size()-1) ;
-        profiles[id+"_bias_train"] = make_pair(pf_train, train_nbx);      
+        for (int ibin = 1; ibin<et_bins.size(); ibin++){
+            string name = "h_"+id+"_bias_etbin"+to_string(ibin);
+            histos[name] = df_nonzero_etar.Filter([ibin](int etbin){return etbin==ibin;}, {"ET_bin"})
+                                            .Histo1D({name.c_str(), "", 200,-5,+5},"BIAS");
+        }
+        for (int ibx = 0; ibx<train_nbx; ibx++){
+            string name = "h_"+id+"_bias_bx"+to_string(ibx);
+            histos[name] = df_nonzero_etar.Filter([ibx](int bx){return bx==ibx;}, {"BX0"})
+                                           .Histo1D({name.c_str(), "", 200,-5,+5},"BIAS");
+        }
+
     }
 
-    // Now all the objects are defined we can calcolate
-    vector<pair<TGraph*, TGraph*>> graphs; 
-    for (auto const & [id, obj] : profiles){
-        graphs.push_back(produceMeanRmsGraphs("gr_" + id, obj.first, obj.second));
-        graphs.push_back(countEntriesGraph("gr_"+id, obj.first,obj.second));
-    }
-    for (auto const & grs : graphs ){
-        grs.first->Write();
-        grs.second->Write();
-    }
     for (auto & [id, obj]: histos){
         obj->Write();
     }
-    for (auto & [id, obj]: histos2D){
-        obj->Write();
-    }
+    
     
 }
 
