@@ -89,6 +89,13 @@ int getTrainBX(int bx){
     }
 }
 
+int getNStrips(int nXtals){
+    if (nXtals <= 5) return 1;
+    if (nXtals <= 10) return 2;
+    if (nXtals <= 15) return 3;
+    if (nXtals <= 20) return 4;
+    if (nXtals <= 25) return 5;
+}
 
 pair<TGraph*,TGraph*> produceMeanRmsGraphs(string id, RResultPtr<TProfile> prof, int nbins){
     float means [nbins];
@@ -140,8 +147,11 @@ void analyseBias(RNode rdf, string name, string train, vector<pair<int,int>> eta
                 // Get the BX in train (-1 if to be ignored)
                 .Define("BX0", getTrainBX, {"bxNb"}) 
                 .Filter("BX0 !=-1")
-                // Define the ET bin on trueA_T, the e-rec
+                // Extract ET per xtal and strip
                 .Define("xtalET", "eRec/crystNb")
+                .Define("nStrips", getNStrips, {"crystNb"})
+                .Define("stripET", "eRec/nStrips")
+                // Define the ET bin on trueA_T, the e-rec
                 .Define("ET_bin", getETbin(train), {"eRec"})
                 .Define("TP", "emulTP[2]")
                 // Calculate bias
@@ -175,6 +185,8 @@ void analyseBias(RNode rdf, string name, string train, vector<pair<int,int>> eta
         auto h_trueA_zero = df_zero_etar.Histo1D({("h_" + id + "_trueA_zero").c_str(), "", 256, 0, 128}, "eRec");
         // ET and TP spectrum
         auto h_trueA_spectrum = df_nonzero_etar.Histo1D({("h_" + id +"_trueA_spectrum").c_str(), "", 256,0,128}, "eRec");
+        auto h_xtalET_spectrum = df_nonzero_etar.Histo1D({("h_" + id +"_xtalET_spectrum").c_str(), "", 256,0,128}, "xtalET");
+        auto h_stripET_spectrum = df_nonzero_etar.Histo1D({("h_" + id +"_stripET_spectrum").c_str(), "", 256,0,128}, "stripET");
         auto h_recoA_spectrum = df_nonzero_etar.Histo1D({("h_" + id +"_recoA_spectrum").c_str(), "", 256,0,128}, "TP");
 
         auto h_BX_etbin_spectrum = df_nonzero_etar.Histo2D({("h_" + id +"_BX_etbin_spectrum").c_str(), "", 
@@ -182,6 +194,8 @@ void analyseBias(RNode rdf, string name, string train, vector<pair<int,int>> eta
         
         histos["h_"+id+"_trueA_zero"] =  h_trueA_zero;
         histos["h_"+id+"_trueA_spectrum"] =  h_trueA_spectrum;
+        histos["h_"+id+"_xtalET_spectrum"] =  h_xtalET_spectrum;
+        histos["h_"+id+"_stripET_spectrum"] =  h_stripET_spectrum;
         histos["h_"+id+"_recoA_spectrum"] =  h_trueA_spectrum;
         histos2D["h_"+id+"_BX_etbin_spectrum"] = h_BX_etbin_spectrum;
         profiles[id+"_bias_etbin"] = make_pair(pf_bias_nonzero, et_bins.size()-1) ;
