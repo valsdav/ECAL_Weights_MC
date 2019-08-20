@@ -29,6 +29,7 @@ parser.add_argument("-cw","--calculate-weights", action="store_true", default=Fa
 parser.add_argument("-nw", "--nweights", type=int, help="Number of weights",default=5, required=False)
 parser.add_argument("-wfs", "--weights-first-sample", type=int, help="First sample for weights calculation (position from 1)", default=3, required=False)
 parser.add_argument("--debug", action="store_true", default=False, help="Activate debug output", required=False)
+parser.add_argument("--redo", action="store_true", default=False, help="Redo all jobs", required=False)
 args = parser.parse_args()
 
 
@@ -139,7 +140,7 @@ params = []
 for strip, dfs in df.groupby("stripid"):
     
     outputfile = "samples_ID{}.root".format(strip) 
-    if outputfile in existing_files:
+    if outputfile in existing_files and not args.redo:
         continue
     
     alphas = []
